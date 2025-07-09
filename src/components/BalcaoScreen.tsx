@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Home, Users, QrCode, Puzzle } from "lucide-react";
+import { Home, Table, QrCode, Puzzle } from "lucide-react";
 
 const BalcaoScreen = () => {
   const [activeTab, setActiveTab] = useState("inicio");
@@ -11,7 +11,7 @@ const BalcaoScreen = () => {
 
   const navItems = [
     { id: "inicio", label: "Início", icon: Home },
-    { id: "mesa", label: "Mesa", icon: Users },
+    { id: "mesa", label: "Mesa", icon: Table },
     { id: "comanda", label: "Comanda", icon: QrCode },
     { id: "funcoes", label: "Funções", icon: Puzzle },
   ];
@@ -28,10 +28,14 @@ const BalcaoScreen = () => {
         {/* Sales Summary Card */}
         <Card className="bg-white shadow-sm">
           <CardContent className="p-6">
-            <div className="text-center space-y-2">
-              <h2 className="text-lg font-semibold text-gray-800">Total Vendas Hoje</h2>
-              <p className="text-sm text-gray-600">{currentDate}</p>
-              <p className="text-2xl font-bold text-primary">R$ 0,00</p>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <h2 className="text-lg font-semibold text-gray-800">Total Vendas Hoje</h2>
+                <p className="text-sm text-gray-600">{currentDate}</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-primary">R$ 0,00</p>
+              </div>
             </div>
           </CardContent>
         </Card>
