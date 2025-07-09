@@ -18,6 +18,8 @@ const LoginScreen = () => {
   const handleLogin = () => {
     // Login logic here
     console.log("Login attempt:", { user: selectedUser, password });
+    // Navigate to cash opening screen
+    window.location.href = "/abertura-caixa";
   };
 
   return (
