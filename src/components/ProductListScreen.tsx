@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
 
 // Mock data for products
 const productCategories = [
@@ -32,61 +33,16 @@ const mockProducts = {
   ],
 };
 
-interface CartItem {
-  productId: number;
-  quantity: number;
-}
-
 const ProductListScreen = () => {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("bebidas");
-  const [cart, setCart] = useState<CartItem[]>([]);
-
-  const getTotalItems = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
-  };
-
-  const getProductQuantity = (productId: number) => {
-    const item = cart.find(item => item.productId === productId);
-    return item ? item.quantity : 0;
-  };
-
-  const addToCart = (productId: number) => {
-    setCart(prev => {
-      const existingItem = prev.find(item => item.productId === productId);
-      if (existingItem) {
-        return prev.map(item =>
-          item.productId === productId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      } else {
-        return [...prev, { productId, quantity: 1 }];
-      }
-    });
-  };
-
-  const removeFromCart = (productId: number) => {
-    setCart(prev => {
-      const existingItem = prev.find(item => item.productId === productId);
-      if (existingItem && existingItem.quantity > 1) {
-        return prev.map(item =>
-          item.productId === productId
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        );
-      } else {
-        return prev.filter(item => item.productId !== productId);
-      }
-    });
-  };
+  const { getTotalItems, getProductQuantity, addToCart, removeFromCart } = useCart();
 
   const handleProductClick = (product: any) => {
     navigate(`/produto/${product.id}`, { 
       state: { 
         product, 
-        category: activeCategory,
-        cart 
+        category: activeCategory
       } 
     });
   };

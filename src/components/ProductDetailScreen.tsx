@@ -5,21 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus, Edit3, Home } from "lucide-react";
-
-interface CartItem {
-  productId: number;
-  quantity: number;
-}
+import { useCart } from "@/contexts/CartContext";
 
 const ProductDetailScreen = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
-  const { product, category, cart: initialCart } = location.state || {};
+  const { product, category } = location.state || {};
   
-  const [cart, setCart] = useState<CartItem[]>(initialCart || []);
   const [observation, setObservation] = useState("");
   const [showObservation, setShowObservation] = useState(false);
+  const { getTotalItems, getProductQuantity, addToCart, removeFromCart } = useCart();
 
   const categoryNames: { [key: string]: string } = {
     bebidas: "Bebidas",
@@ -30,50 +26,12 @@ const ProductDetailScreen = () => {
     refeicoes: "Refeições",
   };
 
-  const getTotalItems = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
-  };
-
-  const getProductQuantity = (productId: number) => {
-    const item = cart.find(item => item.productId === productId);
-    return item ? item.quantity : 0;
-  };
-
-  const addToCart = (productId: number) => {
-    setCart(prev => {
-      const existingItem = prev.find(item => item.productId === productId);
-      if (existingItem) {
-        return prev.map(item =>
-          item.productId === productId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      } else {
-        return [...prev, { productId, quantity: 1 }];
-      }
-    });
-  };
-
-  const removeFromCart = (productId: number) => {
-    setCart(prev => {
-      const existingItem = prev.find(item => item.productId === productId);
-      if (existingItem && existingItem.quantity > 1) {
-        return prev.map(item =>
-          item.productId === productId
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        );
-      } else {
-        return prev.filter(item => item.productId !== productId);
-      }
-    });
-  };
 
   const handleBreadcrumbClick = (section: string) => {
     if (section === "home") {
       navigate("/balcao");
     } else if (section === "category") {
-      navigate("/produtos", { state: { activeCategory: category, cart } });
+      navigate("/produtos", { state: { activeCategory: category } });
     }
   };
 
@@ -95,7 +53,7 @@ const ProductDetailScreen = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={() => navigate("/produtos", { state: { activeCategory: category, cart } })}
+            onClick={() => navigate("/produtos", { state: { activeCategory: category } })}
             className="text-primary hover:bg-primary/5"
           >
             <ArrowLeft className="h-5 w-5" />
