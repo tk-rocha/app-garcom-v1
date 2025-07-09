@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Home, Table, QrCode, Puzzle } from "lucide-react";
 
 const BalcaoScreen = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("inicio");
   
   // Get current date
@@ -46,6 +48,7 @@ const BalcaoScreen = () => {
           <Button 
             variant="ghost" 
             className="text-primary hover:text-primary/90 hover:bg-primary/5 font-medium"
+            onClick={() => navigate("/produtos")}
           >
             + ADICIONAR ITENS BALCÃO
           </Button>

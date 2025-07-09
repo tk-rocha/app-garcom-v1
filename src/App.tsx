@@ -7,6 +7,8 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import CashOpeningScreen from "./components/CashOpeningScreen";
 import BalcaoScreen from "./components/BalcaoScreen";
+import ProductListScreen from "./components/ProductListScreen";
+import ProductDetailScreen from "./components/ProductDetailScreen";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +22,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/abertura-caixa" element={<CashOpeningScreen />} />
           <Route path="/balcao" element={<BalcaoScreen />} />
+          <Route path="/produtos" element={<ProductListScreen />} />
+          <Route path="/produto/:id" element={<ProductDetailScreen />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
