@@ -11,6 +11,8 @@ interface CartItem {
 interface Discount {
   type: 'percentage' | 'fixed';
   value: number;
+  inputType: 'percentage' | 'value'; // Para lembrar se foi inserido como % ou R$
+  inputValue: string; // Para lembrar o valor original digitado
 }
 
 interface Tax {
@@ -35,7 +37,9 @@ interface CartContextType {
   getTotal: () => number;
   setDiscount: (discount: Discount | null) => void;
   setTax: (tax: Tax | null) => void;
-  applyDiscount: (amount: number) => void;
+  applyDiscount: (amount: number, inputType: 'percentage' | 'value', inputValue: string) => void;
+  getDiscountType: () => 'percentage' | 'value';
+  getDiscountValue: () => string;
   applyTax: (amount: number) => void;
 }
 
@@ -148,8 +152,26 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setTaxState(newTax);
   };
 
-  const applyDiscount = (amount: number) => {
-    setDiscountState(amount > 0 ? { type: 'fixed', value: amount } : null);
+  const applyDiscount = (amount: number, inputType: 'percentage' | 'value', inputValue: string) => {
+    if (amount <= 0) {
+      setDiscountState(null);
+    } else {
+      const discountType = inputType === 'percentage' ? 'percentage' : 'fixed';
+      setDiscountState({ 
+        type: discountType, 
+        value: amount,
+        inputType,
+        inputValue
+      });
+    }
+  };
+
+  const getDiscountType = (): 'percentage' | 'value' => {
+    return discount?.inputType || 'percentage';
+  };
+
+  const getDiscountValue = (): string => {
+    return discount?.inputValue || '';
   };
 
   const applyTax = (amount: number) => {
@@ -172,6 +194,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setDiscount,
     setTax,
     applyDiscount,
+    getDiscountType,
+    getDiscountValue,
     applyTax,
   };
 
