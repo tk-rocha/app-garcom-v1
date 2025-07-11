@@ -14,14 +14,14 @@ const mockCustomers: Record<string, { name: string; points: number }> = {
   "35649814899": { name: "Rodolpho Florentino", points: 1 },
 };
 
-// Mock redeemable products
+// Mock redeemable products - sorted by points (highest last)
 const redeemableProducts = [
-  { id: 1001, name: "Coca Cola", points: 10, image: "/api/placeholder/80/80" },
-  { id: 1002, name: "Chocolate", points: 15, image: "/api/placeholder/80/80" },
   { id: 1003, name: "Água Mineral", points: 5, image: "/api/placeholder/80/80" },
   { id: 1004, name: "Café", points: 8, image: "/api/placeholder/80/80" },
-  { id: 1005, name: "Combo Premium", points: 100, image: "/api/placeholder/80/80" },
+  { id: 1001, name: "Coca Cola", points: 10, image: "/api/placeholder/80/80" },
+  { id: 1002, name: "Chocolate", points: 15, image: "/api/placeholder/80/80" },
   { id: 1006, name: "Sobremesa", points: 25, image: "/api/placeholder/80/80" },
+  { id: 1005, name: "Combo Premium", points: 100, image: "/api/placeholder/80/80" },
 ];
 
 const CustomerScreen = () => {
@@ -165,7 +165,7 @@ const CustomerScreen = () => {
 
         {/* Redeemable Products */}
         {customer && (
-          <div className="space-y-3">
+          <div className="space-y-3 pb-20">
             <h2 className="text-lg font-semibold text-gray-900">Produtos para Resgate</h2>
             
             {redeemableProducts.map((product) => {

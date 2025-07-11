@@ -110,7 +110,12 @@ const PaymentScreen = () => {
   const handleAmountChange = (value: string) => {
     // Only allow numbers and decimal point
     const sanitized = value.replace(/[^0-9.,]/g, "").replace(",", ".");
-    setPaymentAmount(sanitized);
+    if (sanitized && !isNaN(parseFloat(sanitized))) {
+      const numValue = parseFloat(sanitized);
+      setPaymentAmount(numValue.toFixed(2).replace(".", ","));
+    } else {
+      setPaymentAmount(sanitized);
+    }
   };
 
   const processPayment = async () => {
@@ -213,7 +218,7 @@ const PaymentScreen = () => {
         </div>
       </div>
 
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-6 pb-24">
         {/* Payment Methods */}
         <div className="space-y-3">
           <h2 className="text-lg font-semibold text-gray-900">Formas de Pagamento</h2>
@@ -315,15 +320,25 @@ const PaymentScreen = () => {
                 <span>R$ {subtotal.toFixed(2).replace(".", ",")}</span>
               </div>
               {taxAmount > 0 && (
-                <div className="flex justify-between">
+                <div className="flex justify-between cursor-pointer" onClick={() => navigate("/taxas")}>
                   <span className="text-gray-600">Taxas:</span>
                   <span>R$ {taxAmount.toFixed(2).replace(".", ",")}</span>
                 </div>
               )}
+              {taxAmount === 0 && (
+                <div className="flex justify-between cursor-pointer text-blue-600" onClick={() => navigate("/taxas")}>
+                  <span>+ Adicionar Taxa</span>
+                </div>
+              )}
               {discountAmount > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-green-600 cursor-pointer" onClick={() => navigate("/desconto")}>
                   <span>Desconto:</span>
                   <span>- R$ {discountAmount.toFixed(2).replace(".", ",")}</span>
+                </div>
+              )}
+              {discountAmount === 0 && (
+                <div className="flex justify-between cursor-pointer text-blue-600" onClick={() => navigate("/desconto")}>
+                  <span>+ Adicionar Desconto</span>
                 </div>
               )}
               <hr className="my-2" />
@@ -353,7 +368,7 @@ const PaymentScreen = () => {
       </div>
 
       {/* Finalize Button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4" style={{paddingBottom: "env(safe-area-inset-bottom)"}}>
         <Button
           onClick={handleFinalizeOrder}
           disabled={!canFinalize}

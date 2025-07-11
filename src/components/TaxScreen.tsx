@@ -1,151 +1,213 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-
-interface TaxOption {
-  id: string;
-  name: string;
-  type: 'percentage' | 'fixed';
-  value: number;
-}
 
 const TaxScreen = () => {
   const navigate = useNavigate();
-  const { tax, setTax } = useCart();
-  
-  const [selectedTax, setSelectedTax] = useState<TaxOption | null>(null);
+  const { getSubtotal, applyTax, getTaxAmount } = useCart();
+  const [taxType, setTaxType] = useState<"percentage" | "value">("percentage");
+  const [taxValue, setTaxValue] = useState("");
 
-  // Available tax options
-  const taxOptions: TaxOption[] = [
-    { id: '1', name: 'Gorjeta', type: 'percentage', value: 5 },
-    { id: '2', name: 'Gorjeta', type: 'percentage', value: 10 },
-    { id: '3', name: 'Couvert', type: 'fixed', value: 5.00 },
-    { id: '4', name: 'Taxa da Rolha', type: 'fixed', value: 30.00 },
-  ];
+  const subtotal = getSubtotal();
+  const currentTax = getTaxAmount();
 
-  // Load existing tax when component mounts
-  useEffect(() => {
-    if (tax) {
-      const existingTax = taxOptions.find(option => 
-        option.name === tax.name && 
-        option.type === tax.type && 
-        option.value === tax.value
-      );
-      if (existingTax) {
-        setSelectedTax(existingTax);
+  const formatCurrency = (value: number) => {
+    return `R$ ${value.toFixed(2).replace('.', ',')}`;
+  };
+
+  const handleTaxValueChange = (value: string) => {
+    if (taxType === "percentage") {
+      // Only allow numbers and limit to reasonable percentage
+      const sanitized = value.replace(/[^0-9]/g, "");
+      const numValue = parseInt(sanitized);
+      if (numValue <= 100 || sanitized === "") {
+        setTaxValue(sanitized);
       }
+    } else {
+      // For currency values, allow numbers and decimal
+      const sanitized = value.replace(/[^0-9.,]/g, "").replace(",", ".");
+      setTaxValue(sanitized);
     }
-  }, [tax]);
+  };
 
-  const handleConfirm = () => {
-    if (selectedTax) {
-      setTax({
-        id: selectedTax.id,
-        name: selectedTax.name,
-        type: selectedTax.type,
-        value: selectedTax.value
-      });
+  const calculateTaxAmount = () => {
+    if (!taxValue) return 0;
+
+    if (taxType === "percentage") {
+      const percentage = parseInt(taxValue);
+      return (subtotal * percentage) / 100;
+    } else {
+      return parseFloat(taxValue) || 0;
     }
-    navigate("/sacola");
+  };
+
+  const handleApplyTax = () => {
+    const taxAmount = calculateTaxAmount();
+    applyTax(taxAmount);
+    navigate(-1);
   };
 
   const handleRemoveTax = () => {
-    setSelectedTax(null);
-    setTax(null);
-    navigate("/sacola");
+    applyTax(0);
+    navigate(-1);
   };
 
-  const formatTaxValue = (tax: TaxOption) => {
-    if (tax.type === 'percentage') {
-      return `${tax.value}%`;
-    } else {
-      return `R$ ${tax.value.toFixed(2).replace('.', ',')}`;
-    }
-  };
+  const taxAmount = calculateTaxAmount();
+  const newTotal = subtotal + taxAmount;
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center">
+        <div className="flex items-center justify-between">
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={() => navigate("/sacola")}
-            className="text-primary hover:bg-primary/5 mr-4"
+            onClick={() => navigate(-1)}
+            className="text-primary hover:bg-primary/5"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
           <h1 className="text-lg font-semibold text-primary">TAXAS</h1>
+          
+          <div className="w-10" />
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-4 space-y-4">
-        {/* Tax Options */}
-        <div className="space-y-3">
-          {taxOptions.map((taxOption) => (
-            <div
-              key={taxOption.id}
-              className={`p-4 rounded-lg border-2 cursor-pointer transition-colors ${
-                selectedTax?.id === taxOption.id
-                  ? 'border-primary bg-primary/5'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
-              }`}
-              onClick={() => setSelectedTax(taxOption)}
-            >
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-medium text-primary">{taxOption.name}</h3>
-                  <p className="text-sm text-gray-600">
-                    {taxOption.type === 'percentage' 
-                      ? 'Aplicado sobre o subtotal'
-                      : 'Valor fixo'
-                    }
-                  </p>
-                </div>
-                <div className="text-lg font-semibold text-primary">
-                  {formatTaxValue(taxOption)}
-                </div>
+      <div className="p-4 space-y-6">
+        {/* Current Values */}
+        <Card className="bg-white shadow-sm">
+          <CardContent className="p-4">
+            <h3 className="font-semibold text-gray-900 mb-3">Valores Atuais</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Subtotal:</span>
+                <span>{formatCurrency(subtotal)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Taxa atual:</span>
+                <span className="text-orange-600">+ {formatCurrency(currentTax)}</span>
+              </div>
+              <hr className="my-2" />
+              <div className="flex justify-between font-semibold">
+                <span>Total:</span>
+                <span>{formatCurrency(subtotal + currentTax)}</span>
               </div>
             </div>
-          ))}
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Remove Tax Button */}
-        {(selectedTax || tax) && (
-          <div className="pt-4">
-            <Button
-              variant="ghost"
-              onClick={handleRemoveTax}
-              className="w-full text-red-500 hover:bg-red-50 hover:text-red-600"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Remover taxa
-            </Button>
-          </div>
-        )}
-      </div>
+        {/* Tax Type Selection */}
+        <Card className="bg-white shadow-sm">
+          <CardContent className="p-4 space-y-4">
+            <h3 className="font-semibold text-gray-900">Tipo de Taxa</h3>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant={taxType === "percentage" ? "default" : "outline"}
+                className={`${
+                  taxType === "percentage"
+                    ? "bg-primary text-primary-foreground"
+                    : "border-primary text-primary hover:bg-primary/5"
+                }`}
+                onClick={() => {
+                  setTaxType("percentage");
+                  setTaxValue("");
+                }}
+              >
+                Percentual (%)
+              </Button>
+              <Button
+                variant={taxType === "value" ? "default" : "outline"}
+                className={`${
+                  taxType === "value"
+                    ? "bg-primary text-primary-foreground"
+                    : "border-primary text-primary hover:bg-primary/5"
+                }`}
+                onClick={() => {
+                  setTaxType("value");
+                  setTaxValue("");
+                }}
+              >
+                Valor (R$)
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Actions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-        <div className="grid grid-cols-2 gap-3">
-          <Button 
-            variant="outline"
-            className="border-primary text-primary hover:bg-primary/5"
-            onClick={() => navigate("/sacola")}
+        {/* Tax Value Input */}
+        <Card className="bg-white shadow-sm">
+          <CardContent className="p-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="tax" className="text-sm font-medium text-gray-700">
+                {taxType === "percentage" ? "Percentual da taxa" : "Valor da taxa"}
+              </Label>
+              <div className="relative">
+                <Input
+                  id="tax"
+                  value={taxValue}
+                  onChange={(e) => handleTaxValueChange(e.target.value)}
+                  placeholder={taxType === "percentage" ? "0" : "0,00"}
+                  className="text-lg text-center pr-12"
+                  inputMode="decimal"
+                />
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                  {taxType === "percentage" ? "%" : "R$"}
+                </span>
+              </div>
+            </div>
+            
+            {taxValue && (
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Taxa aplicada:</span>
+                    <span className="text-orange-600 font-medium">
+                      + {formatCurrency(taxAmount)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-semibold">
+                    <span>Novo total:</span>
+                    <span>{formatCurrency(newTotal)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Action Buttons */}
+        <div className="space-y-3">
+          <Button
+            onClick={handleApplyTax}
+            disabled={!taxValue || taxAmount <= 0}
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            VOLTAR
+            Aplicar Taxa
           </Button>
           
-          <Button 
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-            onClick={handleConfirm}
+          {currentTax > 0 && (
+            <Button
+              variant="outline"
+              onClick={handleRemoveTax}
+              className="w-full border-red-500 text-red-500 hover:bg-red-50"
+            >
+              Remover Taxa
+            </Button>
+          )}
+          
+          <Button
+            variant="ghost"
+            onClick={() => navigate(-1)}
+            className="w-full text-gray-600 hover:bg-gray-100"
           >
-            CONFIRMAR
+            Cancelar
           </Button>
         </div>
       </div>

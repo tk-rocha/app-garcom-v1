@@ -82,10 +82,20 @@ const ProductListScreen = () => {
             >
               <User className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-primary hover:bg-primary/5"
+              onClick={() => navigate("/pesquisar")}
+            >
               <Search className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-primary hover:bg-primary/5"
+              onClick={() => navigate("/scanner")}
+            >
               <Scan className="h-5 w-5" />
             </Button>
             <div className="relative">

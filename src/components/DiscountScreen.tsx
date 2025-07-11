@@ -1,216 +1,216 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 
 const DiscountScreen = () => {
   const navigate = useNavigate();
-  const { discount, setDiscount } = useCart();
-  
-  const [discountType, setDiscountType] = useState<'percentage' | 'fixed'>('percentage');
-  const [discountValue, setDiscountValue] = useState<string>('');
+  const { getSubtotal, applyDiscount, getDiscountAmount } = useCart();
+  const [discountType, setDiscountType] = useState<"percentage" | "value">("percentage");
+  const [discountValue, setDiscountValue] = useState("");
 
-  // Load existing discount when component mounts
-  useEffect(() => {
-    if (discount) {
-      setDiscountType(discount.type);
-      setDiscountValue(discount.value.toString());
-    }
-  }, [discount]);
+  const subtotal = getSubtotal();
+  const currentDiscount = getDiscountAmount();
 
-  const percentageOptions = [5, 10, 15, 20];
-  const fixedOptions = [2.00, 5.00];
-
-  const handleQuickDiscount = (value: number) => {
-    setDiscountValue(value.toString());
+  const formatCurrency = (value: number) => {
+    return `R$ ${value.toFixed(2).replace('.', ',')}`;
   };
 
-  const handleConfirm = () => {
-    const value = parseFloat(discountValue) || 0;
-    
-    if (value === 0) {
-      setDiscount(null);
+  const handleDiscountValueChange = (value: string) => {
+    if (discountType === "percentage") {
+      // Only allow numbers and limit to 100%
+      const sanitized = value.replace(/[^0-9]/g, "");
+      const numValue = parseInt(sanitized);
+      if (numValue <= 100 || sanitized === "") {
+        setDiscountValue(sanitized);
+      }
     } else {
-      setDiscount({
-        type: discountType,
-        value: value
-      });
+      // For currency values, allow numbers and decimal
+      const sanitized = value.replace(/[^0-9.,]/g, "").replace(",", ".");
+      const numValue = parseFloat(sanitized);
+      if (numValue <= subtotal || sanitized === "" || sanitized === ".") {
+        setDiscountValue(sanitized);
+      }
     }
-    
-    navigate("/sacola");
+  };
+
+  const calculateDiscountAmount = () => {
+    if (!discountValue) return 0;
+
+    if (discountType === "percentage") {
+      const percentage = parseInt(discountValue);
+      return (subtotal * percentage) / 100;
+    } else {
+      return parseFloat(discountValue) || 0;
+    }
+  };
+
+  const handleApplyDiscount = () => {
+    const discountAmount = calculateDiscountAmount();
+    applyDiscount(discountAmount);
+    navigate(-1);
   };
 
   const handleRemoveDiscount = () => {
-    setDiscountValue('');
-    setDiscount(null);
-    navigate("/sacola");
+    applyDiscount(0);
+    navigate(-1);
   };
 
-  const formatPercentageInput = (value: string) => {
-    // Remove non-numeric characters except comma and dot
-    const numericValue = value.replace(/[^0-9.,]/g, '');
-    return numericValue;
-  };
-
-  const formatCurrencyInput = (value: string) => {
-    // Remove non-numeric characters except comma and dot
-    const numericValue = value.replace(/[^0-9.,]/g, '');
-    return numericValue;
-  };
-
-  const formatCurrencyMask = (value: string) => {
-    // Convert string to number and format as R$ X,XX
-    const numericValue = parseFloat(value.replace(',', '.')) || 0;
-    return numericValue.toFixed(2).replace('.', ',');
-  };
+  const discountAmount = calculateDiscountAmount();
+  const newTotal = subtotal - discountAmount;
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center">
+        <div className="flex items-center justify-between">
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={() => navigate("/sacola")}
-            className="text-primary hover:bg-primary/5 mr-4"
+            onClick={() => navigate(-1)}
+            className="text-primary hover:bg-primary/5"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
           <h1 className="text-lg font-semibold text-primary">DESCONTO</h1>
+          
+          <div className="w-10" />
         </div>
       </div>
 
-      {/* Content */}
       <div className="p-4 space-y-6">
-        {/* Type Toggle */}
-        <div className="flex bg-gray-100 rounded-lg p-1">
+        {/* Current Values */}
+        <Card className="bg-white shadow-sm">
+          <CardContent className="p-4">
+            <h3 className="font-semibold text-gray-900 mb-3">Valores Atuais</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Subtotal:</span>
+                <span>{formatCurrency(subtotal)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Desconto atual:</span>
+                <span className="text-green-600">- {formatCurrency(currentDiscount)}</span>
+              </div>
+              <hr className="my-2" />
+              <div className="flex justify-between font-semibold">
+                <span>Total:</span>
+                <span>{formatCurrency(subtotal - currentDiscount)}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Discount Type Selection */}
+        <Card className="bg-white shadow-sm">
+          <CardContent className="p-4 space-y-4">
+            <h3 className="font-semibold text-gray-900">Tipo de Desconto</h3>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant={discountType === "percentage" ? "default" : "outline"}
+                className={`${
+                  discountType === "percentage"
+                    ? "bg-primary text-primary-foreground"
+                    : "border-primary text-primary hover:bg-primary/5"
+                }`}
+                onClick={() => {
+                  setDiscountType("percentage");
+                  setDiscountValue("");
+                }}
+              >
+                Percentual (%)
+              </Button>
+              <Button
+                variant={discountType === "value" ? "default" : "outline"}
+                className={`${
+                  discountType === "value"
+                    ? "bg-primary text-primary-foreground"
+                    : "border-primary text-primary hover:bg-primary/5"
+                }`}
+                onClick={() => {
+                  setDiscountType("value");
+                  setDiscountValue("");
+                }}
+              >
+                Valor (R$)
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Discount Value Input */}
+        <Card className="bg-white shadow-sm">
+          <CardContent className="p-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="discount" className="text-sm font-medium text-gray-700">
+                {discountType === "percentage" ? "Percentual de desconto" : "Valor do desconto"}
+              </Label>
+              <div className="relative">
+                <Input
+                  id="discount"
+                  value={discountValue}
+                  onChange={(e) => handleDiscountValueChange(e.target.value)}
+                  placeholder={discountType === "percentage" ? "0" : "0,00"}
+                  className="text-lg text-center pr-12"
+                  inputMode="decimal"
+                />
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                  {discountType === "percentage" ? "%" : "R$"}
+                </span>
+              </div>
+            </div>
+            
+            {discountValue && (
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Desconto aplicado:</span>
+                    <span className="text-green-600 font-medium">
+                      - {formatCurrency(discountAmount)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-semibold">
+                    <span>Novo total:</span>
+                    <span>{formatCurrency(newTotal)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Action Buttons */}
+        <div className="space-y-3">
           <Button
-            variant={discountType === 'percentage' ? 'default' : 'ghost'}
-            className={`flex-1 ${
-              discountType === 'percentage'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-primary hover:bg-primary/5'
-            }`}
-            onClick={() => {
-              setDiscountType('percentage');
-              setDiscountValue('');
-            }}
+            onClick={handleApplyDiscount}
+            disabled={!discountValue || discountAmount <= 0}
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            %
-          </Button>
-          <Button
-            variant={discountType === 'fixed' ? 'default' : 'ghost'}
-            className={`flex-1 ${
-              discountType === 'fixed'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-primary hover:bg-primary/5'
-            }`}
-            onClick={() => {
-              setDiscountType('fixed');
-              setDiscountValue('');
-            }}
-          >
-            R$
-          </Button>
-        </div>
-
-        {/* Quick Options */}
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            {discountType === 'percentage' ? (
-              percentageOptions.map((value) => (
-                <Button
-                  key={value}
-                  variant="outline"
-                  className="h-12 rounded-full border-primary text-primary hover:bg-primary/5"
-                  onClick={() => handleQuickDiscount(value)}
-                >
-                  {value}%
-                </Button>
-              ))
-            ) : (
-              fixedOptions.map((value) => (
-                <Button
-                  key={value}
-                  variant="outline"
-                  className="h-12 rounded-full border-primary text-primary hover:bg-primary/5"
-                  onClick={() => handleQuickDiscount(value)}
-                >
-                  R$ {value.toFixed(2).replace('.', ',')}
-                </Button>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Input Field */}
-        <div className="space-y-2">
-          <Label htmlFor="discount" className="text-primary font-medium">
-            Desconto
-          </Label>
-          <div className="relative">
-            <Input
-              id="discount"
-              type="text"
-              value={discountType === 'fixed' ? formatCurrencyMask(discountValue) : discountValue}
-              onChange={(e) => {
-                const value = discountType === 'percentage' 
-                  ? formatPercentageInput(e.target.value)
-                  : formatCurrencyInput(e.target.value);
-                setDiscountValue(value);
-              }}
-              placeholder={discountType === 'percentage' ? '00,00%' : '00,00'}
-              className="text-center text-lg border-primary focus:ring-primary pl-12"
-            />
-            {discountType === 'percentage' && (
-              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary">
-                %
-              </span>
-            )}
-            {discountType === 'fixed' && (
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary">
-                R$
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Remove Discount Button */}
-        {(discountValue || discount) && (
-          <div className="pt-4">
-            <Button
-              variant="ghost"
-              onClick={handleRemoveDiscount}
-              className="w-full text-red-500 hover:bg-red-50 hover:text-red-600"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Remover desconto
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {/* Actions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-        <div className="grid grid-cols-2 gap-3">
-          <Button 
-            variant="outline"
-            className="border-primary text-primary hover:bg-primary/5"
-            onClick={() => navigate("/sacola")}
-          >
-            VOLTAR
+            Aplicar Desconto
           </Button>
           
-          <Button 
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-            onClick={handleConfirm}
+          {currentDiscount > 0 && (
+            <Button
+              variant="outline"
+              onClick={handleRemoveDiscount}
+              className="w-full border-red-500 text-red-500 hover:bg-red-50"
+            >
+              Remover Desconto
+            </Button>
+          )}
+          
+          <Button
+            variant="ghost"
+            onClick={() => navigate(-1)}
+            className="w-full text-gray-600 hover:bg-gray-100"
           >
-            CONFIRMAR
+            Cancelar
           </Button>
         </div>
       </div>

@@ -35,6 +35,8 @@ interface CartContextType {
   getTotal: () => number;
   setDiscount: (discount: Discount | null) => void;
   setTax: (tax: Tax | null) => void;
+  applyDiscount: (amount: number) => void;
+  applyTax: (amount: number) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -146,6 +148,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setTaxState(newTax);
   };
 
+  const applyDiscount = (amount: number) => {
+    setDiscountState(amount > 0 ? { type: 'fixed', value: amount } : null);
+  };
+
+  const applyTax = (amount: number) => {
+    setTaxState(amount > 0 ? { id: 'manual', name: 'Taxa Manual', type: 'fixed', value: amount } : null);
+  };
+
   const value = {
     cart,
     discount,
@@ -161,6 +171,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     getTotal,
     setDiscount,
     setTax,
+    applyDiscount,
+    applyTax,
   };
 
   return (
