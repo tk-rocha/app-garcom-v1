@@ -14,6 +14,7 @@ import CartScreen from "./components/CartScreen";
 import DiscountScreen from "./components/DiscountScreen";
 import TaxScreen from "./components/TaxScreen";
 import CPFScreen from "./components/CPFScreen";
+import CustomerScreen from "./components/CustomerScreen";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/desconto" element={<DiscountScreen />} />
             <Route path="/taxas" element={<TaxScreen />} />
             <Route path="/cpf" element={<CPFScreen />} />
+            <Route path="/cliente" element={<CustomerScreen />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

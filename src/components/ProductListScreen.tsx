@@ -74,7 +74,12 @@ const ProductListScreen = () => {
           <h1 className="text-lg font-semibold text-primary">Balcão</h1>
           
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-primary hover:bg-primary/5"
+              onClick={() => navigate("/cliente")}
+            >
               <User className="h-5 w-5" />
             </Button>
             <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
