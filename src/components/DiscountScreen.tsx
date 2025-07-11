@@ -55,6 +55,12 @@ const DiscountScreen = () => {
     return numericValue;
   };
 
+  const formatCurrencyMask = (value: string) => {
+    // Convert string to number and format as R$ X,XX
+    const numericValue = parseFloat(value.replace(',', '.')) || 0;
+    return numericValue.toFixed(2).replace('.', ',');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -145,15 +151,15 @@ const DiscountScreen = () => {
             <Input
               id="discount"
               type="text"
-              value={discountValue}
+              value={discountType === 'fixed' ? formatCurrencyMask(discountValue) : discountValue}
               onChange={(e) => {
                 const value = discountType === 'percentage' 
                   ? formatPercentageInput(e.target.value)
                   : formatCurrencyInput(e.target.value);
                 setDiscountValue(value);
               }}
-              placeholder={discountType === 'percentage' ? '00,00%' : 'R$ 00,00'}
-              className="text-center text-lg border-primary focus:ring-primary"
+              placeholder={discountType === 'percentage' ? '00,00%' : '00,00'}
+              className="text-center text-lg border-primary focus:ring-primary pl-12"
             />
             {discountType === 'percentage' && (
               <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary">
@@ -170,21 +176,23 @@ const DiscountScreen = () => {
       </div>
 
       {/* Actions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 space-y-2">
-        <Button 
-          variant="outline"
-          className="w-full border-primary text-primary hover:bg-primary/5"
-          onClick={() => navigate("/sacola")}
-        >
-          VOLTAR
-        </Button>
-        
-        <Button 
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-          onClick={handleConfirm}
-        >
-          CONFIRMAR
-        </Button>
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+        <div className="grid grid-cols-2 gap-3">
+          <Button 
+            variant="outline"
+            className="border-primary text-primary hover:bg-primary/5"
+            onClick={() => navigate("/sacola")}
+          >
+            VOLTAR
+          </Button>
+          
+          <Button 
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+            onClick={handleConfirm}
+          >
+            CONFIRMAR
+          </Button>
+        </div>
       </div>
     </div>
   );
