@@ -39,17 +39,11 @@ const CPFScreen = () => {
   };
 
   const handleContinueWithCPF = () => {
-    // TODO: Implementar próximo passo do fluxo de finalização
-    console.log("Continuando com CPF:", cpf);
-    // Por enquanto volta para a sacola
-    navigate("/sacola");
+    navigate("/pagamento", { state: { cpf } });
   };
 
   const handleContinueWithoutCPF = () => {
-    // TODO: Implementar próximo passo do fluxo de finalização
-    console.log("Continuando sem CPF");
-    // Por enquanto volta para a sacola
-    navigate("/sacola");
+    navigate("/pagamento", { state: { cpf: "" } });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
