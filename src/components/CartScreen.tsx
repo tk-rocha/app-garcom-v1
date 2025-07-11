@@ -16,6 +16,7 @@ const CartScreen = () => {
     removeItemCompletely, 
     getSubtotal, 
     getDiscountAmount, 
+    getTaxAmount,
     getTotal 
   } = useCart();
 
@@ -216,8 +217,13 @@ const CartScreen = () => {
           </div>
           
           <div className="flex justify-between items-center">
-            <button className="text-primary underline">Taxas</button>
-            <span className="font-semibold">R$ 0,00</span>
+            <button 
+              className="text-primary underline"
+              onClick={() => navigate("/taxas")}
+            >
+              Taxas
+            </button>
+            <span className="font-semibold">R$ {getTaxAmount().toFixed(2).replace('.', ',')}</span>
           </div>
           
           <div className="flex justify-between items-center">

@@ -13,9 +13,17 @@ interface Discount {
   value: number;
 }
 
+interface Tax {
+  id: string;
+  name: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+}
+
 interface CartContextType {
   cart: CartItem[];
   discount: Discount | null;
+  tax: Tax | null;
   getTotalItems: () => number;
   getProductQuantity: (productId: number) => number;
   addToCart: (productId: number, productData: { name: string; price: number; image: string }) => void;
@@ -23,8 +31,10 @@ interface CartContextType {
   removeItemCompletely: (productId: number) => void;
   getSubtotal: () => number;
   getDiscountAmount: () => number;
+  getTaxAmount: () => number;
   getTotal: () => number;
   setDiscount: (discount: Discount | null) => void;
+  setTax: (tax: Tax | null) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -44,6 +54,7 @@ interface CartProviderProps {
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [discount, setDiscountState] = useState<Discount | null>(null);
+  const [tax, setTaxState] = useState<Tax | null>(null);
 
   const getTotalItems = () => {
     return cart.reduce((total, item) => total + item.quantity, 0);
@@ -109,19 +120,36 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   };
 
+  const getTaxAmount = () => {
+    if (!tax) return 0;
+    const subtotal = getSubtotal();
+    
+    if (tax.type === 'percentage') {
+      return (subtotal * tax.value) / 100;
+    } else {
+      return tax.value;
+    }
+  };
+
   const getTotal = () => {
     const subtotal = getSubtotal();
     const discountAmount = getDiscountAmount();
-    return Math.max(0, subtotal - discountAmount);
+    const taxAmount = getTaxAmount();
+    return Math.max(0, subtotal + taxAmount - discountAmount);
   };
 
   const setDiscount = (newDiscount: Discount | null) => {
     setDiscountState(newDiscount);
   };
 
+  const setTax = (newTax: Tax | null) => {
+    setTaxState(newTax);
+  };
+
   const value = {
     cart,
     discount,
+    tax,
     getTotalItems,
     getProductQuantity,
     addToCart,
@@ -129,8 +157,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     removeItemCompletely,
     getSubtotal,
     getDiscountAmount,
+    getTaxAmount,
     getTotal,
     setDiscount,
+    setTax,
   };
 
   return (
