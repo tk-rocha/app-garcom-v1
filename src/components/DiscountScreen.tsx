@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 
 const DiscountScreen = () => {
@@ -40,6 +40,12 @@ const DiscountScreen = () => {
       });
     }
     
+    navigate("/sacola");
+  };
+
+  const handleRemoveDiscount = () => {
+    setDiscountValue('');
+    setDiscount(null);
     navigate("/sacola");
   };
 
@@ -173,6 +179,20 @@ const DiscountScreen = () => {
             )}
           </div>
         </div>
+
+        {/* Remove Discount Button */}
+        {(discountValue || discount) && (
+          <div className="pt-4">
+            <Button
+              variant="ghost"
+              onClick={handleRemoveDiscount}
+              className="w-full text-red-500 hover:bg-red-50 hover:text-red-600"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Remover desconto
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Actions */}
