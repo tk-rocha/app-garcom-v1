@@ -3,14 +3,28 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 interface CartItem {
   productId: number;
   quantity: number;
+  name: string;
+  price: number;
+  image: string;
+}
+
+interface Discount {
+  type: 'percentage' | 'fixed';
+  value: number;
 }
 
 interface CartContextType {
   cart: CartItem[];
+  discount: Discount | null;
   getTotalItems: () => number;
   getProductQuantity: (productId: number) => number;
-  addToCart: (productId: number) => void;
+  addToCart: (productId: number, productData: { name: string; price: number; image: string }) => void;
   removeFromCart: (productId: number) => void;
+  removeItemCompletely: (productId: number) => void;
+  getSubtotal: () => number;
+  getDiscountAmount: () => number;
+  getTotal: () => number;
+  setDiscount: (discount: Discount | null) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -29,6 +43,7 @@ interface CartProviderProps {
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [discount, setDiscountState] = useState<Discount | null>(null);
 
   const getTotalItems = () => {
     return cart.reduce((total, item) => total + item.quantity, 0);
@@ -39,7 +54,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     return item ? item.quantity : 0;
   };
 
-  const addToCart = (productId: number) => {
+  const addToCart = (productId: number, productData: { name: string; price: number; image: string }) => {
     setCart(prev => {
       const existingItem = prev.find(item => item.productId === productId);
       if (existingItem) {
@@ -49,7 +64,13 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
             : item
         );
       } else {
-        return [...prev, { productId, quantity: 1 }];
+        return [...prev, { 
+          productId, 
+          quantity: 1,
+          name: productData.name,
+          price: productData.price,
+          image: productData.image
+        }];
       }
     });
   };
@@ -69,12 +90,47 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     });
   };
 
+  const removeItemCompletely = (productId: number) => {
+    setCart(prev => prev.filter(item => item.productId !== productId));
+  };
+
+  const getSubtotal = () => {
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  const getDiscountAmount = () => {
+    if (!discount) return 0;
+    const subtotal = getSubtotal();
+    
+    if (discount.type === 'percentage') {
+      return (subtotal * discount.value) / 100;
+    } else {
+      return Math.min(discount.value, subtotal);
+    }
+  };
+
+  const getTotal = () => {
+    const subtotal = getSubtotal();
+    const discountAmount = getDiscountAmount();
+    return Math.max(0, subtotal - discountAmount);
+  };
+
+  const setDiscount = (newDiscount: Discount | null) => {
+    setDiscountState(newDiscount);
+  };
+
   const value = {
     cart,
+    discount,
     getTotalItems,
     getProductQuantity,
     addToCart,
     removeFromCart,
+    removeItemCompletely,
+    getSubtotal,
+    getDiscountAmount,
+    getTotal,
+    setDiscount,
   };
 
   return (

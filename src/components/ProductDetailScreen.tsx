@@ -45,6 +45,14 @@ const ProductDetailScreen = () => {
 
   const quantity = getProductQuantity(product.id);
 
+  const handleAddToCart = () => {
+    addToCart(product.id, {
+      name: product.name,
+      price: product.price,
+      image: product.image
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -133,7 +141,7 @@ const ProductDetailScreen = () => {
         <div className="flex justify-center">
           {quantity === 0 ? (
             <Button
-              onClick={() => addToCart(product.id)}
+              onClick={handleAddToCart}
               className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 text-lg"
             >
               ADICIONAR
@@ -154,7 +162,7 @@ const ProductDetailScreen = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => addToCart(product.id)}
+                onClick={handleAddToCart}
                 className="h-10 w-10 text-primary hover:bg-primary/5"
               >
                 <Plus className="h-5 w-5" />

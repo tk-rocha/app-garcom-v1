@@ -47,6 +47,14 @@ const ProductListScreen = () => {
     });
   };
 
+  const handleAddToCart = (product: any) => {
+    addToCart(product.id, {
+      name: product.name,
+      price: product.price,
+      image: product.image
+    });
+  };
+
   const currentProducts = mockProducts[activeCategory as keyof typeof mockProducts] || [];
 
   return (
@@ -76,7 +84,16 @@ const ProductListScreen = () => {
               <Scan className="h-5 w-5" />
             </Button>
             <div className="relative">
-              <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-primary hover:bg-primary/5"
+                onClick={() => {
+                  if (getTotalItems() > 0) {
+                    navigate("/sacola");
+                  }
+                }}
+              >
                 <ShoppingBag className="h-5 w-5" />
               </Button>
               {getTotalItems() > 0 && (
@@ -144,7 +161,7 @@ const ProductListScreen = () => {
                   <div className="flex-shrink-0">
                     {quantity === 0 ? (
                       <Button
-                        onClick={() => addToCart(product.id)}
+                        onClick={() => handleAddToCart(product)}
                         className="bg-primary text-primary-foreground hover:bg-primary/90 px-6"
                       >
                         ADICIONAR
@@ -165,7 +182,7 @@ const ProductListScreen = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => addToCart(product.id)}
+                          onClick={() => handleAddToCart(product)}
                           className="h-8 w-8 text-primary hover:bg-primary/5"
                         >
                           <Plus className="h-4 w-4" />
