@@ -257,7 +257,7 @@ const CartScreen = () => {
           
           <Button 
             className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-            onClick={() => {/* TODO: Implementar finalizar compra */}}
+            onClick={() => navigate("/cpf")}
           >
             FINALIZAR COMPRA
           </Button>
