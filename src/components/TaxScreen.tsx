@@ -1,64 +1,92 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+
+interface TaxOption {
+  id: string;
+  name: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  displayValue: string;
+}
 
 const TaxScreen = () => {
   const navigate = useNavigate();
-  const { getSubtotal, applyTax, getTaxAmount } = useCart();
-  const [taxType, setTaxType] = useState<"percentage" | "value">("percentage");
-  const [taxValue, setTaxValue] = useState("");
+  const { getSubtotal, setTax, tax } = useCart();
+  const [selectedTaxId, setSelectedTaxId] = useState<string | null>(null);
 
   const subtotal = getSubtotal();
-  const currentTax = getTaxAmount();
+
+  // Lista de taxas disponíveis
+  const taxOptions: TaxOption[] = [
+    { id: 'gorjeta_5', name: 'Gorjeta', type: 'percentage', value: 5, displayValue: '5%' },
+    { id: 'gorjeta_10', name: 'Gorjeta', type: 'percentage', value: 10, displayValue: '10%' },
+    { id: 'gorjeta_15', name: 'Gorjeta', type: 'percentage', value: 15, displayValue: '15%' },
+    { id: 'couvert_5', name: 'Couvert', type: 'fixed', value: 5, displayValue: 'R$ 5,00' },
+    { id: 'couvert_10', name: 'Couvert', type: 'fixed', value: 10, displayValue: 'R$ 10,00' },
+    { id: 'taxa_rolha', name: 'Taxa da Rolha', type: 'fixed', value: 30, displayValue: 'R$ 30,00' },
+  ];
+
+  // Carrega a taxa atual se houver
+  useEffect(() => {
+    if (tax) {
+      const currentTax = taxOptions.find(option => 
+        option.type === tax.type && 
+        option.value === tax.value
+      );
+      if (currentTax) {
+        setSelectedTaxId(currentTax.id);
+      }
+    }
+  }, [tax]);
 
   const formatCurrency = (value: number) => {
     return `R$ ${value.toFixed(2).replace('.', ',')}`;
   };
 
-  const handleTaxValueChange = (value: string) => {
-    if (taxType === "percentage") {
-      // Only allow numbers and limit to reasonable percentage
-      const sanitized = value.replace(/[^0-9]/g, "");
-      const numValue = parseInt(sanitized);
-      if (numValue <= 100 || sanitized === "") {
-        setTaxValue(sanitized);
-      }
+  const calculateTaxAmount = (taxOption: TaxOption) => {
+    if (taxOption.type === 'percentage') {
+      return (subtotal * taxOption.value) / 100;
     } else {
-      // For currency values, allow numbers and decimal
-      const sanitized = value.replace(/[^0-9.,]/g, "").replace(",", ".");
-      setTaxValue(sanitized);
+      return taxOption.value;
     }
   };
 
-  const calculateTaxAmount = () => {
-    if (!taxValue) return 0;
-
-    if (taxType === "percentage") {
-      const percentage = parseInt(taxValue);
-      return (subtotal * percentage) / 100;
-    } else {
-      return parseFloat(taxValue) || 0;
-    }
+  const getSelectedTax = () => {
+    return taxOptions.find(option => option.id === selectedTaxId);
   };
 
-  const handleApplyTax = () => {
-    const taxAmount = calculateTaxAmount();
-    applyTax(taxAmount);
+  const handleTaxSelect = (taxId: string) => {
+    setSelectedTaxId(selectedTaxId === taxId ? null : taxId);
+  };
+
+  const handleConfirm = () => {
+    const selectedTax = getSelectedTax();
+    if (selectedTax) {
+      setTax({
+        id: selectedTax.id,
+        name: selectedTax.name,
+        type: selectedTax.type,
+        value: selectedTax.value
+      });
+    } else {
+      setTax(null);
+    }
     navigate(-1);
   };
 
   const handleRemoveTax = () => {
-    applyTax(0);
+    setSelectedTaxId(null);
+    setTax(null);
     navigate(-1);
   };
 
-  const taxAmount = calculateTaxAmount();
-  const newTotal = subtotal + taxAmount;
+  const selectedTaxOption = getSelectedTax();
+  const selectedTaxAmount = selectedTaxOption ? calculateTaxAmount(selectedTaxOption) : 0;
+  const newTotal = subtotal + selectedTaxAmount;
 
   return (
     <div className="min-h-screen bg-background">
@@ -81,118 +109,97 @@ const TaxScreen = () => {
       </div>
 
       <div className="p-4 space-y-6">
-        {/* Current Values */}
-        <Card className="bg-white shadow-sm">
-          <CardContent className="p-4">
-            <h3 className="font-semibold text-gray-900 mb-3">Valores Atuais</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Subtotal:</span>
-                <span>{formatCurrency(subtotal)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Taxa atual:</span>
-                <span className="text-orange-600">+ {formatCurrency(currentTax)}</span>
-              </div>
-              <hr className="my-2" />
-              <div className="flex justify-between font-semibold">
-                <span>Total:</span>
-                <span>{formatCurrency(subtotal + currentTax)}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Tax Type Selection */}
+        {/* Lista de Taxas Disponíveis */}
         <Card className="bg-white shadow-sm">
           <CardContent className="p-4 space-y-4">
-            <h3 className="font-semibold text-gray-900">Tipo de Taxa</h3>
+            <h3 className="font-semibold text-gray-900">Taxas Disponíveis</h3>
             
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                variant={taxType === "percentage" ? "default" : "outline"}
-                className={`${
-                  taxType === "percentage"
-                    ? "bg-primary text-primary-foreground"
-                    : "border-primary text-primary hover:bg-primary/5"
-                }`}
-                onClick={() => {
-                  setTaxType("percentage");
-                  setTaxValue("");
-                }}
-              >
-                Percentual (%)
-              </Button>
-              <Button
-                variant={taxType === "value" ? "default" : "outline"}
-                className={`${
-                  taxType === "value"
-                    ? "bg-primary text-primary-foreground"
-                    : "border-primary text-primary hover:bg-primary/5"
-                }`}
-                onClick={() => {
-                  setTaxType("value");
-                  setTaxValue("");
-                }}
-              >
-                Valor (R$)
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Tax Value Input */}
-        <Card className="bg-white shadow-sm">
-          <CardContent className="p-4 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="tax" className="text-sm font-medium text-gray-700">
-                {taxType === "percentage" ? "Percentual da taxa" : "Valor da taxa"}
-              </Label>
-              <div className="relative">
-                <Input
-                  id="tax"
-                  value={taxValue}
-                  onChange={(e) => handleTaxValueChange(e.target.value)}
-                  placeholder={taxType === "percentage" ? "0" : "0,00"}
-                  className="text-lg text-center pr-12"
-                  inputMode="decimal"
-                />
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                  {taxType === "percentage" ? "%" : "R$"}
-                </span>
-              </div>
+              {taxOptions.map((taxOption) => {
+                const isSelected = selectedTaxId === taxOption.id;
+                const taxAmount = calculateTaxAmount(taxOption);
+                
+                return (
+                  <div
+                    key={taxOption.id}
+                    onClick={() => handleTaxSelect(taxOption.id)}
+                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                      isSelected
+                        ? "border-primary bg-primary/5"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                          isSelected 
+                            ? "border-primary bg-primary" 
+                            : "border-gray-300"
+                        }`}>
+                          {isSelected && <Check className="w-3 h-3 text-white" />}
+                        </div>
+                        
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {taxOption.name}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {taxOption.displayValue}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className="font-medium text-primary">
+                          + {formatCurrency(taxAmount)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            
-            {taxValue && (
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <div className="space-y-1 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Taxa aplicada:</span>
-                    <span className="text-orange-600 font-medium">
-                      + {formatCurrency(taxAmount)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between font-semibold">
-                    <span>Novo total:</span>
-                    <span>{formatCurrency(newTotal)}</span>
-                  </div>
+          </CardContent>
+        </Card>
+
+        {/* Resumo do Cálculo */}
+        {selectedTaxOption && (
+          <Card className="bg-white shadow-sm">
+            <CardContent className="p-4">
+              <h3 className="font-semibold text-gray-900 mb-3">Resumo</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Subtotal:</span>
+                  <span>{formatCurrency(subtotal)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">
+                    {selectedTaxOption.name} ({selectedTaxOption.displayValue}):
+                  </span>
+                  <span className="text-orange-600 font-medium">
+                    + {formatCurrency(selectedTaxAmount)}
+                  </span>
+                </div>
+                <hr className="my-2" />
+                <div className="flex justify-between font-semibold text-lg">
+                  <span>Total:</span>
+                  <span>{formatCurrency(newTotal)}</span>
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Action Buttons */}
+        {/* Botões de Ação */}
         <div className="space-y-3">
           <Button
-            onClick={handleApplyTax}
-            disabled={!taxValue || taxAmount <= 0}
+            onClick={handleConfirm}
             className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            Aplicar Taxa
+            Confirmar
           </Button>
           
-          {currentTax > 0 && (
+          {tax && (
             <Button
               variant="outline"
               onClick={handleRemoveTax}
@@ -207,7 +214,7 @@ const TaxScreen = () => {
             onClick={() => navigate(-1)}
             className="w-full text-gray-600 hover:bg-gray-100"
           >
-            Cancelar
+            Voltar
           </Button>
         </div>
       </div>
