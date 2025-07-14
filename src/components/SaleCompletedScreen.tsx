@@ -38,6 +38,15 @@ const SaleCompletedScreen = () => {
       const now = new Date();
       const receiptNumber = Date.now();
       
+      // Check if this exact receipt number already exists
+      const existingReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
+      const alreadyExists = existingReceipts.some((r: any) => r.number === receiptNumber);
+      
+      if (alreadyExists) {
+        console.log('ERRO: Recibo já existe! Número:', receiptNumber);
+        return;
+      }
+      
       const receipt = {
         number: receiptNumber,
         timestamp: now.toISOString(),
@@ -52,7 +61,6 @@ const SaleCompletedScreen = () => {
       };
 
       // Store receipt in localStorage
-      const existingReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
       existingReceipts.push(receipt);
       localStorage.setItem('fiscalReceipts', JSON.stringify(existingReceipts));
 
@@ -62,7 +70,7 @@ const SaleCompletedScreen = () => {
       dailySales[today] = (dailySales[today] || 0) + saleData.total;
       localStorage.setItem('dailySales', JSON.stringify(dailySales));
 
-      console.log('Receipt generated:', receipt);
+      console.log('Recibo gerado com sucesso:', receipt);
     };
 
     generateReceipt();

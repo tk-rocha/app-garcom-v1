@@ -11,7 +11,16 @@ const CancelarCupomScreen = () => {
   useEffect(() => {
     // Debug: Load all receipts from localStorage
     const storedReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
+    console.log('=== DEBUG INICIO ===');
     console.log('Todos os recibos armazenados:', storedReceipts);
+    console.log('Quantidade total de recibos:', storedReceipts.length);
+    
+    // Check for duplicates
+    const receiptNumbers = storedReceipts.map((r: any) => r.number);
+    const duplicates = receiptNumbers.filter((num: any, index: number) => receiptNumbers.indexOf(num) !== index);
+    if (duplicates.length > 0) {
+      console.log('DUPLICATAS ENCONTRADAS! Números duplicados:', duplicates);
+    }
     
     // Filter to get only today's sales
     const today = new Date().toDateString();
@@ -19,11 +28,13 @@ const CancelarCupomScreen = () => {
     
     const vendasHoje = storedReceipts.filter((receipt: any) => {
       const receiptDate = new Date(receipt.timestamp).toDateString();
-      console.log('Comparando:', receiptDate, 'com', today);
+      console.log('Comparando:', receiptDate, 'com', today, '- Match:', receiptDate === today);
       return receiptDate === today;
     });
     
-    console.log('Vendas de hoje encontradas:', vendasHoje);
+    console.log('Vendas de hoje encontradas:', vendasHoje.length, 'vendas');
+    console.log('Vendas de hoje detalhadas:', vendasHoje);
+    console.log('=== DEBUG FIM ===');
     setVendas(vendasHoje);
   }, []);
 
