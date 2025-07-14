@@ -92,8 +92,17 @@ const SaleCompletedScreen = () => {
         cleanReceipts.push(receipt);
         localStorage.setItem('fiscalReceipts', JSON.stringify(cleanReceipts));
 
+        // Update daily sales total
+        const today = new Date().toDateString();
+        const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
+        const currentDailyTotal = dailySales[today] || 0;
+        const newDailyTotal = currentDailyTotal + saleData.total;
+        dailySales[today] = newDailyTotal;
+        localStorage.setItem('dailySales', JSON.stringify(dailySales));
+
         console.log('Recibo gerado com sucesso:', receipt);
         console.log('Total de recibos após geração:', cleanReceipts.length);
+        console.log('Total diário atualizado:', { anterior: currentDailyTotal, novo: newDailyTotal, venda: saleData.total });
         
       } finally {
         // Always remove lock
