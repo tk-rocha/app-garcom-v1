@@ -200,13 +200,18 @@ const PaymentScreen = () => {
   const handleFinalizeOrder = () => {
     if (!canFinalize) return;
     
-    toast({
-      title: "Pedido finalizado!",
-      description: "Venda realizada com sucesso.",
-    });
+    // Prepare sale data for the completion screen
+    const saleData = {
+      subtotal,
+      discountAmount,
+      taxAmount,
+      total,
+      payments,
+      customerCpf,
+    };
     
-    // Navigate to success screen or reset
-    navigate("/balcao");
+    // Navigate to sale completed screen with data
+    navigate("/venda-finalizada", { state: { saleData } });
   };
 
   const removePayment = (paymentId: string) => {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,9 +7,17 @@ import { Home, Table, QrCode, Puzzle } from "lucide-react";
 const BalcaoScreen = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("inicio");
+  const [dailyTotal, setDailyTotal] = useState(0);
   
   // Get current date
   const currentDate = new Date().toLocaleDateString("pt-BR");
+
+  // Load daily sales total
+  useEffect(() => {
+    const today = new Date().toDateString();
+    const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
+    setDailyTotal(dailySales[today] || 0);
+  }, []);
 
   const navItems = [
     { id: "inicio", label: "Início", icon: Home },
@@ -36,7 +44,9 @@ const BalcaoScreen = () => {
                 <p className="text-sm text-gray-600">{currentDate}</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-primary">R$ 0,00</p>
+                <p className="text-2xl font-bold text-primary">
+                  R$ {dailyTotal.toFixed(2).replace(".", ",")}
+                </p>
               </div>
             </div>
           </CardContent>

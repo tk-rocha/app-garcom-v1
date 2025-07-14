@@ -41,6 +41,7 @@ interface CartContextType {
   getDiscountType: () => 'percentage' | 'value';
   getDiscountValue: () => string;
   applyTax: (amount: number) => void;
+  clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -178,6 +179,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setTaxState(amount > 0 ? { id: 'manual', name: 'Taxa Manual', type: 'fixed', value: amount } : null);
   };
 
+  const clearCart = () => {
+    setCart([]);
+    setDiscountState(null);
+    setTaxState(null);
+  };
+
   const value = {
     cart,
     discount,
@@ -197,6 +204,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     getDiscountType,
     getDiscountValue,
     applyTax,
+    clearCart,
   };
 
   return (

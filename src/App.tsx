@@ -18,6 +18,7 @@ import CustomerScreen from "./components/CustomerScreen";
 import PaymentScreen from "./components/PaymentScreen";
 import ProductSearchScreen from "./components/ProductSearchScreen";
 import BarcodeScannerScreen from "./components/BarcodeScannerScreen";
+import SaleCompletedScreen from "./components/SaleCompletedScreen";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/pagamento" element={<PaymentScreen />} />
             <Route path="/pesquisar" element={<ProductSearchScreen />} />
             <Route path="/scanner" element={<BarcodeScannerScreen />} />
+            <Route path="/venda-finalizada" element={<SaleCompletedScreen />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
