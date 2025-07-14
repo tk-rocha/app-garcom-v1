@@ -81,6 +81,9 @@ const PaymentScreen = () => {
   const { getSubtotal, getDiscountAmount, getTaxAmount, getTotal } = useCart();
   const { toast } = useToast();
   
+  console.log('PaymentScreen - Component loaded');
+  console.log('PaymentScreen - Location state:', location.state);
+  
   const [payments, setPayments] = useState<Payment[]>([]);
   const [selectedMethod, setSelectedMethod] = useState<string>("");
   const [paymentAmount, setPaymentAmount] = useState("");
@@ -96,6 +99,8 @@ const PaymentScreen = () => {
   const discountAmount = getDiscountAmount();
   const taxAmount = getTaxAmount();
   const total = getTotal();
+  
+  console.log('PaymentScreen - Totals:', { subtotal, discountAmount, taxAmount, total });
   
   const totalPaid = payments.reduce((sum, payment) => sum + payment.amount, 0);
   const remaining = Math.max(0, total - totalPaid);
