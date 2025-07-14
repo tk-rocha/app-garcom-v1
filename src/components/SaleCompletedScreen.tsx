@@ -67,12 +67,13 @@ const SaleCompletedScreen = () => {
   }, [navigate, saleData, clearCart]);
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div className="text-center space-y-6 animate-fade-in">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <div className="text-center space-y-4 sm:space-y-6 md:space-y-8 animate-fade-in max-w-md mx-auto">
         {/* Success Icon with Animation */}
-        <div className="mx-auto w-20 h-20 bg-primary rounded-full flex items-center justify-center animate-scale-in relative">
+        <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center animate-scale-in relative"
+             style={{ backgroundColor: '#180F33' }}>
           <svg 
-            className="h-10 w-10 text-white" 
+            className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-white" 
             fill="none" 
             viewBox="0 0 24 24" 
             stroke="currentColor"
@@ -92,11 +93,13 @@ const SaleCompletedScreen = () => {
         </div>
         
         {/* Success Message */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold" style={{ color: '#180F33' }}>
+        <div className="space-y-2 sm:space-y-3 md:space-y-4 px-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight" 
+              style={{ color: '#180F33' }}>
             Venda Finalizada
           </h1>
-          <p className="text-lg" style={{ color: '#8A8A8A' }}>
+          <p className="text-base sm:text-lg md:text-xl leading-relaxed" 
+             style={{ color: '#8A8A8A' }}>
             Cupom fiscal gerado com sucesso
           </p>
         </div>
