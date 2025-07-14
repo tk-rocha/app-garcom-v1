@@ -75,7 +75,13 @@ const BalcaoScreen = () => {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  if (item.id === "funcoes") {
+                    navigate("/funcoes");
+                  } else {
+                    setActiveTab(item.id);
+                  }
+                }}
                 className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors ${
                   isActive 
                     ? "bg-primary text-accent" 
