@@ -38,23 +38,14 @@ const ConfirmarCancelamentoScreen = () => {
       return;
     }
 
-    // Load and update cupons
-    const storedCupons = JSON.parse(localStorage.getItem('cupons') || '[]');
-    const updatedCupons = storedCupons.map((c: Cupom) => 
-      c.id === cupom.id 
-        ? { ...c, cancelado: true, motivoCancelamento: motivo }
-        : c
+    // Load and update fiscal receipts
+    const storedReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
+    const updatedReceipts = storedReceipts.map((receipt: any) => 
+      receipt.number.toString() === cupom.numero 
+        ? { ...receipt, cancelado: true, motivoCancelamento: motivo }
+        : receipt
     );
-    localStorage.setItem('cupons', JSON.stringify(updatedCupons));
-
-    // Update daily sales (subtract the cancelled cupom value)
-    const today = new Date().toDateString();
-    const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
-    if (dailySales[today]) {
-      dailySales[today] -= cupom.valorLiquido;
-      if (dailySales[today] < 0) dailySales[today] = 0;
-      localStorage.setItem('dailySales', JSON.stringify(dailySales));
-    }
+    localStorage.setItem('fiscalReceipts', JSON.stringify(updatedReceipts));
 
     toast({
       title: "Cupom cancelado",
@@ -77,7 +68,7 @@ const ConfirmarCancelamentoScreen = () => {
           <ArrowLeft className="h-6 w-6" />
         </Button>
         <h1 className="text-xl font-medium text-[#180F33] flex-1 text-center mr-10">
-          CANCELAR CUPOM
+          Cancelar Cupom
         </h1>
       </div>
 
@@ -86,25 +77,13 @@ const ConfirmarCancelamentoScreen = () => {
         {/* Cupom Details Card */}
         <Card className="bg-white shadow-sm border-2 border-red-200">
           <CardContent className="p-6">
-            <div className="space-y-2">
+            <div className="text-center space-y-2">
               <h3 className="text-lg font-semibold text-[#180F33]">
-                Cupom #{cupom.numero}
+                Cupom Nº {cupom.numero} – {formatCurrency(cupom.valorLiquido)}
               </h3>
               <p className="text-sm text-gray-600">
                 {new Date(cupom.timestamp).toLocaleString('pt-BR')}
               </p>
-              <div className="flex justify-between items-center pt-2">
-                <span className="text-sm">Valor Bruto:</span>
-                <span className="font-medium">
-                  {formatCurrency(cupom.valorBruto)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Valor Líquido:</span>
-                <span className="font-medium">
-                  {formatCurrency(cupom.valorLiquido)}
-                </span>
-              </div>
             </div>
           </CardContent>
         </Card>
