@@ -107,22 +107,37 @@ const PaymentScreen = () => {
     setShowPixQR(false);
   };
 
+  // Format currency as user types (Brazilian format)
+  const formatCurrency = (value: string) => {
+    // Remove all non-numeric characters
+    const numericValue = value.replace(/\D/g, '');
+    
+    if (!numericValue) return '';
+    
+    // Convert to number and divide by 100 to get decimal places
+    const number = parseInt(numericValue) / 100;
+    
+    // Format with Brazilian locale (R$ and comma as decimal separator)
+    return number.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+    });
+  };
+
   const handleAmountChange = (value: string) => {
-    // Only allow numbers and decimal point
-    const sanitized = value.replace(/[^0-9.,]/g, "").replace(",", ".");
-    if (sanitized && !isNaN(parseFloat(sanitized))) {
-      const numValue = parseFloat(sanitized);
-      setPaymentAmount(numValue.toFixed(2).replace(".", ","));
-    } else {
-      setPaymentAmount(sanitized);
-    }
+    const formatted = formatCurrency(value);
+    setPaymentAmount(formatted);
   };
 
   const processPayment = async () => {
     const method = paymentMethods.find(m => m.id === selectedMethod);
     if (!method || !paymentAmount) return;
 
-    const amount = parseFloat(paymentAmount);
+    // Parse amount from Brazilian currency format (R$ 1.234,56)
+    const numericString = paymentAmount.replace(/[^\d,]/g, '').replace(',', '.');
+    const amount = parseFloat(numericString);
+    
     if (isNaN(amount) || amount <= 0) {
       toast({
         title: "Valor inválido",
@@ -254,9 +269,9 @@ const PaymentScreen = () => {
                   id="amount"
                   value={paymentAmount}
                   onChange={(e) => handleAmountChange(e.target.value)}
-                  placeholder="0,00"
+                  placeholder="R$ 0,00"
                   className="text-lg text-center"
-                  inputMode="decimal"
+                  inputMode="numeric"
                 />
               </div>
               
