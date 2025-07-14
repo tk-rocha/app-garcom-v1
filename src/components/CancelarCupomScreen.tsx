@@ -27,8 +27,19 @@ const CancelarCupomScreen = () => {
       
       // Remove duplicates based on number AND timestamp similarity (within 10 seconds)
       const cleanReceipts = rawReceipts.filter((receipt: any, index: number) => {
+        // Skip invalid receipts
+        if (!receipt || !receipt.number || !receipt.timestamp) return false;
+        
         const firstOccurrence = rawReceipts.findIndex((r: any) => {
-          const timeDiff = Math.abs(new Date(r.timestamp).getTime() - new Date(receipt.timestamp).getTime());
+          if (!r || !r.number || !r.timestamp) return false;
+          
+          const rTime = new Date(r.timestamp).getTime();
+          const receiptTime = new Date(receipt.timestamp).getTime();
+          
+          // Skip if dates are invalid
+          if (isNaN(rTime) || isNaN(receiptTime)) return false;
+          
+          const timeDiff = Math.abs(rTime - receiptTime);
           return r.number === receipt.number && timeDiff < 10000;
         });
         return firstOccurrence === index;
@@ -46,12 +57,16 @@ const CancelarCupomScreen = () => {
       
       const todayCupons = cleanReceipts
         .filter((receipt: any) => {
-          const receiptDate = new Date(receipt.timestamp).toDateString();
-          return receiptDate === today;
+          if (!receipt || !receipt.timestamp) return false;
+          
+          const receiptDate = new Date(receipt.timestamp);
+          if (isNaN(receiptDate.getTime())) return false;
+          
+          return receiptDate.toDateString() === today;
         })
         .map((receipt: any, index: number) => ({
-          id: receipt.id || `${receipt.number}-${receipt.timestamp}-${index}`,
-          numero: receipt.number.toString(),
+          id: receipt.id || `${receipt.number || 'unknown'}-${receipt.timestamp}-${index}`,
+          numero: (receipt.number || 0).toString(),
           timestamp: receipt.timestamp,
           valorBruto: receipt.grossAmount || 0,
           valorLiquido: receipt.netAmount || 0,
