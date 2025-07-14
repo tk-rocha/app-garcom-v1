@@ -58,10 +58,10 @@ const SaleCompletedScreen = () => {
     generateReceipt();
     clearCart(); // Clear cart after successful sale
 
-    // Auto redirect after 3 seconds
+    // Auto redirect after 4 seconds
     const timer = setTimeout(() => {
       navigate("/balcao");
-    }, 3000);
+    }, 4000);
 
     return () => clearTimeout(timer);
   }, [navigate, saleData, clearCart]);
