@@ -67,45 +67,39 @@ const SaleCompletedScreen = () => {
   }, [navigate, saleData, clearCart]);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="text-center space-y-6 animate-fade-in">
         {/* Success Icon with Animation */}
-        <div className="mx-auto w-20 h-20 bg-primary rounded-full flex items-center justify-center animate-scale-in">
-          <Check className="h-10 w-10 text-primary-foreground animate-pulse" />
+        <div className="mx-auto w-20 h-20 bg-primary rounded-full flex items-center justify-center animate-scale-in relative">
+          <svg 
+            className="h-10 w-10 text-white" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path 
+              className="animate-check-draw"
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={3} 
+              d="M5 13l4 4L19 7"
+              style={{
+                strokeDasharray: '100',
+                strokeDashoffset: '100',
+              }}
+            />
+          </svg>
         </div>
         
         {/* Success Message */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-primary">
+          <h1 className="text-3xl font-bold" style={{ color: '#180F33' }}>
             Venda Finalizada
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg" style={{ color: '#8A8A8A' }}>
             Cupom fiscal gerado com sucesso
           </p>
         </div>
-
-        {/* Sale Summary */}
-        <div className="bg-card border rounded-lg p-4 max-w-sm mx-auto">
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Total da venda:</span>
-              <span className="font-semibold text-primary">
-                R$ {saleData.total?.toFixed(2).replace(".", ",") || "0,00"}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Cupom nº:</span>
-              <span className="font-mono text-xs">
-                {Date.now().toString().slice(-6)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Redirect Message */}
-        <p className="text-sm text-muted-foreground">
-          Redirecionando automaticamente...
-        </p>
       </div>
     </div>
   );
