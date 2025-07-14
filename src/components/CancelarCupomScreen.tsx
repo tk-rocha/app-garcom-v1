@@ -19,43 +19,54 @@ const CancelarCupomScreen = () => {
   const [cupons, setCupons] = useState<Cupom[]>([]);
 
   useEffect(() => {
-    // Debug: Load all receipts from localStorage
-    const storedReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
-    console.log('=== DEBUG INICIO ===');
-    console.log('Todos os recibos armazenados:', storedReceipts);
-    console.log('Quantidade total de recibos:', storedReceipts.length);
-    
-    // Check for duplicates
-    const receiptNumbers = storedReceipts.map((r: any) => r.number);
-    const duplicates = receiptNumbers.filter((num: any, index: number) => receiptNumbers.indexOf(num) !== index);
-    if (duplicates.length > 0) {
-      console.log('DUPLICATAS ENCONTRADAS! Números duplicados:', duplicates);
-    }
-    
-    // Filter to get only today's sales
-    const today = new Date().toDateString();
-    console.log('Data de hoje:', today);
-    
-    const todayCupons = storedReceipts
-      .filter((receipt: any) => {
-        const receiptDate = new Date(receipt.timestamp).toDateString();
-        console.log('Comparando:', receiptDate, 'com', today, '- Match:', receiptDate === today);
-        return receiptDate === today;
-      })
-      .map((receipt: any, index: number) => ({
-        id: `${receipt.number}-${receipt.timestamp}-${index}`,
-        numero: receipt.number.toString(),
-        timestamp: receipt.timestamp,
-        valorBruto: receipt.grossAmount || 0,
-        valorLiquido: receipt.netAmount || 0,
-        cancelado: receipt.cancelado || false
-      }))
-      .sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
-    
-    console.log('Cupons de hoje encontrados:', todayCupons.length, 'cupons');
-    console.log('Cupons de hoje detalhados:', todayCupons);
-    console.log('=== DEBUG FIM ===');
-    setCupons(todayCupons);
+    // Clean and load receipts from localStorage
+    const cleanAndLoadReceipts = () => {
+      const rawReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
+      console.log('=== DEBUG INICIO ===');
+      console.log('Raw receipts:', rawReceipts.length);
+      
+      // Remove duplicates based on number AND timestamp similarity (within 10 seconds)
+      const cleanReceipts = rawReceipts.filter((receipt: any, index: number) => {
+        const firstOccurrence = rawReceipts.findIndex((r: any) => {
+          const timeDiff = Math.abs(new Date(r.timestamp).getTime() - new Date(receipt.timestamp).getTime());
+          return r.number === receipt.number && timeDiff < 10000;
+        });
+        return firstOccurrence === index;
+      });
+      
+      // Save cleaned receipts back if we removed duplicates
+      if (cleanReceipts.length !== rawReceipts.length) {
+        console.log('Removing duplicates:', rawReceipts.length - cleanReceipts.length, 'duplicates found');
+        localStorage.setItem('fiscalReceipts', JSON.stringify(cleanReceipts));
+      }
+      
+      // Filter to get only today's sales
+      const today = new Date().toDateString();
+      console.log('Data de hoje:', today);
+      
+      const todayCupons = cleanReceipts
+        .filter((receipt: any) => {
+          const receiptDate = new Date(receipt.timestamp).toDateString();
+          return receiptDate === today;
+        })
+        .map((receipt: any, index: number) => ({
+          id: receipt.id || `${receipt.number}-${receipt.timestamp}-${index}`,
+          numero: receipt.number.toString(),
+          timestamp: receipt.timestamp,
+          valorBruto: receipt.grossAmount || 0,
+          valorLiquido: receipt.netAmount || 0,
+          cancelado: receipt.cancelado || false
+        }))
+        .sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
+      
+      console.log('Clean receipts:', cleanReceipts.length);
+      console.log('Cupons de hoje encontrados:', todayCupons.length);
+      console.log('=== DEBUG FIM ===');
+      
+      return todayCupons;
+    };
+
+    setCupons(cleanAndLoadReceipts());
   }, []);
 
   // Calculate total sales for today (excluding cancelled coupons)

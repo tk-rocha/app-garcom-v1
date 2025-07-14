@@ -24,63 +24,85 @@ const SaleCompletedScreen = () => {
   const saleData: SaleData = location.state?.saleData || {};
 
   useEffect(() => {
-    // Prevent multiple executions
+    // Prevent multiple executions with stronger safeguards
     if (hasProcessed.current) {
       console.log('Sale already processed, skipping...');
       return;
     }
 
-    console.log('Processing sale completion...');
-    hasProcessed.current = true;
-
-    // Generate fiscal receipt
+    // Generate unique receipt with lock mechanism
     const generateReceipt = () => {
       const now = new Date();
+      const lockKey = 'receipts_generating_lock';
+      const timestampKey = 'last_receipt_timestamp';
       
-      // Get existing receipts to determine next coupon number
-      const existingReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
+      // Check if we're already generating a receipt (within 5 seconds)
+      const lastTimestamp = localStorage.getItem(timestampKey);
+      const timeDiff = lastTimestamp ? now.getTime() - parseInt(lastTimestamp) : Infinity;
       
-      // Find the highest coupon number and increment, or start at 700
-      let receiptNumber = 700; // Starting number
-      if (existingReceipts.length > 0) {
-        const maxNumber = Math.max(...existingReceipts.map((r: any) => parseInt(r.number) || 699));
-        receiptNumber = maxNumber + 1;
-      }
-      
-      // Check if this exact receipt number already exists (extra safety)
-      const alreadyExists = existingReceipts.some((r: any) => r.number === receiptNumber);
-      
-      if (alreadyExists) {
-        console.log('ERRO: Recibo já existe! Número:', receiptNumber);
+      if (timeDiff < 5000) {
+        console.log('Recibo já sendo gerado recentemente, pulando...');
         return;
       }
+
+      // Set lock
+      localStorage.setItem(lockKey, 'true');
+      localStorage.setItem(timestampKey, now.getTime().toString());
       
-      const receipt = {
-        number: receiptNumber,
-        timestamp: now.toISOString(),
-        date: now.toLocaleDateString('pt-BR'),
-        time: now.toLocaleTimeString('pt-BR'),
-        grossAmount: saleData.subtotal + saleData.taxAmount,
-        netAmount: saleData.total,
-        discount: saleData.discountAmount,
-        tax: saleData.taxAmount,
-        payments: saleData.payments,
-        customerCpf: saleData.customerCpf,
-      };
+      try {
+        // Clean duplicates first
+        const rawReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
+        console.log('Raw receipts before cleaning:', rawReceipts.length);
+        
+        // Remove duplicates based on number AND timestamp similarity (within 10 seconds)
+        const cleanReceipts = rawReceipts.filter((receipt: any, index: number) => {
+          const firstOccurrence = rawReceipts.findIndex((r: any) => {
+            const timeDiff = Math.abs(new Date(r.timestamp).getTime() - new Date(receipt.timestamp).getTime());
+            return r.number === receipt.number && timeDiff < 10000;
+          });
+          return firstOccurrence === index;
+        });
+        
+        console.log('Cleaned receipts:', cleanReceipts.length, 'removed:', rawReceipts.length - cleanReceipts.length);
+        
+        // Find the highest coupon number and increment
+        let receiptNumber = 700;
+        if (cleanReceipts.length > 0) {
+          const maxNumber = Math.max(...cleanReceipts.map((r: any) => parseInt(r.number) || 699));
+          receiptNumber = maxNumber + 1;
+        }
+        
+        // Create unique receipt with stronger ID
+        const uniqueId = `${now.getTime()}-${Math.random().toString(36).substring(2)}`;
+        const receipt = {
+          id: uniqueId,
+          number: receiptNumber,
+          timestamp: now.toISOString(),
+          date: now.toLocaleDateString('pt-BR'),
+          time: now.toLocaleTimeString('pt-BR'),
+          grossAmount: saleData.subtotal + saleData.taxAmount,
+          netAmount: saleData.total,
+          discount: saleData.discountAmount,
+          tax: saleData.taxAmount,
+          payments: saleData.payments,
+          customerCpf: saleData.customerCpf,
+        };
 
-      // Store receipt in localStorage
-      existingReceipts.push(receipt);
-      localStorage.setItem('fiscalReceipts', JSON.stringify(existingReceipts));
+        // Store updated receipts
+        cleanReceipts.push(receipt);
+        localStorage.setItem('fiscalReceipts', JSON.stringify(cleanReceipts));
 
-      // Update daily sales total
-      const today = now.toDateString();
-      const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
-      dailySales[today] = (dailySales[today] || 0) + saleData.total;
-      localStorage.setItem('dailySales', JSON.stringify(dailySales));
-
-      console.log('Recibo gerado com sucesso:', receipt);
+        console.log('Recibo gerado com sucesso:', receipt);
+        console.log('Total de recibos após geração:', cleanReceipts.length);
+        
+      } finally {
+        // Always remove lock
+        localStorage.removeItem(lockKey);
+      }
     };
 
+    console.log('Processing sale completion...');
+    hasProcessed.current = true;
     generateReceipt();
     clearCart();
 

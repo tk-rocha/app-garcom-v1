@@ -86,6 +86,7 @@ const PaymentScreen = () => {
   const [paymentAmount, setPaymentAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPixQR, setShowPixQR] = useState(false);
+  const [isFinalizingOrder, setIsFinalizingOrder] = useState(false);
 
   // Customer info from previous screen
   const customerCpf = location.state?.cpf || "";
@@ -199,7 +200,9 @@ const PaymentScreen = () => {
   };
 
   const handleFinalizeOrder = () => {
-    if (!canFinalize) return;
+    if (!canFinalize || isFinalizingOrder) return;
+    
+    setIsFinalizingOrder(true);
     
     // Prepare sale data for the completion screen
     const saleData = {
@@ -392,14 +395,14 @@ const PaymentScreen = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4" style={{paddingBottom: "env(safe-area-inset-bottom)"}}>
         <Button
           onClick={handleFinalizeOrder}
-          disabled={!canFinalize}
+          disabled={!canFinalize || isFinalizingOrder}
           className={`w-full py-4 text-lg font-semibold ${
-            canFinalize
+            canFinalize && !isFinalizingOrder
               ? "bg-[#180F33] text-[#FFC72C] hover:bg-[#180F33]/90"
               : "bg-gray-300 text-gray-500 cursor-not-allowed"
           }`}
         >
-          FINALIZAR COMPRA
+          {isFinalizingOrder ? "FINALIZANDO..." : "FINALIZAR COMPRA"}
         </Button>
       </div>
     </div>
