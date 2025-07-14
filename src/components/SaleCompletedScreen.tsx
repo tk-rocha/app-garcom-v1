@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Check } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
@@ -19,29 +19,39 @@ const SaleCompletedScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { clearCart } = useCart();
+  const hasProcessed = useRef(false);
   
   const saleData: SaleData = location.state?.saleData || {};
 
   useEffect(() => {
+    // Prevent multiple executions
+    if (hasProcessed.current) {
+      console.log('Sale already processed, skipping...');
+      return;
+    }
+
+    console.log('Processing sale completion...');
+    hasProcessed.current = true;
+
     // Generate fiscal receipt
     const generateReceipt = () => {
       const now = new Date();
-      const receiptNumber = Date.now(); // Simple sequential number based on timestamp
+      const receiptNumber = Date.now();
       
       const receipt = {
         number: receiptNumber,
         timestamp: now.toISOString(),
         date: now.toLocaleDateString('pt-BR'),
         time: now.toLocaleTimeString('pt-BR'),
-        grossAmount: saleData.subtotal + saleData.taxAmount, // Valor bruto
-        netAmount: saleData.total, // Valor líquido após desconto
+        grossAmount: saleData.subtotal + saleData.taxAmount,
+        netAmount: saleData.total,
         discount: saleData.discountAmount,
         tax: saleData.taxAmount,
         payments: saleData.payments,
         customerCpf: saleData.customerCpf,
       };
 
-      // Store receipt in localStorage for future "Cupons Emitidos" screen
+      // Store receipt in localStorage
       const existingReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
       existingReceipts.push(receipt);
       localStorage.setItem('fiscalReceipts', JSON.stringify(existingReceipts));
@@ -56,15 +66,20 @@ const SaleCompletedScreen = () => {
     };
 
     generateReceipt();
-    clearCart(); // Clear cart after successful sale
+    clearCart();
 
     // Auto redirect after 3 seconds
+    console.log('Setting 3-second timer for redirect...');
     const timer = setTimeout(() => {
+      console.log('Timer fired, redirecting to /balcao');
       navigate("/balcao");
     }, 3000);
 
-    return () => clearTimeout(timer);
-  }, [navigate, saleData, clearCart]);
+    return () => {
+      console.log('Cleaning up timer');
+      clearTimeout(timer);
+    };
+  }, []); // Empty dependencies to run only once
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-6 md:p-8">
