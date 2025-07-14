@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, CreditCard, Smartphone, Banknote } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
+import { formatCurrency as formatBRL } from "@/lib/utils";
 
 interface Payment {
   id: string;
@@ -184,7 +185,7 @@ const PaymentScreen = () => {
 
       toast({
         title: "Pagamento processado",
-        description: `${method.name}: R$ ${amount.toFixed(2).replace(".", ",")}`,
+        description: `${method.name}: ${formatBRL(amount)}`,
       });
     } catch (error) {
       toast({
@@ -313,7 +314,7 @@ const PaymentScreen = () => {
                   <div key={payment.id} className="flex justify-between items-center py-2 border-b">
                     <span className="text-gray-700">{payment.method}</span>
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium">R$ {payment.amount.toFixed(2).replace(".", ",")}</span>
+                      <span className="font-medium">{formatBRL(payment.amount)}</span>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -337,12 +338,12 @@ const PaymentScreen = () => {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal:</span>
-                <span>R$ {subtotal.toFixed(2).replace(".", ",")}</span>
+                <span>{formatBRL(subtotal)}</span>
               </div>
               {taxAmount > 0 && (
                 <div className="flex justify-between cursor-pointer" onClick={() => navigate("/taxas")}>
                   <span className="text-gray-600">Taxas:</span>
-                  <span>R$ {taxAmount.toFixed(2).replace(".", ",")}</span>
+                  <span>{formatBRL(taxAmount)}</span>
                 </div>
               )}
               {taxAmount === 0 && (
@@ -353,7 +354,7 @@ const PaymentScreen = () => {
               {discountAmount > 0 && (
                 <div className="flex justify-between text-green-600 cursor-pointer" onClick={() => navigate("/desconto")}>
                   <span>Desconto:</span>
-                  <span>- R$ {discountAmount.toFixed(2).replace(".", ",")}</span>
+                  <span>- {formatBRL(discountAmount)}</span>
                 </div>
               )}
               {discountAmount === 0 && (
@@ -364,22 +365,22 @@ const PaymentScreen = () => {
               <hr className="my-2" />
               <div className="flex justify-between font-semibold text-lg">
                 <span>Total:</span>
-                <span>R$ {total.toFixed(2).replace(".", ",")}</span>
+                <span>{formatBRL(total)}</span>
               </div>
               <div className="flex justify-between text-primary font-medium">
                 <span>Pago:</span>
-                <span>R$ {totalPaid.toFixed(2).replace(".", ",")}</span>
+                <span>{formatBRL(totalPaid)}</span>
               </div>
               <div className="flex justify-between font-medium">
                 <span>Faltante:</span>
                 <span className={remaining > 0 ? "text-red-500" : "text-green-600"}>
-                  R$ {remaining.toFixed(2).replace(".", ",")}
+                  {formatBRL(remaining)}
                 </span>
               </div>
               {change > 0 && (
                 <div className="flex justify-between text-accent font-medium">
                   <span>Troco:</span>
-                  <span>R$ {change.toFixed(2).replace(".", ",")}</span>
+                  <span>{formatBRL(change)}</span>
                 </div>
               )}
             </div>

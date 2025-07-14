@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Edit } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { formatCurrency } from "@/lib/utils";
 
 interface Cupom {
   id: number;
@@ -95,13 +96,13 @@ const ConfirmarCancelamentoScreen = () => {
               <div className="flex justify-between items-center pt-2">
                 <span className="text-sm">Valor Bruto:</span>
                 <span className="font-medium">
-                  R$ {cupom.valorBruto.toFixed(2).replace(".", ",")}
+                  {formatCurrency(cupom.valorBruto)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">Valor Líquido:</span>
                 <span className="font-medium">
-                  R$ {cupom.valorLiquido.toFixed(2).replace(".", ",")}
+                  {formatCurrency(cupom.valorLiquido)}
                 </span>
               </div>
             </div>

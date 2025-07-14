@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Printer, Calendar } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { formatCurrency } from "@/lib/utils";
 
 interface Cupom {
   id: number;
@@ -103,10 +104,10 @@ const ReimpressaoScreen = () => {
                       </div>
                       <div className="flex items-center space-x-4 text-sm">
                         <span>
-                          Bruto: R$ {cupom.valorBruto.toFixed(2).replace(".", ",")}
+                          Bruto: {formatCurrency(cupom.valorBruto)}
                         </span>
                         <span>
-                          Líquido: R$ {cupom.valorLiquido.toFixed(2).replace(".", ",")}
+                          Líquido: {formatCurrency(cupom.valorLiquido)}
                         </span>
                       </div>
                       {cupom.cancelado && (

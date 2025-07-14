@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Home, Table, QrCode, Puzzle } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
 
 const BalcaoScreen = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const BalcaoScreen = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-primary">
-                  R$ {dailyTotal.toFixed(2).replace(".", ",")}
+                  {formatCurrency(dailyTotal)}
                 </p>
               </div>
             </div>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Trash2 } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
 
 interface Cupom {
   id: number;
@@ -80,10 +81,10 @@ const CancelarCupomScreen = () => {
                       </div>
                       <div className="flex items-center space-x-4 text-sm">
                         <span>
-                          Bruto: R$ {cupom.valorBruto.toFixed(2).replace(".", ",")}
+                          Bruto: {formatCurrency(cupom.valorBruto)}
                         </span>
                         <span>
-                          Líquido: R$ {cupom.valorLiquido.toFixed(2).replace(".", ",")}
+                          Líquido: {formatCurrency(cupom.valorLiquido)}
                         </span>
                       </div>
                       {cupom.cancelado && (

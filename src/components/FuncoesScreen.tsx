@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Minus, Plus, Trash2, Printer, Settings, LogOut, DollarSign } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
 
 const FuncoesScreen = () => {
   const navigate = useNavigate();
@@ -98,7 +99,7 @@ const FuncoesScreen = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-[#180F33]">
-                  R$ {dailyTotal.toFixed(2).replace(".", ",")}
+                  {formatCurrency(dailyTotal)}
                 </p>
               </div>
             </div>
