@@ -207,20 +207,80 @@ const PaymentScreen = () => {
   const handleFinalizeOrder = () => {
     if (!canFinalize || isFinalizingOrder) return;
     
+    console.log('=== FINALIZAR COMPRA - DEBUG INICIO ===');
+    
+    // Log de cada variável individual
+    console.log('subtotal:', subtotal, 'tipo:', typeof subtotal);
+    console.log('discountAmount:', discountAmount, 'tipo:', typeof discountAmount);
+    console.log('taxAmount:', taxAmount, 'tipo:', typeof taxAmount);
+    console.log('total:', total, 'tipo:', typeof total);
+    console.log('payments:', payments, 'tipo:', typeof payments, 'length:', payments?.length);
+    console.log('customerCpf:', customerCpf, 'tipo:', typeof customerCpf);
+    
+    // Validação básica dos dados essenciais
+    if (total === null || total === undefined || isNaN(total)) {
+      console.error('ERRO: Total inválido:', total);
+      toast({
+        title: "Erro na finalização",
+        description: "Total da venda inválido. Tente novamente.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!Array.isArray(payments) || payments.length === 0) {
+      console.error('ERRO: Pagamentos inválidos:', payments);
+      toast({
+        title: "Erro na finalização",
+        description: "Nenhum pagamento encontrado. Adicione pelo menos um pagamento.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (subtotal === null || subtotal === undefined || isNaN(subtotal)) {
+      console.error('ERRO: Subtotal inválido:', subtotal);
+      toast({
+        title: "Erro na finalização",
+        description: "Subtotal da venda inválido. Tente novamente.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsFinalizingOrder(true);
     
-    // Prepare sale data for the completion screen
-    const saleData = {
-      subtotal,
-      discountAmount,
-      taxAmount,
-      total,
-      payments,
-      customerCpf,
-    };
+    try {
+      // Prepare sale data for the completion screen
+      const saleData = {
+        subtotal,
+        discountAmount,
+        taxAmount,
+        total,
+        payments,
+        customerCpf,
+      };
+      
+      console.log('saleData completo:', JSON.stringify(saleData, null, 2));
+      console.log('Navegando para /venda-finalizada...');
+      
+      // Navigate to sale completed screen with data
+      navigate("/venda-finalizada", { state: { saleData } });
+      
+      console.log('Navegação executada com sucesso');
+      
+    } catch (error) {
+      console.error('ERRO durante a navegação:', error);
+      setIsFinalizingOrder(false);
+      
+      toast({
+        title: "Erro na finalização",
+        description: `Erro inesperado: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
+        variant: "destructive",
+      });
+    }
     
-    // Navigate to sale completed screen with data
-    navigate("/venda-finalizada", { state: { saleData } });
+    console.log('=== FINALIZAR COMPRA - DEBUG FIM ===');
   };
 
   const removePayment = (paymentId: string) => {
