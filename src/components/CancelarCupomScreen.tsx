@@ -6,7 +6,7 @@ import { ArrowLeft, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 interface Cupom {
-  id: number;
+  id: string; // Changed to string since we're using composite key
   numero: string;
   timestamp: string;
   valorBruto: number;
@@ -29,14 +29,15 @@ const CancelarCupomScreen = () => {
         const receiptDate = new Date(receipt.timestamp).toDateString();
         return receiptDate === today;
       })
-      .map((receipt: any) => ({
-        id: receipt.number,
+      .map((receipt: any, index: number) => ({
+        id: `${receipt.number}-${receipt.timestamp}-${index}`, // Unique key combining multiple fields
         numero: receipt.number.toString(),
         timestamp: receipt.timestamp,
-        valorBruto: receipt.grossAmount,
-        valorLiquido: receipt.netAmount,
+        valorBruto: receipt.grossAmount || 0,
+        valorLiquido: receipt.netAmount || 0,
         cancelado: receipt.cancelado || false
-      }));
+      }))
+      .sort((a, b) => parseInt(a.numero) - parseInt(b.numero)); // Sort by coupon number
 
     setCupons(todayCupons);
   }, []);
@@ -44,7 +45,7 @@ const CancelarCupomScreen = () => {
   // Calculate total sales for today
   const totalVendasHoje = cupons
     .filter(cupom => !cupom.cancelado)
-    .reduce((total, cupom) => total + cupom.valorLiquido, 0);
+    .reduce((total, cupom) => total + (cupom.valorLiquido || 0), 0);
 
   const handleCancelCupom = (cupom: Cupom) => {
     navigate("/confirmar-cancelamento", { state: { cupom } });

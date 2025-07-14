@@ -9,7 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
 
 interface Cupom {
-  id: number;
+  id: string; // Changed to string to match CancelarCupomScreen
   numero: string;
   timestamp: string;
   valorBruto: number;
@@ -111,17 +111,17 @@ const ConfirmarCancelamentoScreen = () => {
       </div>
 
       {/* Footer Buttons */}
-      <div className="p-4 sm:p-6 bg-white border-t border-gray-200">
-        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+      <div className="p-6 bg-white border-t border-[#E1E1E5]">
+        <div className="flex gap-4">
           <Button
             onClick={() => navigate(-1)}
-            className="flex-1 h-12 sm:h-14 bg-[#180F33] hover:bg-[#180F33]/90 text-white font-medium text-base"
+            className="flex-1 h-14 bg-[#180F33] hover:bg-[#180F33]/90 text-white font-medium text-lg rounded-lg"
           >
             Voltar
           </Button>
           <Button
             onClick={handleConfirm}
-            className="flex-1 h-12 sm:h-14 bg-[#180F33] hover:bg-[#180F33]/90 text-white font-medium text-base"
+            className="flex-1 h-14 bg-[#180F33] hover:bg-[#180F33]/90 text-white font-medium text-lg rounded-lg"
           >
             Confirmar Cancelamento
           </Button>
