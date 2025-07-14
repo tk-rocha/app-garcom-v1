@@ -36,10 +36,18 @@ const SaleCompletedScreen = () => {
     // Generate fiscal receipt
     const generateReceipt = () => {
       const now = new Date();
-      const receiptNumber = Date.now();
       
-      // Check if this exact receipt number already exists
+      // Get existing receipts to determine next coupon number
       const existingReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
+      
+      // Find the highest coupon number and increment, or start at 700
+      let receiptNumber = 700; // Starting number
+      if (existingReceipts.length > 0) {
+        const maxNumber = Math.max(...existingReceipts.map((r: any) => parseInt(r.number) || 699));
+        receiptNumber = maxNumber + 1;
+      }
+      
+      // Check if this exact receipt number already exists (extra safety)
       const alreadyExists = existingReceipts.some((r: any) => r.number === receiptNumber);
       
       if (alreadyExists) {
