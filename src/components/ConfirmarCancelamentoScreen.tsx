@@ -47,6 +47,20 @@ const ConfirmarCancelamentoScreen = () => {
     );
     localStorage.setItem('fiscalReceipts', JSON.stringify(updatedReceipts));
 
+    // Update daily sales total by subtracting the cancelled amount
+    const today = new Date().toDateString();
+    const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
+    const currentDailyTotal = dailySales[today] || 0;
+    const newDailyTotal = Math.max(0, currentDailyTotal - cupom.valorLiquido);
+    dailySales[today] = newDailyTotal;
+    localStorage.setItem('dailySales', JSON.stringify(dailySales));
+
+    console.log('Cupom cancelado - Total diário atualizado:', {
+      cupomValor: cupom.valorLiquido,
+      totalAnterior: currentDailyTotal,
+      novoTotal: newDailyTotal
+    });
+
     toast({
       title: "Cupom cancelado",
       description: `Cupom ${cupom.numero} cancelado com sucesso`

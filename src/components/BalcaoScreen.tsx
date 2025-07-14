@@ -13,11 +13,25 @@ const BalcaoScreen = () => {
   // Get current date
   const currentDate = new Date().toLocaleDateString("pt-BR");
 
-  // Load daily sales total
+  // Load daily sales total - refresh on every render to catch updates
   useEffect(() => {
-    const today = new Date().toDateString();
-    const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
-    setDailyTotal(dailySales[today] || 0);
+    const loadDailyTotal = () => {
+      const today = new Date().toDateString();
+      const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
+      setDailyTotal(dailySales[today] || 0);
+    };
+    
+    loadDailyTotal();
+    
+    // Add event listener for storage changes
+    const handleStorageChange = () => loadDailyTotal();
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleStorageChange);
+    };
   }, []);
 
   const navItems = [
