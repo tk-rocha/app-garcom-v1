@@ -23,56 +23,48 @@ const FuncoesScreen = () => {
       id: "sangria", 
       label: "Sangria", 
       icon: Minus, 
-      color: "bg-red-500 hover:bg-red-600",
       action: () => navigate("/sangria")
     },
     { 
       id: "suprimento", 
       label: "Suprimento", 
       icon: Plus, 
-      color: "bg-green-500 hover:bg-green-600",
       action: () => navigate("/suprimento")
     },
     { 
       id: "cancelar-cupom", 
       label: "Cancelar Cupom", 
       icon: Trash2, 
-      color: "bg-orange-500 hover:bg-orange-600",
       action: () => navigate("/cancelar-cupom")
     },
     { 
       id: "reimpressao", 
       label: "Reimpressão", 
       icon: Printer, 
-      color: "bg-blue-500 hover:bg-blue-600",
       action: () => navigate("/reimpressao")
     },
     { 
       id: "adm-tef", 
       label: "Adm TEF", 
       icon: DollarSign, 
-      color: "bg-purple-500 hover:bg-purple-600",
       action: () => console.log("Adm TEF - Em desenvolvimento")
     },
     { 
       id: "configuracoes", 
       label: "Configurações", 
       icon: Settings, 
-      color: "bg-gray-500 hover:bg-gray-600",
       action: () => console.log("Configurações - Em desenvolvimento")
     },
     { 
       id: "sair-pdv", 
       label: "Sair PDV", 
       icon: LogOut, 
-      color: "bg-red-600 hover:bg-red-700",
       action: () => navigate("/")
     },
     { 
       id: "fechar-pdv", 
       label: "Fechar PDV", 
       icon: DollarSign, 
-      color: "bg-yellow-500 hover:bg-yellow-600",
       action: () => console.log("Fechar PDV - Em desenvolvimento")
     },
   ];
@@ -114,7 +106,7 @@ const FuncoesScreen = () => {
         </Card>
 
         {/* Function Buttons Grid */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {functionItems.map((item) => {
             const Icon = item.icon;
             
@@ -122,10 +114,10 @@ const FuncoesScreen = () => {
               <Button
                 key={item.id}
                 onClick={item.action}
-                className={`${item.color} text-white h-24 flex flex-col items-center justify-center space-y-2 rounded-lg transition-colors`}
+                className="bg-[#180F33] hover:bg-[#180F33]/90 text-white h-20 sm:h-24 flex flex-col items-center justify-center space-y-2 rounded-lg transition-colors font-medium"
               >
-                <Icon className="h-8 w-8" />
-                <span className="text-sm font-medium text-center">{item.label}</span>
+                <Icon className="h-6 w-6 sm:h-8 sm:w-8" />
+                <span className="text-sm sm:text-base text-center leading-tight">{item.label}</span>
               </Button>
             );
           })}

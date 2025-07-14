@@ -131,18 +131,17 @@ const ConfirmarCancelamentoScreen = () => {
       </div>
 
       {/* Footer Buttons */}
-      <div className="p-6 bg-white border-t border-gray-200">
-        <div className="flex space-x-4">
+      <div className="p-4 sm:p-6 bg-white border-t border-gray-200">
+        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
           <Button
-            variant="outline"
             onClick={() => navigate(-1)}
-            className="flex-1"
+            className="flex-1 h-12 sm:h-14 bg-[#180F33] hover:bg-[#180F33]/90 text-white font-medium text-base"
           >
             Voltar
           </Button>
           <Button
             onClick={handleConfirm}
-            className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+            className="flex-1 h-12 sm:h-14 bg-[#180F33] hover:bg-[#180F33]/90 text-white font-medium text-base"
           >
             Confirmar Cancelamento
           </Button>
