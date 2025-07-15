@@ -25,6 +25,10 @@ import SuprimentoScreen from "./components/SuprimentoScreen";
 import CancelarCupomScreen from "./components/CancelarCupomScreen";
 import ConfirmarCancelamentoScreen from "./components/ConfirmarCancelamentoScreen";
 import ReimpressaoScreen from "./components/ReimpressaoScreen";
+import AutorizacaoScreen from "./components/AutorizacaoScreen";
+import ConfiguracoesBancoDadosScreen from "./components/ConfiguracoesBancoDadosScreen";
+import ConfiguracoesSistemaScreen from "./components/ConfiguracoesSistemaScreen";
+import ConfiguracoesInstalacaoScreen from "./components/ConfiguracoesInstalacaoScreen";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +60,10 @@ const App = () => (
             <Route path="/cancelar-cupom" element={<CancelarCupomScreen />} />
             <Route path="/confirmar-cancelamento" element={<ConfirmarCancelamentoScreen />} />
             <Route path="/reimpressao" element={<ReimpressaoScreen />} />
+            <Route path="/autorizacao" element={<AutorizacaoScreen />} />
+            <Route path="/configuracoes-base-dados" element={<ConfiguracoesBancoDadosScreen />} />
+            <Route path="/configuracoes-sistema" element={<ConfiguracoesSistemaScreen />} />
+            <Route path="/configuracoes-instalacao" element={<ConfiguracoesInstalacaoScreen />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

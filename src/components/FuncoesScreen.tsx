@@ -68,7 +68,7 @@ const FuncoesScreen = () => {
       id: "configuracoes", 
       label: "Configurações", 
       icon: Settings, 
-      action: () => console.log("Configurações - Em desenvolvimento")
+      action: () => navigate("/autorizacao")
     },
     { 
       id: "sair-pdv", 
