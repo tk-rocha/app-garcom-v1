@@ -103,10 +103,25 @@ const PaymentScreen = () => {
   console.log('PaymentScreen - Totals:', { subtotal, discountAmount, taxAmount, total });
   
   const totalPaid = payments.reduce((sum, payment) => sum + payment.amount, 0);
-  const remaining = Math.max(0, total - totalPaid);
-  const change = totalPaid > total ? totalPaid - total : 0;
   
-  const canFinalize = remaining === 0;
+  // Round to 2 decimal places to avoid floating-point precision issues
+  const roundedTotal = Math.round(total * 100) / 100;
+  const roundedTotalPaid = Math.round(totalPaid * 100) / 100;
+  const remaining = Math.max(0, roundedTotal - roundedTotalPaid);
+  const change = roundedTotalPaid > roundedTotal ? roundedTotalPaid - roundedTotal : 0;
+  
+  // Use tolerance for finalization check (accept differences smaller than 1 cent)
+  const canFinalize = remaining < 0.01;
+  
+  // Debug logs for troubleshooting
+  console.log('PaymentScreen - Payment calculations:', {
+    total: total,
+    roundedTotal: roundedTotal,
+    totalPaid: totalPaid,
+    roundedTotalPaid: roundedTotalPaid,
+    remaining: remaining,
+    canFinalize: canFinalize
+  });
 
   const handlePaymentMethodSelect = (methodId: string) => {
     setSelectedMethod(methodId);
@@ -441,8 +456,8 @@ const PaymentScreen = () => {
               </div>
               <div className="flex justify-between font-medium">
                 <span>Faltante:</span>
-                <span className={remaining > 0 ? "text-red-500" : "text-green-600"}>
-                  {formatBRL(remaining)}
+                <span className={remaining > 0.01 ? "text-red-500" : "text-green-600"}>
+                  {formatBRL(remaining < 0.01 ? 0 : remaining)}
                 </span>
               </div>
               {change > 0 && (
