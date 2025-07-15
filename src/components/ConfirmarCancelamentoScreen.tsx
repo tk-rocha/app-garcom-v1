@@ -76,7 +76,7 @@ const ConfirmarCancelamentoScreen = () => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/cancelar-cupom")}
           className="mr-4"
         >
           <ArrowLeft className="h-6 w-6" />
@@ -128,7 +128,7 @@ const ConfirmarCancelamentoScreen = () => {
       <div className="p-6 bg-white border-t border-[#E1E1E5]">
         <div className="flex gap-4">
           <Button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/cancelar-cupom")}
             className="flex-1 h-14 bg-[#180F33] hover:bg-[#180F33]/90 text-white font-medium text-lg rounded-lg"
           >
             Voltar
