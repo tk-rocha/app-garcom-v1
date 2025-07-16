@@ -75,10 +75,7 @@ const MesasScreen = () => {
             <div
               key={mesa.id}
               className={`aspect-square rounded-lg border-2 flex items-center justify-center shadow-sm cursor-pointer hover:shadow-md transition-all ${getStatusColor(mesa.status)}`}
-              onClick={() => {
-                // TODO: Implementar navegação para a mesa específica
-                console.log(`Mesa ${mesa.id} clicada`);
-              }}
+              onClick={() => navigate(`/mesa/${mesa.id}`)}
             >
               <span className="text-lg font-semibold">
                 Mesa {mesa.id.toString().padStart(2, '0')}
