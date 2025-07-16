@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,11 +35,18 @@ const mockProducts = {
 
 const ProductListScreen = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [activeCategory, setActiveCategory] = useState("bebidas");
+  
+  // Check if we're in mesa context
+  const mesaId = searchParams.get('mesa');
+  const isFromMesa = Boolean(mesaId);
+  
   const { getTotalItems, getProductQuantity, addToCart, removeFromCart } = useCart();
 
   const handleProductClick = (product: any) => {
-    navigate(`/produto/${product.id}`, { 
+    const targetUrl = `/produto/${product.id}${isFromMesa ? `?mesa=${mesaId}` : ''}`;
+    navigate(targetUrl, { 
       state: { 
         product, 
         category: activeCategory
@@ -52,7 +59,7 @@ const ProductListScreen = () => {
       name: product.name,
       price: product.price,
       image: product.image
-    });
+    }, isFromMesa ? `mesa-${mesaId}` : 'balcao');
   };
 
   const currentProducts = mockProducts[activeCategory as keyof typeof mockProducts] || [];
@@ -65,20 +72,22 @@ const ProductListScreen = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={() => navigate("/balcao")}
+            onClick={() => navigate(isFromMesa ? `/mesa/${mesaId}` : "/balcao")}
             className="text-primary hover:bg-primary/5"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
-          <h1 className="text-lg font-semibold text-primary">Balcão</h1>
+          <h1 className="text-lg font-semibold text-primary">
+            {isFromMesa ? `MESA ${mesaId}` : 'Balcão'}
+          </h1>
           
           <div className="flex items-center space-x-2">
             <Button 
               variant="ghost" 
               size="icon" 
               className="text-primary hover:bg-primary/5"
-              onClick={() => navigate("/cliente")}
+              onClick={() => navigate(isFromMesa ? `/cliente?mesa=${mesaId}` : "/cliente")}
             >
               <User className="h-5 w-5" />
             </Button>
@@ -86,7 +95,7 @@ const ProductListScreen = () => {
               variant="ghost" 
               size="icon" 
               className="text-primary hover:bg-primary/5"
-              onClick={() => navigate("/pesquisar")}
+              onClick={() => navigate(isFromMesa ? `/pesquisar?mesa=${mesaId}` : "/pesquisar")}
             >
               <Search className="h-5 w-5" />
             </Button>
@@ -94,7 +103,7 @@ const ProductListScreen = () => {
               variant="ghost" 
               size="icon" 
               className="text-primary hover:bg-primary/5"
-              onClick={() => navigate("/scanner")}
+              onClick={() => navigate(isFromMesa ? `/scanner?mesa=${mesaId}` : "/scanner")}
             >
               <Scan className="h-5 w-5" />
             </Button>
@@ -104,18 +113,18 @@ const ProductListScreen = () => {
                 size="icon" 
                 className="text-primary hover:bg-primary/5"
                 onClick={() => {
-                  if (getTotalItems() > 0) {
-                    navigate("/sacola");
+                  if (getTotalItems(isFromMesa ? `mesa-${mesaId}` : 'balcao') > 0) {
+                    navigate(isFromMesa ? `/sacola?mesa=${mesaId}` : "/sacola");
                   }
                 }}
               >
                 <ShoppingBag className="h-5 w-5" />
               </Button>
-              {getTotalItems() > 0 && (
+              {getTotalItems(isFromMesa ? `mesa-${mesaId}` : 'balcao') > 0 && (
                 <Badge 
                   className="absolute -top-2 -right-2 bg-accent text-primary text-xs min-w-[20px] h-5 flex items-center justify-center animate-scale-in"
                 >
-                  {getTotalItems()}
+                  {getTotalItems(isFromMesa ? `mesa-${mesaId}` : 'balcao')}
                 </Badge>
               )}
             </div>
@@ -146,7 +155,7 @@ const ProductListScreen = () => {
       {/* Products List */}
       <div className="p-4 space-y-3">
         {currentProducts.map((product) => {
-          const quantity = getProductQuantity(product.id);
+          const quantity = getProductQuantity(product.id, isFromMesa ? `mesa-${mesaId}` : 'balcao');
           
           return (
             <Card key={product.id} className="bg-white shadow-sm">
@@ -186,7 +195,7 @@ const ProductListScreen = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => removeFromCart(product.id)}
+                          onClick={() => removeFromCart(product.id, isFromMesa ? `mesa-${mesaId}` : 'balcao')}
                           className="h-8 w-8 text-primary hover:bg-primary/5"
                         >
                           <Minus className="h-4 w-4" />

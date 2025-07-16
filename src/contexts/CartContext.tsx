@@ -26,22 +26,23 @@ interface CartContextType {
   cart: CartItem[];
   discount: Discount | null;
   tax: Tax | null;
-  getTotalItems: () => number;
-  getProductQuantity: (productId: number) => number;
-  addToCart: (productId: number, productData: { name: string; price: number; image: string }) => void;
-  removeFromCart: (productId: number) => void;
-  removeItemCompletely: (productId: number) => void;
-  getSubtotal: () => number;
-  getDiscountAmount: () => number;
-  getTaxAmount: () => number;
-  getTotal: () => number;
-  setDiscount: (discount: Discount | null) => void;
-  setTax: (tax: Tax | null) => void;
-  applyDiscount: (amount: number, inputType: 'percentage' | 'value', inputValue: string) => void;
-  getDiscountType: () => 'percentage' | 'value';
-  getDiscountValue: () => string;
-  applyTax: (amount: number) => void;
-  clearCart: () => void;
+  getTotalItems: (cartId?: string) => number;
+  getProductQuantity: (productId: number, cartId?: string) => number;
+  addToCart: (productId: number, productData: { name: string; price: number; image: string }, cartId?: string) => void;
+  removeFromCart: (productId: number, cartId?: string) => void;
+  removeItemCompletely: (productId: number, cartId?: string) => void;
+  getSubtotal: (cartId?: string) => number;
+  getDiscountAmount: (cartId?: string) => number;
+  getTaxAmount: (cartId?: string) => number;
+  getTotal: (cartId?: string) => number;
+  setDiscount: (discount: Discount | null, cartId?: string) => void;
+  setTax: (tax: Tax | null, cartId?: string) => void;
+  applyDiscount: (amount: number, inputType: 'percentage' | 'value', inputValue: string, cartId?: string) => void;
+  getDiscountType: (cartId?: string) => 'percentage' | 'value';
+  getDiscountValue: (cartId?: string) => string;
+  applyTax: (amount: number, cartId?: string) => void;
+  clearCart: (cartId?: string) => void;
+  getCartItems: (cartId?: string) => CartItem[];
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -59,130 +60,157 @@ interface CartProviderProps {
 }
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [discount, setDiscountState] = useState<Discount | null>(null);
-  const [tax, setTaxState] = useState<Tax | null>(null);
+  // Multi-cart system: key is cartId (e.g., 'balcao', 'mesa-1', 'mesa-2')
+  const [carts, setCarts] = useState<Record<string, CartItem[]>>({ balcao: [] });
+  const [discounts, setDiscounts] = useState<Record<string, Discount | null>>({ balcao: null });
+  const [taxes, setTaxes] = useState<Record<string, Tax | null>>({ balcao: null });
 
-  const getTotalItems = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
+  // Get current cart, discount, and tax (for backward compatibility)
+  const cart = carts.balcao || [];
+  const discount = discounts.balcao;
+  const tax = taxes.balcao;
+
+  const getCartItems = (cartId: string = 'balcao'): CartItem[] => {
+    return carts[cartId] || [];
   };
 
-  const getProductQuantity = (productId: number) => {
-    const item = cart.find(item => item.productId === productId);
+  const getTotalItems = (cartId: string = 'balcao') => {
+    const currentCart = carts[cartId] || [];
+    return currentCart.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  const getProductQuantity = (productId: number, cartId: string = 'balcao') => {
+    const currentCart = carts[cartId] || [];
+    const item = currentCart.find(item => item.productId === productId);
     return item ? item.quantity : 0;
   };
 
-  const addToCart = (productId: number, productData: { name: string; price: number; image: string }) => {
-    setCart(prev => {
-      const existingItem = prev.find(item => item.productId === productId);
+  const addToCart = (productId: number, productData: { name: string; price: number; image: string }, cartId: string = 'balcao') => {
+    setCarts(prev => {
+      const currentCart = prev[cartId] || [];
+      const existingItem = currentCart.find(item => item.productId === productId);
+      
       if (existingItem) {
-        return prev.map(item =>
+        const updatedCart = currentCart.map(item =>
           item.productId === productId
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
+        return { ...prev, [cartId]: updatedCart };
       } else {
-        return [...prev, { 
+        const newItem = { 
           productId, 
           quantity: 1,
           name: productData.name,
           price: productData.price,
           image: productData.image
-        }];
+        };
+        return { ...prev, [cartId]: [...currentCart, newItem] };
       }
     });
   };
 
-  const removeFromCart = (productId: number) => {
-    setCart(prev => {
-      const existingItem = prev.find(item => item.productId === productId);
+  const removeFromCart = (productId: number, cartId: string = 'balcao') => {
+    setCarts(prev => {
+      const currentCart = prev[cartId] || [];
+      const existingItem = currentCart.find(item => item.productId === productId);
+      
       if (existingItem && existingItem.quantity > 1) {
-        return prev.map(item =>
+        const updatedCart = currentCart.map(item =>
           item.productId === productId
             ? { ...item, quantity: item.quantity - 1 }
             : item
         );
+        return { ...prev, [cartId]: updatedCart };
       } else {
-        return prev.filter(item => item.productId !== productId);
+        const updatedCart = currentCart.filter(item => item.productId !== productId);
+        return { ...prev, [cartId]: updatedCart };
       }
     });
   };
 
-  const removeItemCompletely = (productId: number) => {
-    setCart(prev => prev.filter(item => item.productId !== productId));
+  const removeItemCompletely = (productId: number, cartId: string = 'balcao') => {
+    setCarts(prev => {
+      const currentCart = prev[cartId] || [];
+      const updatedCart = currentCart.filter(item => item.productId !== productId);
+      return { ...prev, [cartId]: updatedCart };
+    });
   };
 
-  const getSubtotal = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const getSubtotal = (cartId: string = 'balcao') => {
+    const currentCart = carts[cartId] || [];
+    return currentCart.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
-  const getDiscountAmount = () => {
-    if (!discount) return 0;
-    const subtotal = getSubtotal();
+  const getDiscountAmount = (cartId: string = 'balcao') => {
+    const currentDiscount = discounts[cartId];
+    if (!currentDiscount) return 0;
+    const subtotal = getSubtotal(cartId);
     
-    if (discount.type === 'percentage') {
-      return (subtotal * discount.value) / 100;
+    if (currentDiscount.type === 'percentage') {
+      return (subtotal * currentDiscount.value) / 100;
     } else {
-      return Math.min(discount.value, subtotal);
+      return Math.min(currentDiscount.value, subtotal);
     }
   };
 
-  const getTaxAmount = () => {
-    if (!tax) return 0;
-    const subtotal = getSubtotal();
+  const getTaxAmount = (cartId: string = 'balcao') => {
+    const currentTax = taxes[cartId];
+    if (!currentTax) return 0;
+    const subtotal = getSubtotal(cartId);
     
-    if (tax.type === 'percentage') {
-      return (subtotal * tax.value) / 100;
+    if (currentTax.type === 'percentage') {
+      return (subtotal * currentTax.value) / 100;
     } else {
-      return tax.value;
+      return currentTax.value;
     }
   };
 
-  const getTotal = () => {
-    const subtotal = getSubtotal();
-    const discountAmount = getDiscountAmount();
-    const taxAmount = getTaxAmount();
+  const getTotal = (cartId: string = 'balcao') => {
+    const subtotal = getSubtotal(cartId);
+    const discountAmount = getDiscountAmount(cartId);
+    const taxAmount = getTaxAmount(cartId);
     return Math.max(0, subtotal + taxAmount - discountAmount);
   };
 
-  const setDiscount = (newDiscount: Discount | null) => {
-    setDiscountState(newDiscount);
+  const setDiscount = (newDiscount: Discount | null, cartId: string = 'balcao') => {
+    setDiscounts(prev => ({ ...prev, [cartId]: newDiscount }));
   };
 
-  const setTax = (newTax: Tax | null) => {
-    setTaxState(newTax);
+  const setTax = (newTax: Tax | null, cartId: string = 'balcao') => {
+    setTaxes(prev => ({ ...prev, [cartId]: newTax }));
   };
 
-  const applyDiscount = (amount: number, inputType: 'percentage' | 'value', inputValue: string) => {
+  const applyDiscount = (amount: number, inputType: 'percentage' | 'value', inputValue: string, cartId: string = 'balcao') => {
     if (amount <= 0) {
-      setDiscountState(null);
+      setDiscount(null, cartId);
     } else {
       const discountType = inputType === 'percentage' ? 'percentage' : 'fixed';
-      setDiscountState({ 
+      setDiscount({ 
         type: discountType, 
         value: amount,
         inputType,
         inputValue
-      });
+      }, cartId);
     }
   };
 
-  const getDiscountType = (): 'percentage' | 'value' => {
-    return discount?.inputType || 'percentage';
+  const getDiscountType = (cartId: string = 'balcao'): 'percentage' | 'value' => {
+    return discounts[cartId]?.inputType || 'percentage';
   };
 
-  const getDiscountValue = (): string => {
-    return discount?.inputValue || '';
+  const getDiscountValue = (cartId: string = 'balcao'): string => {
+    return discounts[cartId]?.inputValue || '';
   };
 
-  const applyTax = (amount: number) => {
-    setTaxState(amount > 0 ? { id: 'manual', name: 'Taxa Manual', type: 'fixed', value: amount } : null);
+  const applyTax = (amount: number, cartId: string = 'balcao') => {
+    setTax(amount > 0 ? { id: 'manual', name: 'Taxa Manual', type: 'fixed', value: amount } : null, cartId);
   };
 
-  const clearCart = () => {
-    setCart([]);
-    setDiscountState(null);
-    setTaxState(null);
+  const clearCart = (cartId: string = 'balcao') => {
+    setCarts(prev => ({ ...prev, [cartId]: [] }));
+    setDiscount(null, cartId);
+    setTax(null, cartId);
   };
 
   const value = {
@@ -205,6 +233,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     getDiscountValue,
     applyTax,
     clearCart,
+    getCartItems,
   };
 
   return (
