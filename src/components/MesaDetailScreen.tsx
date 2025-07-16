@@ -20,11 +20,17 @@ const MesaDetailScreen = () => {
   const cartId = `mesa-${mesaId}`;
   
   // Use CartContext para gerenciar itens da mesa
-  const { getCartItems, removeItemCompletely } = useCart();
+  const { 
+    getCartItems, 
+    removeItemCompletely, 
+    markItemsAsEnviado, 
+    getItensEnviados,
+    getItensNaoEnviados,
+    hasItensEnviados: hasItensEnviadosCart
+  } = useCart();
   const cartItems = getCartItems(cartId);
   
   const [numeroPessoas, setNumeroPessoas] = useState(1);
-  const [itensEnviados, setItensEnviados] = useState<Set<number>>(new Set());
   const [showPendingItemsDialog, setShowPendingItemsDialog] = useState(false);
 
   // Converte CartItems para ItemMesa
@@ -33,15 +39,19 @@ const MesaDetailScreen = () => {
     nome: item.name,
     quantidade: item.quantity,
     precoUnitario: item.price,
-    enviado: itensEnviados.has(item.productId)
+    enviado: item.enviado || false
   }));
 
   // Debug: Log do estado dos itens para verificar se há itens marcados como enviados
+  const itensEnviadosArray = getItensEnviados(cartId);
+  const itensNaoEnviados = getItensNaoEnviados(cartId);
+  const hasItensEnviados = hasItensEnviadosCart(cartId);
+  
   console.log('MesaDetailScreen - Cart Items:', cartItems);
-  console.log('MesaDetailScreen - Itens Enviados Set:', itensEnviados);
-  console.log('MesaDetailScreen - Itens:', itens);
-  console.log('MesaDetailScreen - Itens enviados:', itens.filter(item => item.enviado));
-  console.log('MesaDetailScreen - hasItensEnviados:', itens.filter(item => item.enviado).length > 0);
+  console.log('MesaDetailScreen - Itens Enviados:', itensEnviadosArray);
+  console.log('MesaDetailScreen - Itens Nao Enviados:', itensNaoEnviados);
+  console.log('MesaDetailScreen - Has Itens Enviados:', hasItensEnviados);
+  console.log('MesaDetailScreen - Total de itens:', cartItems.length);
 
   const handleVoltar = () => {
     navigate("/mesas");
@@ -64,28 +74,34 @@ const MesaDetailScreen = () => {
   };
 
   const handleFinalizarPedido = () => {
-    const itensEnviadosArray = itens.filter(item => item.enviado);
-    const itensNaoEnviados = itens.filter(item => !item.enviado);
+    const itensEnviadosArray = getItensEnviados(cartId);
+    const itensNaoEnviados = getItensNaoEnviados(cartId);
+    
+    console.log('handleFinalizarPedido - Itens enviados:', itensEnviadosArray);
+    console.log('handleFinalizarPedido - Itens não enviados:', itensNaoEnviados);
     
     if (itensEnviadosArray.length === 0) {
-      // Não há itens enviados para cozinha
+      // Não há itens enviados para cozinha - não deve permitir finalizar
+      console.log('handleFinalizarPedido - Bloqueado: nenhum item enviado');
       return;
     }
     
     if (itensNaoEnviados.length > 0) {
       // Há itens pendentes, mostrar modal de confirmação
+      console.log('handleFinalizarPedido - Mostrando modal de confirmação');
       setShowPendingItemsDialog(true);
     } else {
       // Todos os itens foram enviados
+      console.log('handleFinalizarPedido - Navegando para CPF');
       navigate(`/cpf?mesa=${mesaId}`, { state: { mesa: mesaId } });
     }
   };
 
   const handleConfirmWithPendingItems = () => {
     // Remove itens não enviados do carrinho
-    const itensNaoEnviados = itens.filter(item => !item.enviado);
+    const itensNaoEnviados = getItensNaoEnviados(cartId);
     itensNaoEnviados.forEach(item => {
-      removeItemCompletely(item.id, cartId);
+      removeItemCompletely(item.productId, cartId);
     });
     setShowPendingItemsDialog(false);
     navigate(`/cpf?mesa=${mesaId}`, { state: { mesa: mesaId } });
@@ -97,11 +113,8 @@ const MesaDetailScreen = () => {
 
   const handleEnviarCozinha = () => {
     // Marca todos os itens como enviados
-    const newItensEnviados = new Set(itensEnviados);
-    itens.forEach(item => {
-      newItensEnviados.add(item.id);
-    });
-    setItensEnviados(newItensEnviados);
+    markItemsAsEnviado(cartId);
+    console.log('handleEnviarCozinha - Itens marcados como enviados');
   };
 
   const handleAdicionarItens = () => {
@@ -115,24 +128,19 @@ const MesaDetailScreen = () => {
 
   const handleRemoverItem = (itemId: number) => {
     removeItemCompletely(itemId, cartId);
-    // Remove também do set de itens enviados se estiver lá
-    const newItensEnviados = new Set(itensEnviados);
-    newItensEnviados.delete(itemId);
-    setItensEnviados(newItensEnviados);
   };
 
   const calcularTotal = () => {
     return itens.reduce((total, item) => total + (item.quantidade * item.precoUnitario), 0);
   };
 
-  const itensNaoEnviados = itens.filter(item => !item.enviado);
-  const itensEnviadosArray = itens.filter(item => item.enviado);
   const hasItensNaoEnviados = itensNaoEnviados.length > 0;
-  const hasItensEnviados = itensEnviadosArray.length > 0;
 
   // Debug: Log específico do estado do botão
   console.log('MesaDetailScreen - Button Debug:', {
-    hasItens: itens.length > 0,
+    totalItens: cartItems.length,
+    itensEnviados: itensEnviadosArray.length,
+    itensNaoEnviados: itensNaoEnviados.length,
     hasItensEnviados,
     hasItensNaoEnviados,
     buttonShouldBeEnabled: hasItensEnviados,
@@ -319,17 +327,12 @@ const MesaDetailScreen = () => {
               </div>
             )}
             
-            {/* Botão Finalizar Pedido */}
-            {itens.length > 0 && (
+            {/* Botão Finalizar Pedido - só aparece se há itens enviados */}
+            {hasItensEnviados && (
               <div className="mt-4">
                 <Button
                   onClick={handleFinalizarPedido}
-                  disabled={!hasItensEnviados}
-                  className={`w-full py-4 text-lg font-semibold ${
-                    hasItensEnviados
-                      ? "bg-[#180F33] text-[#FFC72C] hover:bg-[#180F33]/90"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  }`}
+                  className="w-full py-4 text-lg font-semibold bg-[#180F33] text-[#FFC72C] hover:bg-[#180F33]/90"
                 >
                   FINALIZAR PEDIDO
                 </Button>

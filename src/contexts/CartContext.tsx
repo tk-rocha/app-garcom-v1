@@ -6,6 +6,7 @@ interface CartItem {
   name: string;
   price: number;
   image: string;
+  enviado?: boolean; // Para rastrear se o item foi enviado para a cozinha
 }
 
 interface Discount {
@@ -43,6 +44,10 @@ interface CartContextType {
   applyTax: (amount: number, cartId?: string) => void;
   clearCart: (cartId?: string) => void;
   getCartItems: (cartId?: string) => CartItem[];
+  markItemsAsEnviado: (cartId?: string) => void;
+  getItensEnviados: (cartId?: string) => CartItem[];
+  getItensNaoEnviados: (cartId?: string) => CartItem[];
+  hasItensEnviados: (cartId?: string) => boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -213,6 +218,32 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setTax(null, cartId);
   };
 
+  const markItemsAsEnviado = (cartId: string = 'balcao') => {
+    setCarts(prev => {
+      const currentCart = prev[cartId] || [];
+      const updatedCart = currentCart.map(item => ({
+        ...item,
+        enviado: true
+      }));
+      return { ...prev, [cartId]: updatedCart };
+    });
+  };
+
+  const getItensEnviados = (cartId: string = 'balcao'): CartItem[] => {
+    const currentCart = carts[cartId] || [];
+    return currentCart.filter(item => item.enviado);
+  };
+
+  const getItensNaoEnviados = (cartId: string = 'balcao'): CartItem[] => {
+    const currentCart = carts[cartId] || [];
+    return currentCart.filter(item => !item.enviado);
+  };
+
+  const hasItensEnviados = (cartId: string = 'balcao'): boolean => {
+    const itensEnviados = getItensEnviados(cartId);
+    return itensEnviados.length > 0;
+  };
+
   const value = {
     cart,
     discount,
@@ -234,6 +265,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     applyTax,
     clearCart,
     getCartItems,
+    markItemsAsEnviado,
+    getItensEnviados,
+    getItensNaoEnviados,
+    hasItensEnviados,
   };
 
   return (
