@@ -33,18 +33,6 @@ const ComandasScreen = () => {
     }
   };
 
-  const getStatusText = (status: Comanda["status"]) => {
-    switch (status) {
-      case "aberta":
-        return "Aberta";
-      case "em-progresso":
-        return "Em Progresso";
-      case "fechada":
-        return "Fechada";
-      default:
-        return "Aberta";
-    }
-  };
 
   const navItems = [
     { id: "inicio", label: "Início", icon: Home },
@@ -69,23 +57,32 @@ const ComandasScreen = () => {
         <div className="w-10" />
       </div>
 
+      {/* Action Buttons */}
+      <div className="p-4 bg-white border-b border-gray-200">
+        <div className="flex gap-4">
+          <Button className="flex-1 bg-[#180F33] text-white hover:bg-[#180F33]/90">
+            Fechamento Parcial
+          </Button>
+          <Button className="flex-1 bg-[#180F33] text-white hover:bg-[#180F33]/90">
+            Transferência
+          </Button>
+        </div>
+      </div>
+
       {/* Content */}
       <div className="flex-1 p-6">
-        <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto">
+        <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
           {comandas.map((comanda) => (
             <div
               key={comanda.id}
-              className={`aspect-square rounded-lg border-2 flex flex-col items-center justify-center shadow-sm cursor-pointer hover:shadow-md transition-all p-4 ${getStatusColor(comanda.status)}`}
+              className={`aspect-square rounded-lg border-2 flex items-center justify-center shadow-sm cursor-pointer hover:shadow-md transition-all ${getStatusColor(comanda.status)}`}
               onClick={() => {
                 // TODO: Implementar navegação para a comanda específica
                 console.log(`Comanda ${comanda.id} clicada`);
               }}
             >
-              <span className="text-lg font-semibold text-center mb-2">
+              <span className="text-lg font-semibold">
                 Comanda {comanda.id}
-              </span>
-              <span className="text-sm font-medium text-center">
-                {getStatusText(comanda.status)}
               </span>
             </div>
           ))}
