@@ -20,6 +20,8 @@ import ProductSearchScreen from "./components/ProductSearchScreen";
 import BarcodeScannerScreen from "./components/BarcodeScannerScreen";
 import SaleCompletedScreen from "./components/SaleCompletedScreen";
 import FuncoesScreen from "./components/FuncoesScreen";
+import MesasScreen from "./components/MesasScreen";
+import ComandasScreen from "./components/ComandasScreen";
 import SangriaScreen from "./components/SangriaScreen";
 import SuprimentoScreen from "./components/SuprimentoScreen";
 import CancelarCupomScreen from "./components/CancelarCupomScreen";
@@ -55,6 +57,8 @@ const App = () => (
             <Route path="/scanner" element={<BarcodeScannerScreen />} />
             <Route path="/venda-finalizada" element={<SaleCompletedScreen />} />
             <Route path="/funcoes" element={<FuncoesScreen />} />
+            <Route path="/mesas" element={<MesasScreen />} />
+            <Route path="/comandas" element={<ComandasScreen />} />
             <Route path="/sangria" element={<SangriaScreen />} />
             <Route path="/suprimento" element={<SuprimentoScreen />} />
             <Route path="/cancelar-cupom" element={<CancelarCupomScreen />} />

@@ -1,0 +1,131 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Home, Table, QrCode, Puzzle } from "lucide-react";
+
+interface Comanda {
+  id: number;
+  status: "aberta" | "em-progresso" | "fechada";
+}
+
+const ComandasScreen = () => {
+  const navigate = useNavigate();
+  const [activeTab] = useState("comanda");
+  
+  // Initialize 10 comandas (100-109)
+  const [comandas] = useState<Comanda[]>(
+    Array.from({ length: 10 }, (_, i) => ({
+      id: 100 + i,
+      status: "aberta"
+    }))
+  );
+
+  const getStatusColor = (status: Comanda["status"]) => {
+    switch (status) {
+      case "aberta":
+        return "bg-green-200 text-[#180F33] border-green-300";
+      case "em-progresso":
+        return "bg-yellow-300 text-[#180F33] border-yellow-400";
+      case "fechada":
+        return "bg-red-200 text-[#180F33] border-red-300";
+      default:
+        return "bg-green-200 text-[#180F33] border-green-300";
+    }
+  };
+
+  const getStatusText = (status: Comanda["status"]) => {
+    switch (status) {
+      case "aberta":
+        return "Aberta";
+      case "em-progresso":
+        return "Em Progresso";
+      case "fechada":
+        return "Fechada";
+      default:
+        return "Aberta";
+    }
+  };
+
+  const navItems = [
+    { id: "inicio", label: "Início", icon: Home },
+    { id: "mesa", label: "Mesa", icon: Table },
+    { id: "comanda", label: "Comanda", icon: QrCode },
+    { id: "funcoes", label: "Funções", icon: Puzzle },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#E1E1E5] flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 bg-white">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate("/")}
+          className="text-[#180F33] hover:bg-gray-100"
+        >
+          <ArrowLeft className="h-6 w-6" />
+        </Button>
+        <h1 className="text-xl font-bold text-[#180F33]">COMANDAS</h1>
+        <div className="w-10" />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 p-6">
+        <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto">
+          {comandas.map((comanda) => (
+            <div
+              key={comanda.id}
+              className={`aspect-square rounded-lg border-2 flex flex-col items-center justify-center shadow-sm cursor-pointer hover:shadow-md transition-all p-4 ${getStatusColor(comanda.status)}`}
+              onClick={() => {
+                // TODO: Implementar navegação para a comanda específica
+                console.log(`Comanda ${comanda.id} clicada`);
+              }}
+            >
+              <span className="text-lg font-semibold text-center mb-2">
+                Comanda {comanda.id}
+              </span>
+              <span className="text-sm font-medium text-center">
+                {getStatusText(comanda.status)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="bg-white border-t border-gray-200 px-2 py-1">
+        <div className="flex items-center justify-around">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  if (item.id === "inicio") {
+                    navigate("/");
+                  } else if (item.id === "mesa") {
+                    navigate("/mesas");
+                  } else if (item.id === "funcoes") {
+                    navigate("/funcoes");
+                  }
+                }}
+                className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors ${
+                  isActive 
+                    ? "bg-[#180F33] text-[#FFC72C]" 
+                    : "text-[#180F33] hover:bg-gray-100"
+                }`}
+              >
+                <Icon className="h-6 w-6 mb-1" />
+                <span className="text-xs font-medium">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ComandasScreen;

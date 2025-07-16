@@ -93,6 +93,10 @@ const BalcaoScreen = () => {
                 onClick={() => {
                   if (item.id === "funcoes") {
                     navigate("/funcoes");
+                  } else if (item.id === "mesa") {
+                    navigate("/mesas");
+                  } else if (item.id === "comanda") {
+                    navigate("/comandas");
                   } else {
                     setActiveTab(item.id);
                   }
