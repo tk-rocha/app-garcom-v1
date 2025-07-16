@@ -158,12 +158,12 @@ const MesaDetailScreen = () => {
           // Estado inicial - sem itens
           <div className="flex flex-col items-center justify-center h-full gap-6">
             <p className="text-gray-500 text-center">ainda não há nenhum item</p>
-            <Button
+            <Button 
+              variant="ghost" 
+              className="text-primary hover:text-primary/90 hover:bg-primary/5 font-medium"
               onClick={handleAdicionarItens}
-              className="bg-[#180F33] text-white hover:bg-[#180F33]/90 flex items-center gap-2"
             >
-              <Plus className="h-4 w-4" />
-              ADICIONAR ITENS MESA
+              + ADICIONAR ITENS MESA
             </Button>
           </div>
         ) : (
