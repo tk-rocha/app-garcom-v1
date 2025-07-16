@@ -1,15 +1,23 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus, Trash2 } from "lucide-react";
+import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus, Trash2, Users, ChefHat } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 
 const CartScreen = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [numeroPessoas, setNumeroPessoas] = useState(1);
+  
+  // Check if we're in mesa context
+  const mesaId = searchParams.get('mesa');
+  const isFromMesa = Boolean(mesaId);
+  const cartId = isFromMesa ? `mesa-${mesaId}` : 'balcao';
+  
   const { 
-    cart, 
+    getCartItems,
     getTotalItems, 
     addToCart, 
     removeFromCart, 
@@ -20,8 +28,11 @@ const CartScreen = () => {
     getTotal 
   } = useCart();
 
+  const cart = getCartItems(cartId);
+
   const handleProductClick = (item: any) => {
-    navigate(`/produto/${item.productId}`, { 
+    const targetUrl = `/produto/${item.productId}${isFromMesa ? `?mesa=${mesaId}` : ''}`;
+    navigate(targetUrl, { 
       state: { 
         product: {
           id: item.productId,
@@ -39,7 +50,17 @@ const CartScreen = () => {
       name: item.name,
       price: item.price,
       image: item.image
-    });
+    }, cartId);
+  };
+
+  const handleEditarPessoas = () => {
+    // TODO: Implementar modal/tela para editar número de pessoas
+    console.log("Editar número de pessoas");
+  };
+
+  const handleEnviarCozinha = () => {
+    // TODO: Implementar envio para cozinha
+    console.log("Enviar para cozinha");
   };
 
   if (cart.length === 0) {
@@ -51,33 +72,50 @@ const CartScreen = () => {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate("/produtos")}
+              onClick={() => navigate(isFromMesa ? `/produtos?mesa=${mesaId}` : "/produtos")}
               className="text-primary hover:bg-primary/5"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
             
-            <h1 className="text-lg font-semibold text-primary">BALCÃO</h1>
+            <h1 className="text-lg font-semibold text-primary">
+              {isFromMesa ? `MESA ${mesaId}` : 'BALCÃO'}
+            </h1>
             
             <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-primary hover:bg-primary/5"
+                onClick={() => navigate(isFromMesa ? `/cliente?mesa=${mesaId}` : "/cliente")}
+              >
                 <User className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-primary hover:bg-primary/5"
+                onClick={() => navigate(isFromMesa ? `/pesquisar?mesa=${mesaId}` : "/pesquisar")}
+              >
                 <Search className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-primary hover:bg-primary/5"
+                onClick={() => navigate(isFromMesa ? `/scanner?mesa=${mesaId}` : "/scanner")}
+              >
                 <Scan className="h-5 w-5" />
               </Button>
               <div className="relative">
                 <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
                   <ShoppingBag className="h-5 w-5" />
                 </Button>
-                {getTotalItems() > 0 && (
+                {getTotalItems(cartId) > 0 && (
                   <Badge 
                     className="absolute -top-2 -right-2 bg-accent text-primary text-xs min-w-[20px] h-5 flex items-center justify-center"
                   >
-                    {getTotalItems()}
+                    {getTotalItems(cartId)}
                   </Badge>
                 )}
               </div>
@@ -91,7 +129,7 @@ const CartScreen = () => {
           <h2 className="text-xl font-semibold text-primary mb-2">Sua sacola está vazia</h2>
           <p className="text-gray-600 text-center mb-6">Adicione produtos para começar sua compra</p>
           <Button 
-            onClick={() => navigate("/produtos")}
+            onClick={() => navigate(isFromMesa ? `/produtos?mesa=${mesaId}` : "/produtos")}
             className="bg-primary text-primary-foreground hover:bg-primary/90"
           >
             CONTINUAR COMPRANDO
@@ -109,39 +147,78 @@ const CartScreen = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={() => navigate("/produtos")}
+            onClick={() => navigate(isFromMesa ? `/produtos?mesa=${mesaId}` : "/produtos")}
             className="text-primary hover:bg-primary/5"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
-          <h1 className="text-lg font-semibold text-primary">BALCÃO</h1>
+          <h1 className="text-lg font-semibold text-primary">
+            {isFromMesa ? `MESA ${mesaId}` : 'BALCÃO'}
+          </h1>
           
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-primary hover:bg-primary/5"
+              onClick={() => navigate(isFromMesa ? `/cliente?mesa=${mesaId}` : "/cliente")}
+            >
               <User className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-primary hover:bg-primary/5"
+              onClick={() => navigate(isFromMesa ? `/pesquisar?mesa=${mesaId}` : "/pesquisar")}
+            >
               <Search className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-primary hover:bg-primary/5"
+              onClick={() => navigate(isFromMesa ? `/scanner?mesa=${mesaId}` : "/scanner")}
+            >
               <Scan className="h-5 w-5" />
             </Button>
             <div className="relative">
               <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
                 <ShoppingBag className="h-5 w-5" />
               </Button>
-              {getTotalItems() > 0 && (
+              {getTotalItems(cartId) > 0 && (
                 <Badge 
                   className="absolute -top-2 -right-2 bg-accent text-primary text-xs min-w-[20px] h-5 flex items-center justify-center"
                 >
-                  {getTotalItems()}
+                  {getTotalItems(cartId)}
                 </Badge>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Mesa Action Buttons - Only show when from mesa */}
+      {isFromMesa && (
+        <div className="p-4 bg-white border-b border-gray-200">
+          <div className="flex gap-4">
+            <Button
+              onClick={handleEditarPessoas}
+              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
+            >
+              <Users className="h-4 w-4" />
+              {numeroPessoas} Pessoa{numeroPessoas !== 1 ? 's' : ''}
+            </Button>
+            <Button
+              onClick={handleEnviarCozinha}
+              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
+            >
+              <ChefHat className="h-4 w-4" />
+              Enviar Cozinha
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Cart Items */}
       <div className="flex-1 p-4 space-y-3">
@@ -175,7 +252,7 @@ const CartScreen = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => removeFromCart(item.productId)}
+                      onClick={() => removeFromCart(item.productId, cartId)}
                       className="h-8 w-8 text-primary hover:bg-primary/5"
                     >
                       <Minus className="h-4 w-4" />
@@ -196,7 +273,7 @@ const CartScreen = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeItemCompletely(item.productId)}
+                    onClick={() => removeItemCompletely(item.productId, cartId)}
                     className="h-8 w-8 text-red-500 hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -213,35 +290,35 @@ const CartScreen = () => {
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Subtotal:</span>
-            <span className="font-semibold">R$ {getSubtotal().toFixed(2).replace('.', ',')}</span>
+            <span className="font-semibold">R$ {getSubtotal(cartId).toFixed(2).replace('.', ',')}</span>
           </div>
           
           <div className="flex justify-between items-center">
             <button 
               className="text-primary underline"
-              onClick={() => navigate("/taxas")}
+              onClick={() => navigate(isFromMesa ? `/taxas?mesa=${mesaId}` : "/taxas")}
             >
               Taxas
             </button>
-            <span className="font-semibold">R$ {getTaxAmount().toFixed(2).replace('.', ',')}</span>
+            <span className="font-semibold">R$ {getTaxAmount(cartId).toFixed(2).replace('.', ',')}</span>
           </div>
           
           <div className="flex justify-between items-center">
             <button 
               className="text-primary underline"
-              onClick={() => navigate("/desconto")}
+              onClick={() => navigate(isFromMesa ? `/desconto?mesa=${mesaId}` : "/desconto")}
             >
               Desconto
             </button>
             <span className="font-semibold text-red-500">
-              -R$ {getDiscountAmount().toFixed(2).replace('.', ',')}
+              -R$ {getDiscountAmount(cartId).toFixed(2).replace('.', ',')}
             </span>
           </div>
           
           <div className="border-t pt-2 flex justify-between items-center">
             <span className="text-lg font-bold text-primary">Total:</span>
             <span className="text-lg font-bold text-primary">
-              R$ {getTotal().toFixed(2).replace('.', ',')}
+              R$ {getTotal(cartId).toFixed(2).replace('.', ',')}
             </span>
           </div>
         </div>
@@ -250,14 +327,14 @@ const CartScreen = () => {
           <Button 
             variant="outline"
             className="w-full border-primary text-primary hover:bg-primary/5"
-            onClick={() => navigate("/produtos")}
+            onClick={() => navigate(isFromMesa ? `/produtos?mesa=${mesaId}` : "/produtos")}
           >
             CONTINUAR COMPRANDO
           </Button>
           
           <Button 
             className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-            onClick={() => navigate("/cpf")}
+            onClick={() => navigate(isFromMesa ? `/cpf?mesa=${mesaId}` : "/cpf")}
           >
             FINALIZAR COMPRA
           </Button>
