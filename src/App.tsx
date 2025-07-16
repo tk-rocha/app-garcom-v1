@@ -49,11 +49,14 @@ const App = () => (
             <Route path="/produtos" element={<ProductListScreen />} />
             <Route path="/produto/:id" element={<ProductDetailScreen />} />
             <Route path="/sacola" element={<CartScreen />} />
+            <Route path="/carrinho" element={<CartScreen />} />
             <Route path="/desconto" element={<DiscountScreen />} />
             <Route path="/taxas" element={<TaxScreen />} />
             <Route path="/cpf" element={<CPFScreen />} />
             <Route path="/cliente" element={<CustomerScreen />} />
             <Route path="/pagamento" element={<PaymentScreen />} />
+            <Route path="/buscar-produto" element={<ProductSearchScreen />} />
+            <Route path="/codigo-barras" element={<BarcodeScannerScreen />} />
             <Route path="/pesquisar" element={<ProductSearchScreen />} />
             <Route path="/scanner" element={<BarcodeScannerScreen />} />
             <Route path="/venda-finalizada" element={<SaleCompletedScreen />} />

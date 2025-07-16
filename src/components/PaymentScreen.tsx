@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,8 +78,11 @@ const paymentMethods: PaymentMethod[] = [
 const PaymentScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { getSubtotal, getDiscountAmount, getTaxAmount, getTotal } = useCart();
   const { toast } = useToast();
+  
+  const mesaId = searchParams.get('mesa') || location.state?.mesa;
   
   console.log('PaymentScreen - Component loaded');
   console.log('PaymentScreen - Location state:', location.state);
@@ -94,11 +97,12 @@ const PaymentScreen = () => {
   // Customer info from previous screen
   const customerCpf = location.state?.cpf || "";
 
-  // Calculate totals
-  const subtotal = getSubtotal();
-  const discountAmount = getDiscountAmount();
-  const taxAmount = getTaxAmount();
-  const total = getTotal();
+  // Calculate totals - use mesa cart if available
+  const cartId = mesaId ? `mesa-${mesaId}` : undefined;
+  const subtotal = getSubtotal(cartId);
+  const discountAmount = getDiscountAmount(cartId);
+  const taxAmount = getTaxAmount(cartId);
+  const total = getTotal(cartId);
   
   console.log('PaymentScreen - Totals:', { subtotal, discountAmount, taxAmount, total });
   
@@ -310,13 +314,21 @@ const PaymentScreen = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={() => navigate("/cpf")}
+            onClick={() => {
+              if (mesaId) {
+                navigate(`/cpf?mesa=${mesaId}`);
+              } else {
+                navigate("/cpf");
+              }
+            }}
             className="text-primary hover:bg-primary/5"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
-          <h1 className="text-lg font-semibold text-primary">PAGAMENTO</h1>
+          <h1 className="text-lg font-semibold text-primary">
+            {mesaId ? `PAGAMENTO - MESA ${mesaId}` : "PAGAMENTO"}
+          </h1>
           
           <div className="w-10" />
         </div>

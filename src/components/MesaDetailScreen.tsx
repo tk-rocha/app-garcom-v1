@@ -44,7 +44,29 @@ const MesaDetailScreen = () => {
   };
 
   const handleSacola = () => {
-    navigate(`/carrinho?mesa=${mesaId}`);
+    navigate(`/sacola?mesa=${mesaId}`);
+  };
+
+  const handleFinalizarPedido = () => {
+    const itensEnviados = itens.filter(item => item.enviado);
+    const itensNaoEnviados = itens.filter(item => !item.enviado);
+    
+    if (itensEnviados.length === 0) {
+      // Não há itens enviados para cozinha
+      return;
+    }
+    
+    if (itensNaoEnviados.length > 0) {
+      // Há itens pendentes, mostrar confirmação
+      if (confirm("Ainda há itens pendentes de envio. Ao continuar, os itens não enviados serão descartados. Deseja continuar?")) {
+        // Remove itens não enviados e prossegue
+        setItens(itensEnviados);
+        navigate(`/cpf?mesa=${mesaId}`, { state: { mesa: mesaId } });
+      }
+    } else {
+      // Todos os itens foram enviados
+      navigate(`/cpf?mesa=${mesaId}`, { state: { mesa: mesaId } });
+    }
   };
 
   const handleEditarPessoas = () => {
@@ -75,7 +97,9 @@ const MesaDetailScreen = () => {
   };
 
   const itensNaoEnviados = itens.filter(item => !item.enviado);
+  const itensEnviados = itens.filter(item => item.enviado);
   const hasItensNaoEnviados = itensNaoEnviados.length > 0;
+  const hasItensEnviados = itensEnviados.length > 0;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -254,6 +278,23 @@ const MesaDetailScreen = () => {
                     R$ {calcularTotal().toFixed(2)}
                   </span>
                 </div>
+              </div>
+            )}
+            
+            {/* Botão Finalizar Pedido */}
+            {itens.length > 0 && (
+              <div className="mt-4">
+                <Button
+                  onClick={handleFinalizarPedido}
+                  disabled={!hasItensEnviados}
+                  className={`w-full py-4 text-lg font-semibold ${
+                    hasItensEnviados
+                      ? "bg-[#180F33] text-[#FFC72C] hover:bg-[#180F33]/90"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  FINALIZAR PEDIDO
+                </Button>
               </div>
             )}
           </div>

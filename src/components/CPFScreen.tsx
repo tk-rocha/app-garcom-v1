@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,7 +7,11 @@ import { ArrowLeft } from "lucide-react";
 
 const CPFScreen = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [cpf, setCpf] = useState("");
+  
+  const mesaId = searchParams.get('mesa') || location.state?.mesa;
 
   const formatCPF = (value: string) => {
     // Remove tudo que não é número
@@ -39,11 +43,21 @@ const CPFScreen = () => {
   };
 
   const handleContinueWithCPF = () => {
-    navigate("/pagamento", { state: { cpf } });
+    const navigationState = { cpf };
+    if (mesaId) {
+      navigate(`/pagamento?mesa=${mesaId}`, { state: { ...navigationState, mesa: mesaId } });
+    } else {
+      navigate("/pagamento", { state: navigationState });
+    }
   };
 
   const handleContinueWithoutCPF = () => {
-    navigate("/pagamento", { state: { cpf: "" } });
+    const navigationState = { cpf: "" };
+    if (mesaId) {
+      navigate(`/pagamento?mesa=${mesaId}`, { state: { ...navigationState, mesa: mesaId } });
+    } else {
+      navigate("/pagamento", { state: navigationState });
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -59,7 +73,13 @@ const CPFScreen = () => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/sacola")}
+          onClick={() => {
+            if (mesaId) {
+              navigate(`/sacola?mesa=${mesaId}`);
+            } else {
+              navigate("/sacola");
+            }
+          }}
           className="text-primary hover:bg-primary/10"
         >
           <ArrowLeft className="h-5 w-5" />
