@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
@@ -114,15 +115,21 @@ const CancelarCupomScreen = () => {
 
       {/* Total Sales Box */}
       <div className="p-6 bg-[#E1E1E5]">
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <div className="text-center">
-            <p className="text-sm text-gray-600 mb-1">Total Vendas Hoje</p>
-            <p className="text-lg font-medium text-[#180F33]">{today}</p>
-            <p className="text-2xl font-bold text-[#180F33] mt-2">
-              {formatCurrency(totalVendasHoje)}
-            </p>
-          </div>
-        </div>
+        <Card className="bg-white shadow-sm">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <h2 className="text-lg font-semibold text-gray-800">Total Vendas Hoje</h2>
+                <p className="text-sm text-gray-600">{today}</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-primary">
+                  {formatCurrency(totalVendasHoje)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Content */}
