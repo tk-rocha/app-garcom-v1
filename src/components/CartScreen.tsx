@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus, Trash2, Users, ChefHat } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 
@@ -10,6 +11,7 @@ const CartScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [numeroPessoas, setNumeroPessoas] = useState(1);
+  const [showPendingItemsDialog, setShowPendingItemsDialog] = useState(false);
   
   // Check if we're in mesa context
   const mesaId = searchParams.get('mesa');
@@ -25,10 +27,24 @@ const CartScreen = () => {
     getSubtotal, 
     getDiscountAmount, 
     getTaxAmount,
-    getTotal 
+    getTotal,
+    markItemsAsEnviado,
+    getItensEnviados,
+    getItensNaoEnviados,
+    hasItensEnviados
   } = useCart();
 
   const cart = getCartItems(cartId);
+  const itensEnviados = getItensEnviados(cartId);
+  const itensNaoEnviados = getItensNaoEnviados(cartId);
+  const hasItensEnviadosCart = hasItensEnviados(cartId);
+
+  // Debug logs para o CartScreen
+  console.log('CartScreen - Cart Items:', cart);
+  console.log('CartScreen - Itens Enviados:', itensEnviados);
+  console.log('CartScreen - Itens Nao Enviados:', itensNaoEnviados);
+  console.log('CartScreen - Has Itens Enviados:', hasItensEnviadosCart);
+  console.log('CartScreen - Is From Mesa:', isFromMesa);
 
   const handleProductClick = (item: any) => {
     const targetUrl = `/produto/${item.productId}${isFromMesa ? `?mesa=${mesaId}` : ''}`;
@@ -54,14 +70,72 @@ const CartScreen = () => {
   };
 
   const handleEditarPessoas = () => {
-    // TODO: Implementar modal/tela para editar número de pessoas
-    console.log("Editar número de pessoas");
+    if (isFromMesa) {
+      navigate(`/mesa/${mesaId}/pessoas`);
+    }
   };
 
   const handleEnviarCozinha = () => {
-    // TODO: Implementar envio para cozinha
-    console.log("Enviar para cozinha");
+    markItemsAsEnviado(cartId);
+    console.log('CartScreen - Itens marcados como enviados');
   };
+
+  const handleFinalizarCompra = () => {
+    const itensEnviadosArray = getItensEnviados(cartId);
+    const itensNaoEnviados = getItensNaoEnviados(cartId);
+    
+    console.log('CartScreen - handleFinalizarCompra - Itens enviados:', itensEnviadosArray);
+    console.log('CartScreen - handleFinalizarCompra - Itens não enviados:', itensNaoEnviados);
+    
+    if (isFromMesa) {
+      // Para mesa, verificar se há itens enviados
+      if (itensEnviadosArray.length === 0) {
+        console.log('CartScreen - Bloqueado: nenhum item enviado para mesa');
+        return;
+      }
+      
+      if (itensNaoEnviados.length > 0) {
+        console.log('CartScreen - Mostrando modal de confirmação para mesa');
+        setShowPendingItemsDialog(true);
+      } else {
+        console.log('CartScreen - Navegando para CPF (mesa)');
+        navigate(`/cpf?mesa=${mesaId}`, { state: { mesa: mesaId } });
+      }
+    } else {
+      // Para balcão, pode finalizar direto
+      console.log('CartScreen - Navegando para CPF (balcão)');
+      navigate("/cpf");
+    }
+  };
+
+  const handleConfirmWithPendingItems = () => {
+    // Remove itens não enviados do carrinho
+    const itensNaoEnviados = getItensNaoEnviados(cartId);
+    itensNaoEnviados.forEach(item => {
+      removeItemCompletely(item.productId, cartId);
+    });
+    setShowPendingItemsDialog(false);
+    if (isFromMesa) {
+      navigate(`/cpf?mesa=${mesaId}`, { state: { mesa: mesaId } });
+    } else {
+      navigate("/cpf");
+    }
+  };
+
+  // Para mesa: só mostrar botão se há itens enviados
+  // Para balcão: sempre mostrar se há itens
+  const shouldShowFinalizarButton = isFromMesa ? hasItensEnviadosCart : cart.length > 0;
+  const hasItensNaoEnviadosCart = itensNaoEnviados.length > 0;
+
+  console.log('CartScreen - Button Logic:', {
+    isFromMesa,
+    totalItens: cart.length,
+    itensEnviados: itensEnviados.length,
+    itensNaoEnviados: itensNaoEnviados.length,
+    hasItensEnviadosCart,
+    hasItensNaoEnviadosCart,
+    shouldShowFinalizarButton
+  });
 
   if (cart.length === 0) {
     return (
@@ -211,7 +285,8 @@ const CartScreen = () => {
             </Button>
             <Button
               onClick={handleEnviarCozinha}
-              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
+              disabled={!hasItensNaoEnviadosCart}
+              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-gray-300 disabled:text-gray-500 flex items-center gap-2"
             >
               <ChefHat className="h-4 w-4" />
               Enviar Cozinha
@@ -223,7 +298,9 @@ const CartScreen = () => {
       {/* Cart Items */}
       <div className="flex-1 p-4 space-y-3">
         {cart.map((item) => (
-          <Card key={item.productId} className="bg-white shadow-sm">
+          <Card key={item.productId} className={`bg-white shadow-sm ${
+            item.enviado ? "bg-[#E1E1E5] border-gray-300" : ""
+          }`}>
             <CardContent className="p-4">
               <div className="flex items-center space-x-4">
                 <div 
@@ -241,44 +318,55 @@ const CartScreen = () => {
                   className="flex-1 cursor-pointer"
                   onClick={() => handleProductClick(item)}
                 >
-                  <h3 className="font-medium text-gray-900">{item.name}</h3>
-                  <p className="text-lg font-semibold text-primary">
+                  <h3 className={`font-medium ${
+                    item.enviado ? "text-gray-600" : "text-gray-900"
+                  }`}>{item.name}</h3>
+                  <p className={`text-lg font-semibold ${
+                    item.enviado ? "text-gray-600" : "text-primary"
+                  }`}>
                     R$ {item.price.toFixed(2).replace('.', ',')}
                   </p>
+                  {item.enviado && (
+                    <span className="text-xs text-gray-500 mt-1 block">
+                      ✓ Enviado para cozinha
+                    </span>
+                  )}
                 </div>
                 
-                <div className="flex-shrink-0 flex items-center space-x-3">
-                  <div className="flex items-center space-x-3 border border-primary rounded-md p-1">
+                {!item.enviado && (
+                  <div className="flex-shrink-0 flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 border border-primary rounded-md p-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeFromCart(item.productId, cartId)}
+                        className="h-8 w-8 text-primary hover:bg-primary/5"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="font-medium text-primary min-w-[20px] text-center">
+                        {item.quantity}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleAddToCart(item)}
+                        className="h-8 w-8 text-primary hover:bg-primary/5"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => removeFromCart(item.productId, cartId)}
-                      className="h-8 w-8 text-primary hover:bg-primary/5"
+                      onClick={() => removeItemCompletely(item.productId, cartId)}
+                      className="h-8 w-8 text-red-500 hover:bg-red-50"
                     >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="font-medium text-primary min-w-[20px] text-center">
-                      {item.quantity}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleAddToCart(item)}
-                      className="h-8 w-8 text-primary hover:bg-primary/5"
-                    >
-                      <Plus className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeItemCompletely(item.productId, cartId)}
-                    className="h-8 w-8 text-red-500 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -332,14 +420,35 @@ const CartScreen = () => {
             CONTINUAR COMPRANDO
           </Button>
           
-          <Button 
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-            onClick={() => navigate(isFromMesa ? `/cpf?mesa=${mesaId}` : "/cpf")}
-          >
-            FINALIZAR COMPRA
-          </Button>
+          {/* Botão Finalizar só aparece se: para mesa = há itens enviados, para balcão = há itens */}
+          {shouldShowFinalizarButton && (
+            <Button 
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={handleFinalizarCompra}
+            >
+              FINALIZAR COMPRA
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* Modal de confirmação para itens pendentes */}
+      <AlertDialog open={showPendingItemsDialog} onOpenChange={setShowPendingItemsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Itens Pendentes</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ainda há itens pendentes de envio. Ao continuar, os itens não enviados serão descartados. Deseja continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Voltar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmWithPendingItems}>
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogFooter>
+      </AlertDialog>
     </div>
   );
 };
