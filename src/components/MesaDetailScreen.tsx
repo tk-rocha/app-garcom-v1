@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, User, Search, ScanLine, ShoppingBag, Users, ChefHat, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface ItemMesa {
   id: number;
@@ -19,6 +20,7 @@ const MesaDetailScreen = () => {
   const [numeroPessoas, setNumeroPessoas] = useState(1);
   const [itens, setItens] = useState<ItemMesa[]>([]);
   const [temItensParaEnviar, setTemItensParaEnviar] = useState(false);
+  const [showPendingItemsDialog, setShowPendingItemsDialog] = useState(false);
 
   // Exemplo de itens para demonstração
   // const [itens, setItens] = useState<ItemMesa[]>([
@@ -57,16 +59,20 @@ const MesaDetailScreen = () => {
     }
     
     if (itensNaoEnviados.length > 0) {
-      // Há itens pendentes, mostrar confirmação
-      if (confirm("Ainda há itens pendentes de envio. Ao continuar, os itens não enviados serão descartados. Deseja continuar?")) {
-        // Remove itens não enviados e prossegue
-        setItens(itensEnviados);
-        navigate(`/cpf?mesa=${mesaId}`, { state: { mesa: mesaId } });
-      }
+      // Há itens pendentes, mostrar modal de confirmação
+      setShowPendingItemsDialog(true);
     } else {
       // Todos os itens foram enviados
       navigate(`/cpf?mesa=${mesaId}`, { state: { mesa: mesaId } });
     }
+  };
+
+  const handleConfirmWithPendingItems = () => {
+    const itensEnviados = itens.filter(item => item.enviado);
+    // Remove itens não enviados e prossegue
+    setItens(itensEnviados);
+    setShowPendingItemsDialog(false);
+    navigate(`/cpf?mesa=${mesaId}`, { state: { mesa: mesaId } });
   };
 
   const handleEditarPessoas = () => {
@@ -299,6 +305,24 @@ const MesaDetailScreen = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de confirmação para itens pendentes */}
+      <AlertDialog open={showPendingItemsDialog} onOpenChange={setShowPendingItemsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Itens Pendentes</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ainda há itens pendentes de envio. Ao continuar, os itens não enviados serão descartados. Deseja continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Voltar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmWithPendingItems}>
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
