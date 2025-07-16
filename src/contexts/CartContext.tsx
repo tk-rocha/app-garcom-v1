@@ -108,7 +108,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
           quantity: 1,
           name: productData.name,
           price: productData.price,
-          image: productData.image
+          image: productData.image,
+          enviado: false
         };
         return { ...prev, [cartId]: [...currentCart, newItem] };
       }
@@ -240,8 +241,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   const hasItensEnviados = (cartId: string = 'balcao'): boolean => {
-    const itensEnviados = getItensEnviados(cartId);
-    return itensEnviados.length > 0;
+    const currentCart = carts[cartId] || [];
+    const result = currentCart.some(item => item.enviado === true);
+    console.log('🔍 hasItensEnviados check:', { cartId, currentCart, result });
+    return result;
   };
 
   const value = {

@@ -446,8 +446,8 @@ const CartScreen = () => {
             <AlertDialogAction onClick={handleConfirmWithPendingItems}>
               Confirmar
             </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogFooter>
+           </AlertDialogFooter>
+        </AlertDialogContent>
       </AlertDialog>
     </div>
   );
