@@ -70,8 +70,7 @@ const MesaDetailScreen = () => {
   };
 
   const handleEditarPessoas = () => {
-    // TODO: Implementar modal/tela para editar número de pessoas
-    console.log("Editar número de pessoas");
+    navigate(`/mesa/${mesaId}/pessoas`);
   };
 
   const handleEnviarCozinha = () => {
