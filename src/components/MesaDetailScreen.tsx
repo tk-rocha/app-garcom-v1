@@ -22,12 +22,17 @@ const MesaDetailScreen = () => {
   const [temItensParaEnviar, setTemItensParaEnviar] = useState(false);
   const [showPendingItemsDialog, setShowPendingItemsDialog] = useState(false);
 
-  // Exemplo de itens para demonstração
+  // Exemplo de itens para demonstração - TODOS DEVEM COMEÇAR COM enviado: false
   // const [itens, setItens] = useState<ItemMesa[]>([
   //   { id: 1, nome: "Hambúrguer Clássico", quantidade: 2, precoUnitario: 25.90, enviado: false },
-  //   { id: 2, nome: "Batata Frita", quantidade: 1, precoUnitario: 12.50, enviado: true },
+  //   { id: 2, nome: "Batata Frita", quantidade: 1, precoUnitario: 12.50, enviado: false },
   //   { id: 3, nome: "Refrigerante", quantidade: 2, precoUnitario: 8.90, enviado: false },
   // ]);
+
+  // Debug: Log do estado dos itens para verificar se há itens marcados como enviados
+  console.log('MesaDetailScreen - Itens:', itens);
+  console.log('MesaDetailScreen - Itens enviados:', itens.filter(item => item.enviado));
+  console.log('MesaDetailScreen - hasItensEnviados:', itens.filter(item => item.enviado).length > 0);
 
   const handleVoltar = () => {
     navigate("/mesas");
