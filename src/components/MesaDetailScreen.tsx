@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, User, Search, ScanLine, ShoppingBag, Users, ChefHat, Plus } from "lucide-react";
+import { ArrowLeft, User, Search, ScanLine, ShoppingBag, Users, ChefHat, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useCart } from "@/contexts/CartContext";
@@ -22,11 +22,14 @@ const MesaDetailScreen = () => {
   // Use CartContext para gerenciar itens da mesa
   const { 
     getCartItems, 
+    addToCart,
+    removeFromCart,
     removeItemCompletely, 
     markItemsAsEnviado, 
     getItensEnviados,
     getItensNaoEnviados,
-    hasItensEnviados: hasItensEnviadosCart
+    hasItensEnviados: hasItensEnviadosCart,
+    getTotal
   } = useCart();
   const cartItems = getCartItems(cartId);
   
@@ -138,8 +141,16 @@ const MesaDetailScreen = () => {
     removeItemCompletely(itemId, cartId);
   };
 
+  const handleAddToCart = (item: any) => {
+    addToCart(item.productId, {
+      name: item.name,
+      price: item.price,
+      image: item.image
+    }, cartId);
+  };
+
   const calcularTotal = () => {
-    return itens.reduce((total, item) => total + (item.quantidade * item.precoUnitario), 0);
+    return getTotal(cartId);
   };
 
   const hasItensNaoEnviados = itensNaoEnviados.length > 0;
@@ -245,39 +256,39 @@ const MesaDetailScreen = () => {
             </Button>
           </div>
         ) : (
-          // Lista de itens
+          // Lista de itens unificada com CartScreen
           <div className="space-y-4">
-            {itens.map((item) => (
+            {cartItems.slice().reverse().map((item) => (
               <div
-                key={item.id}
-                 className={`p-4 rounded-lg border ${
-                   item.enviado 
-                     ? "bg-muted/50 border-muted" 
-                     : "bg-card border-border shadow-sm"
-                 }`}
+                key={item.productId}
+                className={`p-4 rounded-lg border ${
+                  item.enviado 
+                    ? "bg-muted/50 border-muted" 
+                    : "bg-card border-border shadow-sm"
+                }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <h3 className={`font-medium ${
                       item.enviado ? "text-muted-foreground" : "text-primary"
                     }`}>
-                      {item.nome}
+                      {item.name}
                     </h3>
                     <div className="flex items-center gap-4 mt-1">
                       <span className={`text-sm ${
                         item.enviado ? "text-muted-foreground" : "text-foreground"
                       }`}>
-                        Qtd: {item.quantidade}
+                        Qtd: {item.quantity}
                       </span>
                       <span className={`text-sm ${
                         item.enviado ? "text-muted-foreground" : "text-foreground"
                       }`}>
-                        Unitário: R$ {item.precoUnitario.toFixed(2)}
+                        Unitário: R$ {item.price.toFixed(2)}
                       </span>
                       <span className={`text-sm font-medium ${
                         item.enviado ? "text-muted-foreground" : "text-primary"
                       }`}>
-                        Total: R$ {(item.quantidade * item.precoUnitario).toFixed(2)}
+                        Total: R$ {(item.quantity * item.price).toFixed(2)}
                       </span>
                     </div>
                     {item.enviado && (
@@ -289,18 +300,32 @@ const MesaDetailScreen = () => {
                   
                   {!item.enviado && (
                     <div className="flex items-center gap-2 ml-4">
+                      <div className="flex items-center gap-2 border border-primary rounded-md p-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFromCart(item.productId, cartId)}
+                          className="h-8 w-8 text-primary hover:bg-primary/10"
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <span className="font-medium text-primary min-w-[20px] text-center">
+                          {item.quantity}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleAddToCart(item)}
+                          className="h-8 w-8 text-primary hover:bg-primary/10"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleEditarItem(item.id)}
-                        className="text-primary hover:bg-primary/10"
-                      >
-                        Editar
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoverItem(item.id)}
+                        onClick={() => removeItemCompletely(item.productId, cartId)}
                         className="text-destructive hover:bg-destructive/10"
                       >
                         Remover
@@ -320,35 +345,46 @@ const MesaDetailScreen = () => {
               <Plus className="h-4 w-4" />
               ADICIONAR MAIS ITENS
             </Button>
-            
-            {/* Total */}
-            {itens.length > 0 && (
-              <div className="mt-6 p-4 bg-muted rounded-lg">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-medium text-primary">
-                    Total da Mesa:
-                  </span>
-                  <span className="text-xl font-bold text-primary">
-                    R$ {calcularTotal().toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            )}
-            
-            {/* Botão Finalizar Pedido - só aparece se há itens enviados */}
-            {hasItensEnviados && (
-              <div className="mt-4">
-                <Button
-                   onClick={handleFinalizarPedido}
-                   className="w-full py-4 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  FINALIZAR PEDIDO
-                </Button>
-              </div>
-            )}
           </div>
         )}
       </div>
+
+      {/* Summary - só mostra quando tem itens */}
+      {cartItems.length > 0 && (
+        <div className="bg-background border-t border-border p-6 space-y-4">
+          {/* Total */}
+          <div className="p-4 bg-muted rounded-lg">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-medium text-primary">
+                Total da Mesa:
+              </span>
+              <span className="text-xl font-bold text-primary">
+                R$ {calcularTotal().toFixed(2)}
+              </span>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Button 
+              variant="outline"
+              className="w-full border-primary text-primary hover:bg-primary/10"
+              onClick={handleAdicionarItens}
+            >
+              CONTINUAR COMPRANDO
+            </Button>
+            
+            {/* Botão Finalizar Pedido - só aparece se há itens enviados */}
+            {hasItensEnviados && (
+              <Button 
+                className="w-full py-4 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
+                onClick={handleFinalizarPedido}
+              >
+                FINALIZAR PEDIDO
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Modal de confirmação para itens pendentes */}
       <AlertDialog open={showPendingItemsDialog} onOpenChange={setShowPendingItemsDialog}>
