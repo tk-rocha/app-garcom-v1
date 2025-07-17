@@ -148,20 +148,20 @@ const MesaDetailScreen = () => {
   });
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4">
+      <div className="bg-background border-b border-border p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={handleVoltar}
-              className="text-[#180F33]"
+              className="text-primary hover:text-primary/90"
             >
               <ArrowLeft className="h-6 w-6" />
             </Button>
-            <h1 className="text-xl font-bold text-[#180F33]">MESA {mesaId}</h1>
+            <h1 className="text-xl font-bold text-primary">MESA {mesaId}</h1>
           </div>
           
           <div className="flex items-center gap-2">
@@ -169,7 +169,7 @@ const MesaDetailScreen = () => {
               variant="ghost"
               size="icon"
               onClick={handleCliente}
-              className="text-[#180F33]"
+              className="text-primary hover:text-primary/90"
             >
               <User className="h-5 w-5" />
             </Button>
@@ -177,7 +177,7 @@ const MesaDetailScreen = () => {
               variant="ghost"
               size="icon"
               onClick={handlePesquisa}
-              className="text-[#180F33]"
+              className="text-primary hover:text-primary/90"
             >
               <Search className="h-5 w-5" />
             </Button>
@@ -185,7 +185,7 @@ const MesaDetailScreen = () => {
               variant="ghost"
               size="icon"
               onClick={handleScanner}
-              className="text-[#180F33]"
+              className="text-primary hover:text-primary/90"
             >
               <ScanLine className="h-5 w-5" />
             </Button>
@@ -193,7 +193,7 @@ const MesaDetailScreen = () => {
               variant="ghost"
               size="icon"
               onClick={handleSacola}
-              className="text-[#180F33]"
+              className="text-primary hover:text-primary/90"
             >
               <ShoppingBag className="h-5 w-5" />
             </Button>
@@ -202,11 +202,11 @@ const MesaDetailScreen = () => {
       </div>
 
       {/* Action Buttons */}
-      <div className="p-4 bg-white border-b border-gray-200">
+      <div className="p-4 bg-background border-b border-border">
         <div className="flex gap-4">
           <Button
             onClick={handleEditarPessoas}
-            className="flex-1 bg-[#180F33] text-white hover:bg-[#180F33]/90 flex items-center gap-2"
+            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
           >
             <Users className="h-4 w-4" />
             {numeroPessoas} Pessoa{numeroPessoas !== 1 ? 's' : ''}
@@ -214,7 +214,7 @@ const MesaDetailScreen = () => {
           <Button
             onClick={handleEnviarCozinha}
             disabled={!hasItensNaoEnviados}
-            className="flex-1 bg-[#180F33] text-white hover:bg-[#180F33]/90 disabled:bg-gray-300 disabled:text-gray-500 flex items-center gap-2"
+            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground flex items-center gap-2"
           >
             <ChefHat className="h-4 w-4" />
             Enviar Cozinha
@@ -227,7 +227,7 @@ const MesaDetailScreen = () => {
         {itens.length === 0 ? (
           // Estado inicial - sem itens
           <div className="flex flex-col items-center justify-center h-full gap-6">
-            <p className="text-gray-500 text-center">ainda não há nenhum item</p>
+            <p className="text-muted-foreground text-center">ainda não há nenhum item</p>
             <Button 
               variant="ghost" 
               className="text-primary hover:text-primary/90 hover:bg-primary/5 font-medium"
@@ -244,36 +244,36 @@ const MesaDetailScreen = () => {
                 key={item.id}
                 className={`p-4 rounded-lg border ${
                   item.enviado 
-                    ? "bg-[#E1E1E5] border-gray-300" 
-                    : "bg-white border-gray-200 shadow-sm"
+                    ? "bg-muted border-border" 
+                    : "bg-card border-border shadow-sm"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <h3 className={`font-medium ${
-                      item.enviado ? "text-gray-600" : "text-[#180F33]"
+                      item.enviado ? "text-muted-foreground" : "text-primary"
                     }`}>
                       {item.nome}
                     </h3>
                     <div className="flex items-center gap-4 mt-1">
                       <span className={`text-sm ${
-                        item.enviado ? "text-gray-500" : "text-gray-600"
+                        item.enviado ? "text-muted-foreground" : "text-foreground"
                       }`}>
                         Qtd: {item.quantidade}
                       </span>
                       <span className={`text-sm ${
-                        item.enviado ? "text-gray-500" : "text-gray-600"
+                        item.enviado ? "text-muted-foreground" : "text-foreground"
                       }`}>
                         Unitário: R$ {item.precoUnitario.toFixed(2)}
                       </span>
                       <span className={`text-sm font-medium ${
-                        item.enviado ? "text-gray-600" : "text-[#180F33]"
+                        item.enviado ? "text-muted-foreground" : "text-primary"
                       }`}>
                         Total: R$ {(item.quantidade * item.precoUnitario).toFixed(2)}
                       </span>
                     </div>
                     {item.enviado && (
-                      <span className="text-xs text-gray-500 mt-1 block">
+                      <span className="text-xs text-muted-foreground mt-1 block">
                         ✓ Enviado para cozinha
                       </span>
                     )}
@@ -285,7 +285,7 @@ const MesaDetailScreen = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEditarItem(item.id)}
-                        className="text-[#180F33] hover:bg-[#180F33]/10"
+                        className="text-primary hover:bg-primary/10"
                       >
                         Editar
                       </Button>
@@ -293,7 +293,7 @@ const MesaDetailScreen = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleRemoverItem(item.id)}
-                        className="text-red-600 hover:bg-red-50"
+                        className="text-destructive hover:bg-destructive/10"
                       >
                         Remover
                       </Button>
@@ -307,7 +307,7 @@ const MesaDetailScreen = () => {
             <Button
               onClick={handleAdicionarItens}
               variant="outline"
-              className="w-full border-[#180F33] text-[#180F33] hover:bg-[#180F33]/10 flex items-center gap-2"
+              className="w-full border-primary text-primary hover:bg-primary/10 flex items-center gap-2"
             >
               <Plus className="h-4 w-4" />
               ADICIONAR MAIS ITENS
@@ -315,12 +315,12 @@ const MesaDetailScreen = () => {
             
             {/* Total */}
             {itens.length > 0 && (
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <div className="mt-6 p-4 bg-muted rounded-lg">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-medium text-[#180F33]">
+                  <span className="text-lg font-medium text-primary">
                     Total da Mesa:
                   </span>
-                  <span className="text-xl font-bold text-[#180F33]">
+                  <span className="text-xl font-bold text-primary">
                     R$ {calcularTotal().toFixed(2)}
                   </span>
                 </div>
@@ -332,7 +332,7 @@ const MesaDetailScreen = () => {
               <div className="mt-4">
                 <Button
                   onClick={handleFinalizarPedido}
-                  className="w-full py-4 text-lg font-semibold bg-[#180F33] text-[#FFC72C] hover:bg-[#180F33]/90"
+                  className="w-full py-4 text-lg font-semibold bg-primary text-accent hover:bg-primary/90"
                 >
                   FINALIZAR PEDIDO
                 </Button>
