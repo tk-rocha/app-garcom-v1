@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,14 @@ const redeemableProducts = [
 
 const CustomerScreen = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { addToCart } = useCart();
+  
+  // Detect origin context from URL parameters
+  const mesaId = searchParams.get("mesa");
+  const comandaId = searchParams.get("comanda");
+  const isFromMesa = !!mesaId;
+  const isFromComanda = !!comandaId;
   const [cpf, setCpf] = useState("");
   const [customer, setCustomer] = useState<{ name: string; points: number } | null>(null);
   const [selectedItems, setSelectedItems] = useState<Record<number, number>>({});
@@ -88,6 +95,14 @@ const CustomerScreen = () => {
   const handleRedeem = () => {
     if (!customer) return;
     
+    // Determine the correct cart ID based on origin context
+    let cartId = "balcao"; // Default to balcao
+    if (isFromMesa && mesaId) {
+      cartId = `mesa-${mesaId}`;
+    } else if (isFromComanda && comandaId) {
+      cartId = `comanda-${comandaId}`;
+    }
+    
     // Add selected items to cart with symbolic price of R$ 0.01
     Object.entries(selectedItems).forEach(([productIdStr, quantity]) => {
       const productId = parseInt(productIdStr);
@@ -100,12 +115,19 @@ const CustomerScreen = () => {
             name: `${product.name} (Resgate)`,
             price: 0.01,
             image: product.image
-          });
+          }, cartId);
         }
       }
     });
     
-    navigate("/sacola");
+    // Navigate back to the appropriate cart screen
+    if (isFromMesa) {
+      navigate(`/sacola?mesa=${mesaId}`);
+    } else if (isFromComanda) {
+      navigate(`/sacola?comanda=${comandaId}`);
+    } else {
+      navigate("/sacola");
+    }
   };
 
   const hasSelectedItems = Object.keys(selectedItems).length > 0;
@@ -118,7 +140,15 @@ const CustomerScreen = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={() => navigate("/produtos")}
+            onClick={() => {
+              if (isFromMesa) {
+                navigate(`/produtos?mesa=${mesaId}`);
+              } else if (isFromComanda) {
+                navigate(`/produtos?comanda=${comandaId}`);
+              } else {
+                navigate("/produtos");
+              }
+            }}
             className="text-primary hover:bg-primary/5"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -244,7 +274,15 @@ const CustomerScreen = () => {
             <Button
               variant="outline"
               className="flex-1 border-primary text-primary hover:bg-primary/5"
-              onClick={() => navigate("/produtos")}
+              onClick={() => {
+                if (isFromMesa) {
+                  navigate(`/produtos?mesa=${mesaId}`);
+                } else if (isFromComanda) {
+                  navigate(`/produtos?comanda=${comandaId}`);
+                } else {
+                  navigate("/produtos");
+                }
+              }}
             >
               Cancelar
             </Button>
