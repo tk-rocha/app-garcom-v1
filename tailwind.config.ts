@@ -61,6 +61,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				table: {
+					free: 'hsl(var(--table-free))',
+					'free-foreground': 'hsl(var(--table-free-foreground))',
+					'in-service': 'hsl(var(--table-in-service))',
+					'in-service-foreground': 'hsl(var(--table-in-service-foreground))',
+					reviewed: 'hsl(var(--table-reviewed))',
+					'reviewed-foreground': 'hsl(var(--table-reviewed-foreground))'
 				}
 			},
 			borderRadius: {

@@ -2,34 +2,53 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home, Table, QrCode, Puzzle } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
 
 interface Comanda {
   id: number;
-  status: "aberta" | "em-progresso" | "fechada";
 }
 
 const ComandasScreen = () => {
   const navigate = useNavigate();
   const [activeTab] = useState("comanda");
+  const { getCartItems, hasItensEnviados } = useCart();
   
   // Initialize 10 comandas (100-109)
   const [comandas] = useState<Comanda[]>(
     Array.from({ length: 10 }, (_, i) => ({
       id: 100 + i,
-      status: "aberta"
     }))
   );
 
-  const getStatusColor = (status: Comanda["status"]) => {
+  const getComandaStatus = (comandaId: number) => {
+    const cartId = `comanda-${comandaId}`;
+    const cartItems = getCartItems(cartId);
+    const hasItems = cartItems.length > 0;
+    const hasEnviados = hasItensEnviados(cartId);
+    
+    // Check if comanda was "conferenced" (reviewed)
+    const isReviewed = localStorage.getItem(`comanda-${comandaId}-reviewed`) === 'true';
+    
+    if (isReviewed) {
+      return 'reviewed'; // Status 3: Comanda Reviewed (Conferenced)
+    } else if (hasItems) {
+      return 'in-service'; // Status 2: Items Launched (In Service) 
+    } else {
+      return 'free'; // Status 1: Free Comanda
+    }
+  };
+
+  const getStatusColor = (comandaId: number) => {
+    const status = getComandaStatus(comandaId);
     switch (status) {
-      case "aberta":
-        return "bg-green-200 text-[#180F33] border-green-300";
-      case "em-progresso":
-        return "bg-yellow-300 text-[#180F33] border-yellow-400";
-      case "fechada":
-        return "bg-red-200 text-[#180F33] border-red-300";
+      case 'free':
+        return "bg-table-free text-table-free-foreground border-primary/20";
+      case 'in-service':
+        return "bg-table-in-service text-table-in-service-foreground border-table-in-service";
+      case 'reviewed':
+        return "bg-table-reviewed text-table-reviewed-foreground border-table-reviewed";
       default:
-        return "bg-green-200 text-[#180F33] border-green-300";
+        return "bg-table-free text-table-free-foreground border-primary/20";
     }
   };
 
@@ -42,28 +61,28 @@ const ComandasScreen = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#E1E1E5] flex flex-col">
+    <div className="min-h-screen bg-secondary flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 bg-white">
+      <div className="flex items-center justify-between p-4 bg-background">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => navigate("/")}
-          className="text-[#180F33] hover:bg-gray-100"
+          className="text-primary hover:bg-muted"
         >
           <ArrowLeft className="h-6 w-6" />
         </Button>
-        <h1 className="text-xl font-bold text-[#180F33]">COMANDAS</h1>
+        <h1 className="text-xl font-bold text-primary">COMANDAS</h1>
         <div className="w-10" />
       </div>
 
       {/* Action Buttons */}
-      <div className="p-4 bg-white border-b border-gray-200">
+      <div className="p-4 bg-background border-b border-border">
         <div className="flex gap-4">
-          <Button className="flex-1 bg-[#180F33] text-white hover:bg-[#180F33]/90">
+          <Button className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90">
             Fechamento Parcial
           </Button>
-          <Button className="flex-1 bg-[#180F33] text-white hover:bg-[#180F33]/90">
+          <Button className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90">
             Transferência
           </Button>
         </div>
@@ -75,10 +94,9 @@ const ComandasScreen = () => {
           {comandas.map((comanda) => (
             <div
               key={comanda.id}
-              className={`aspect-square rounded-lg border-2 flex items-center justify-center shadow-sm cursor-pointer hover:shadow-md transition-all ${getStatusColor(comanda.status)}`}
+              className={`aspect-square rounded-lg border-2 flex items-center justify-center shadow-sm cursor-pointer hover:shadow-md transition-all ${getStatusColor(comanda.id)}`}
               onClick={() => {
-                // TODO: Implementar navegação para a comanda específica
-                console.log(`Comanda ${comanda.id} clicada`);
+                navigate(`/comanda/${comanda.id}`);
               }}
             >
               <span className="text-lg font-semibold">
@@ -90,7 +108,7 @@ const ComandasScreen = () => {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="bg-white border-t border-gray-200 px-2 py-1">
+      <div className="bg-background border-t border-border px-2 py-1">
         <div className="flex items-center justify-around">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -110,8 +128,8 @@ const ComandasScreen = () => {
                 }}
                 className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors ${
                   isActive 
-                    ? "bg-[#180F33] text-[#FFC72C]" 
-                    : "text-[#180F33] hover:bg-gray-100"
+                    ? "bg-primary text-accent" 
+                    : "text-primary hover:bg-muted"
                 }`}
               >
                 <Icon className="h-6 w-6 mb-1" />
