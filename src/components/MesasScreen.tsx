@@ -116,7 +116,7 @@ const MesasScreen = () => {
                 key={item.id}
                 onClick={() => {
                   if (item.id === "inicio") {
-                    navigate("/");
+                    navigate("/balcao");
                   } else if (item.id === "comanda") {
                     navigate("/comandas");
                   } else if (item.id === "funcoes") {

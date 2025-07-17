@@ -74,7 +74,7 @@ const FuncoesScreen = () => {
       id: "sair-pdv", 
       label: "Sair PDV", 
       icon: LogOut, 
-      action: () => navigate("/")
+      action: () => navigate("/balcao")
     },
     { 
       id: "fechar-pdv", 

@@ -119,7 +119,7 @@ const ComandasScreen = () => {
                 key={item.id}
                 onClick={() => {
                   if (item.id === "inicio") {
-                    navigate("/");
+                    navigate("/balcao");
                   } else if (item.id === "mesa") {
                     navigate("/mesas");
                   } else if (item.id === "funcoes") {
