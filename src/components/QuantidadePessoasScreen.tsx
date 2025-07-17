@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,14 @@ const QuantidadePessoasScreen = () => {
   
   const { getSubtotal, getTaxAmount, getTotal } = useCart();
   const [numeroPessoas, setNumeroPessoas] = useState(1);
+
+  // Load saved number of people on component mount
+  useEffect(() => {
+    const savedPessoas = localStorage.getItem(`mesa-${mesaId}-pessoas`);
+    if (savedPessoas) {
+      setNumeroPessoas(parseInt(savedPessoas, 10));
+    }
+  }, [mesaId]);
 
   const subtotal = getSubtotal(cartId);
   const servicoMesa = getTaxAmount(cartId);
@@ -34,12 +42,17 @@ const QuantidadePessoasScreen = () => {
   };
 
   const handleConferenciaMesa = () => {
-    // TODO: Implementar lógica para marcar mesa em conferência
+    // Save number of people and mark table as reviewed
+    localStorage.setItem(`mesa-${mesaId}-pessoas`, numeroPessoas.toString());
+    localStorage.setItem(`mesa-${mesaId}-reviewed`, 'true');
+    console.log(`Mesa ${mesaId} marked as reviewed with ${numeroPessoas} people`);
     navigate(`/mesa/${mesaId}`);
   };
 
   const handleConfirmar = () => {
-    // TODO: Salvar o número de pessoas e retornar para a mesa
+    // Save number of people
+    localStorage.setItem(`mesa-${mesaId}-pessoas`, numeroPessoas.toString());
+    console.log(`Mesa ${mesaId} saved with ${numeroPessoas} people`);
     navigate(`/mesa/${mesaId}`);
   };
 

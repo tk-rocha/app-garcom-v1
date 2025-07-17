@@ -33,6 +33,14 @@ const MesaDetailScreen = () => {
   const [numeroPessoas, setNumeroPessoas] = useState(1);
   const [showPendingItemsDialog, setShowPendingItemsDialog] = useState(false);
 
+  // Load saved number of people
+  useEffect(() => {
+    const savedPessoas = localStorage.getItem(`mesa-${mesaId}-pessoas`);
+    if (savedPessoas) {
+      setNumeroPessoas(parseInt(savedPessoas, 10));
+    }
+  }, [mesaId]);
+
   // Converte CartItems para ItemMesa
   const itens: ItemMesa[] = cartItems.map(item => ({
     id: item.productId,
@@ -204,13 +212,13 @@ const MesaDetailScreen = () => {
       {/* Action Buttons */}
       <div className="p-4 bg-background border-b border-border">
         <div className="flex gap-4">
-          <Button
-            onClick={handleEditarPessoas}
-            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
-          >
-            <Users className="h-4 w-4" />
-            {numeroPessoas} Pessoa{numeroPessoas !== 1 ? 's' : ''}
-          </Button>
+            <Button
+              onClick={handleEditarPessoas}
+              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
+            >
+              <Users className="h-4 w-4" />
+              {numeroPessoas} Pessoa{numeroPessoas !== 1 ? 's' : ''}
+            </Button>
           <Button
             onClick={handleEnviarCozinha}
             disabled={!hasItensNaoEnviados}
@@ -242,11 +250,11 @@ const MesaDetailScreen = () => {
             {itens.map((item) => (
               <div
                 key={item.id}
-                className={`p-4 rounded-lg border ${
-                  item.enviado 
-                    ? "bg-muted border-border" 
-                    : "bg-card border-border shadow-sm"
-                }`}
+                 className={`p-4 rounded-lg border ${
+                   item.enviado 
+                     ? "bg-muted/50 border-muted" 
+                     : "bg-card border-border shadow-sm"
+                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -331,8 +339,8 @@ const MesaDetailScreen = () => {
             {hasItensEnviados && (
               <div className="mt-4">
                 <Button
-                  onClick={handleFinalizarPedido}
-                  className="w-full py-4 text-lg font-semibold bg-primary text-accent hover:bg-primary/90"
+                   onClick={handleFinalizarPedido}
+                   className="w-full py-4 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   FINALIZAR PEDIDO
                 </Button>
