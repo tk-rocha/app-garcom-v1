@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { ArrowLeft, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,19 +8,26 @@ import { useCart } from "@/contexts/CartContext";
 const QuantidadePessoasScreen = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const mesaId = id || "1";
-  const cartId = `mesa-${mesaId}`;
+  const location = useLocation();
+  
+  // Determine if this is a mesa or comanda based on the current path
+  const isMesa = location.pathname.includes('/mesa/');
+  const isComanda = location.pathname.includes('/comanda/');
+  
+  const itemId = id || (isMesa ? "1" : "100");
+  const cartId = isMesa ? `mesa-${itemId}` : `comanda-${itemId}`;
+  const storageKey = isMesa ? `mesa-${itemId}-pessoas` : `comanda-${itemId}-pessoas`;
   
   const { getSubtotal, getTaxAmount, getTotal } = useCart();
   const [numeroPessoas, setNumeroPessoas] = useState(1);
 
   // Load saved number of people on component mount
   useEffect(() => {
-    const savedPessoas = localStorage.getItem(`mesa-${mesaId}-pessoas`);
+    const savedPessoas = localStorage.getItem(storageKey);
     if (savedPessoas) {
       setNumeroPessoas(parseInt(savedPessoas, 10));
     }
-  }, [mesaId]);
+  }, [storageKey]);
 
   const subtotal = getSubtotal(cartId);
   const servicoMesa = getTaxAmount(cartId);
@@ -28,7 +35,11 @@ const QuantidadePessoasScreen = () => {
   const totalPorPessoa = total / numeroPessoas;
 
   const handleVoltar = () => {
-    navigate(`/mesa/${mesaId}`);
+    if (isMesa) {
+      navigate(`/mesa/${itemId}`);
+    } else {
+      navigate(`/comanda/${itemId}`);
+    }
   };
 
   const handleDecrementar = () => {
@@ -42,18 +53,19 @@ const QuantidadePessoasScreen = () => {
   };
 
   const handleConferenciaMesa = () => {
-    // Save number of people and mark table as reviewed
-    localStorage.setItem(`mesa-${mesaId}-pessoas`, numeroPessoas.toString());
-    localStorage.setItem(`mesa-${mesaId}-reviewed`, 'true');
-    console.log(`Mesa ${mesaId} marked as reviewed with ${numeroPessoas} people`);
-    navigate(`/mesa/${mesaId}`);
+    // Save number of people and mark table/comanda as reviewed
+    localStorage.setItem(storageKey, numeroPessoas.toString());
+    const reviewedKey = isMesa ? `mesa-${itemId}-reviewed` : `comanda-${itemId}-reviewed`;
+    localStorage.setItem(reviewedKey, 'true');
+    console.log(`${isMesa ? 'Mesa' : 'Comanda'} ${itemId} marked as reviewed with ${numeroPessoas} people`);
+    handleVoltar();
   };
 
   const handleConfirmar = () => {
     // Save number of people
-    localStorage.setItem(`mesa-${mesaId}-pessoas`, numeroPessoas.toString());
-    console.log(`Mesa ${mesaId} saved with ${numeroPessoas} people`);
-    navigate(`/mesa/${mesaId}`);
+    localStorage.setItem(storageKey, numeroPessoas.toString());
+    console.log(`${isMesa ? 'Mesa' : 'Comanda'} ${itemId} saved with ${numeroPessoas} people`);
+    handleVoltar();
   };
 
   return (
@@ -151,7 +163,7 @@ const QuantidadePessoasScreen = () => {
             onClick={handleConferenciaMesa}
             className="w-full py-4 text-lg font-semibold bg-[#180F33] text-[#FFC72C] hover:bg-[#180F33]/90"
           >
-            Conferência de Mesa
+            Conferência de {isMesa ? 'Mesa' : 'Comanda'}
           </Button>
           
           <div className="flex gap-4">

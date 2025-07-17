@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface CartItem {
   productId: number;
@@ -65,10 +65,45 @@ interface CartProviderProps {
 }
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
+  // Load data from localStorage on initialization
+  const loadFromStorage = () => {
+    try {
+      const savedCarts = localStorage.getItem('restaurant-carts');
+      const savedDiscounts = localStorage.getItem('restaurant-discounts');
+      const savedTaxes = localStorage.getItem('restaurant-taxes');
+      
+      return {
+        carts: savedCarts ? JSON.parse(savedCarts) : { balcao: [] },
+        discounts: savedDiscounts ? JSON.parse(savedDiscounts) : { balcao: null },
+        taxes: savedTaxes ? JSON.parse(savedTaxes) : { balcao: null }
+      };
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+      return {
+        carts: { balcao: [] },
+        discounts: { balcao: null },
+        taxes: { balcao: null }
+      };
+    }
+  };
+
   // Multi-cart system: key is cartId (e.g., 'balcao', 'mesa-1', 'mesa-2')
-  const [carts, setCarts] = useState<Record<string, CartItem[]>>({ balcao: [] });
-  const [discounts, setDiscounts] = useState<Record<string, Discount | null>>({ balcao: null });
-  const [taxes, setTaxes] = useState<Record<string, Tax | null>>({ balcao: null });
+  const [carts, setCarts] = useState<Record<string, CartItem[]>>(loadFromStorage().carts);
+  const [discounts, setDiscounts] = useState<Record<string, Discount | null>>(loadFromStorage().discounts);
+  const [taxes, setTaxes] = useState<Record<string, Tax | null>>(loadFromStorage().taxes);
+
+  // Save to localStorage whenever state changes
+  React.useEffect(() => {
+    localStorage.setItem('restaurant-carts', JSON.stringify(carts));
+  }, [carts]);
+
+  React.useEffect(() => {
+    localStorage.setItem('restaurant-discounts', JSON.stringify(discounts));
+  }, [discounts]);
+
+  React.useEffect(() => {
+    localStorage.setItem('restaurant-taxes', JSON.stringify(taxes));
+  }, [taxes]);
 
   // Get current cart, discount, and tax (for backward compatibility)
   const cart = carts.balcao || [];
@@ -217,6 +252,17 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setCarts(prev => ({ ...prev, [cartId]: [] }));
     setDiscount(null, cartId);
     setTax(null, cartId);
+    
+    // Also clear any saved data for this mesa or comanda
+    if (cartId.startsWith('mesa-')) {
+      const mesaId = cartId.replace('mesa-', '');
+      localStorage.removeItem(`mesa-${mesaId}-pessoas`);
+      localStorage.removeItem(`mesa-${mesaId}-reviewed`);
+    } else if (cartId.startsWith('comanda-')) {
+      const comandaId = cartId.replace('comanda-', '');
+      localStorage.removeItem(`comanda-${comandaId}-pessoas`);
+      localStorage.removeItem(`comanda-${comandaId}-reviewed`);
+    }
   };
 
   const markItemsAsEnviado = (cartId: string = 'balcao') => {

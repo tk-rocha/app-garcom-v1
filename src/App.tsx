@@ -23,6 +23,7 @@ import FuncoesScreen from "./components/FuncoesScreen";
 import MesasScreen from "./components/MesasScreen";
 import ComandasScreen from "./components/ComandasScreen";
 import MesaDetailScreen from "./components/MesaDetailScreen";
+import ComandaDetailScreen from "./components/ComandaDetailScreen";
 import QuantidadePessoasScreen from "./components/QuantidadePessoasScreen";
 import SangriaScreen from "./components/SangriaScreen";
 import SuprimentoScreen from "./components/SuprimentoScreen";
@@ -66,6 +67,8 @@ const App = () => (
           <Route path="/mesa/:id" element={<MesaDetailScreen />} />
           <Route path="/mesa/:id/pessoas" element={<QuantidadePessoasScreen />} />
           <Route path="/comandas" element={<ComandasScreen />} />
+          <Route path="/comanda/:id" element={<ComandaDetailScreen />} />
+          <Route path="/comanda/:id/pessoas" element={<QuantidadePessoasScreen />} />
             <Route path="/sangria" element={<SangriaScreen />} />
             <Route path="/suprimento" element={<SuprimentoScreen />} />
             <Route path="/cancelar-cupom" element={<CancelarCupomScreen />} />
