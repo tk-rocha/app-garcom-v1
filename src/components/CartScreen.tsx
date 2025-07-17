@@ -139,75 +139,73 @@ const CartScreen = () => {
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-4 py-3">
+        <div className="bg-background border-b border-border p-4">
           <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => navigate(isFromMesa ? `/produtos?mesa=${mesaId}` : "/produtos")}
-              className="text-primary hover:bg-primary/5"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(isFromMesa ? `/produtos?mesa=${mesaId}` : "/produtos")}
+                className="text-primary hover:text-primary/90"
+              >
+                <ArrowLeft className="h-6 w-6" />
+              </Button>
+              <h1 className="text-xl font-bold text-primary">
+                {isFromMesa ? `MESA ${mesaId}` : 'BALCÃO'}
+              </h1>
+            </div>
             
-            <h1 className="text-lg font-semibold text-primary">
-              {isFromMesa ? `MESA ${mesaId}` : 'BALCÃO'}
-            </h1>
-            
-            <div className="flex items-center space-x-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-primary hover:bg-primary/5"
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => navigate(isFromMesa ? `/cliente?mesa=${mesaId}` : "/cliente")}
+                className="text-primary hover:text-primary/90"
               >
                 <User className="h-5 w-5" />
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-primary hover:bg-primary/5"
-                onClick={() => navigate(isFromMesa ? `/pesquisar?mesa=${mesaId}` : "/pesquisar")}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(isFromMesa ? `/buscar-produto?mesa=${mesaId}` : "/buscar-produto")}
+                className="text-primary hover:text-primary/90"
               >
                 <Search className="h-5 w-5" />
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-primary hover:bg-primary/5"
-                onClick={() => navigate(isFromMesa ? `/scanner?mesa=${mesaId}` : "/scanner")}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(isFromMesa ? `/codigo-barras?mesa=${mesaId}` : "/codigo-barras")}
+                className="text-primary hover:text-primary/90"
               >
                 <Scan className="h-5 w-5" />
               </Button>
-              <div className="relative">
-                <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
-                  <ShoppingBag className="h-5 w-5" />
-                </Button>
-                {getTotalItems(cartId) > 0 && (
-                  <Badge 
-                    className="absolute -top-2 -right-2 bg-accent text-primary text-xs min-w-[20px] h-5 flex items-center justify-center"
-                  >
-                    {getTotalItems(cartId)}
-                  </Badge>
-                )}
-              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-primary hover:text-primary/90"
+              >
+                <ShoppingBag className="h-5 w-5" />
+              </Button>
             </div>
           </div>
         </div>
 
-        {/* Empty Cart Message */}
-        <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
-          <ShoppingBag className="h-16 w-16 text-gray-400 mb-4" />
-          <h2 className="text-xl font-semibold text-primary mb-2">Sua sacola está vazia</h2>
-          <p className="text-gray-600 text-center mb-6">Adicione produtos para começar sua compra</p>
-          <Button 
-            onClick={() => navigate(isFromMesa ? `/produtos?mesa=${mesaId}` : "/produtos")}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            CONTINUAR COMPRANDO
-          </Button>
+        {/* Content */}
+        <div className="flex-1">
+          {/* Empty Cart Message */}
+          <div className="flex flex-col items-center justify-center h-full gap-6 p-6">
+            <p className="text-muted-foreground text-center">ainda não há nenhum item</p>
+            <Button 
+              variant="ghost" 
+              className="text-primary hover:text-primary/90 hover:bg-primary/5 font-medium"
+              onClick={() => navigate(isFromMesa ? `/produtos?mesa=${mesaId}` : "/produtos")}
+            >
+              + ADICIONAR ITENS {isFromMesa ? 'MESA' : 'BALCÃO'}
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -216,65 +214,61 @@ const CartScreen = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-background border-b border-border p-4">
         <div className="flex items-center justify-between">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate(isFromMesa ? `/produtos?mesa=${mesaId}` : "/produtos")}
-            className="text-primary hover:bg-primary/5"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(isFromMesa ? `/produtos?mesa=${mesaId}` : "/produtos")}
+              className="text-primary hover:text-primary/90"
+            >
+              <ArrowLeft className="h-6 w-6" />
+            </Button>
+            <h1 className="text-xl font-bold text-primary">
+              {isFromMesa ? `MESA ${mesaId}` : 'BALCÃO'}
+            </h1>
+          </div>
           
-          <h1 className="text-lg font-semibold text-primary">
-            {isFromMesa ? `MESA ${mesaId}` : 'BALCÃO'}
-          </h1>
-          
-          <div className="flex items-center space-x-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-primary hover:bg-primary/5"
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => navigate(isFromMesa ? `/cliente?mesa=${mesaId}` : "/cliente")}
+              className="text-primary hover:text-primary/90"
             >
               <User className="h-5 w-5" />
             </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-primary hover:bg-primary/5"
-              onClick={() => navigate(isFromMesa ? `/pesquisar?mesa=${mesaId}` : "/pesquisar")}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(isFromMesa ? `/buscar-produto?mesa=${mesaId}` : "/buscar-produto")}
+              className="text-primary hover:text-primary/90"
             >
               <Search className="h-5 w-5" />
             </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-primary hover:bg-primary/5"
-              onClick={() => navigate(isFromMesa ? `/scanner?mesa=${mesaId}` : "/scanner")}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(isFromMesa ? `/codigo-barras?mesa=${mesaId}` : "/codigo-barras")}
+              className="text-primary hover:text-primary/90"
             >
               <Scan className="h-5 w-5" />
             </Button>
-            <div className="relative">
-              <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">
-                <ShoppingBag className="h-5 w-5" />
-              </Button>
-              {getTotalItems(cartId) > 0 && (
-                <Badge 
-                  className="absolute -top-2 -right-2 bg-accent text-primary text-xs min-w-[20px] h-5 flex items-center justify-center"
-                >
-                  {getTotalItems(cartId)}
-                </Badge>
-              )}
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-primary hover:text-primary/90"
+            >
+              <ShoppingBag className="h-5 w-5" />
+            </Button>
           </div>
         </div>
       </div>
 
       {/* Mesa Action Buttons - Only show when from mesa */}
       {isFromMesa && (
-        <div className="p-4 bg-white border-b border-gray-200">
+        <div className="p-4 bg-background border-b border-border">
           <div className="flex gap-4">
             <Button
               onClick={handleEditarPessoas}
@@ -286,7 +280,7 @@ const CartScreen = () => {
             <Button
               onClick={handleEnviarCozinha}
               disabled={!hasItensNaoEnviadosCart}
-              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-gray-300 disabled:text-gray-500 flex items-center gap-2"
+              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground flex items-center gap-2"
             >
               <ChefHat className="h-4 w-4" />
               Enviar Cozinha
@@ -296,51 +290,56 @@ const CartScreen = () => {
       )}
 
       {/* Cart Items */}
-      <div className="flex-1 p-4 space-y-3">
-        {cart.map((item) => (
-          <Card key={item.productId} className={`bg-white shadow-sm ${
-            item.enviado ? "bg-[#E1E1E5] border-gray-300" : ""
-          }`}>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-4">
-                <div 
-                  className="flex-shrink-0 cursor-pointer"
-                  onClick={() => handleProductClick(item)}
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-16 h-16 rounded-lg object-cover bg-gray-100"
-                  />
-                </div>
-                
-                <div 
-                  className="flex-1 cursor-pointer"
-                  onClick={() => handleProductClick(item)}
-                >
+      <div className="flex-1 p-6">
+        <div className="space-y-4">
+          {cart.slice().reverse().map((item) => (
+            <div
+              key={item.productId}
+              className={`p-4 rounded-lg border ${
+                item.enviado 
+                  ? "bg-muted/50 border-muted" 
+                  : "bg-card border-border shadow-sm"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
                   <h3 className={`font-medium ${
-                    item.enviado ? "text-gray-600" : "text-gray-900"
-                  }`}>{item.name}</h3>
-                  <p className={`text-lg font-semibold ${
-                    item.enviado ? "text-gray-600" : "text-primary"
+                    item.enviado ? "text-muted-foreground" : "text-primary"
                   }`}>
-                    R$ {item.price.toFixed(2).replace('.', ',')}
-                  </p>
+                    {item.name}
+                  </h3>
+                  <div className="flex items-center gap-4 mt-1">
+                    <span className={`text-sm ${
+                      item.enviado ? "text-muted-foreground" : "text-foreground"
+                    }`}>
+                      Qtd: {item.quantity}
+                    </span>
+                    <span className={`text-sm ${
+                      item.enviado ? "text-muted-foreground" : "text-foreground"
+                    }`}>
+                      Unitário: R$ {item.price.toFixed(2)}
+                    </span>
+                    <span className={`text-sm font-medium ${
+                      item.enviado ? "text-muted-foreground" : "text-primary"
+                    }`}>
+                      Total: R$ {(item.quantity * item.price).toFixed(2)}
+                    </span>
+                  </div>
                   {item.enviado && (
-                    <span className="text-xs text-gray-500 mt-1 block">
+                    <span className="text-xs text-muted-foreground mt-1 block">
                       ✓ Enviado para cozinha
                     </span>
                   )}
                 </div>
                 
                 {!item.enviado && (
-                  <div className="flex-shrink-0 flex items-center space-x-3">
-                    <div className="flex items-center space-x-3 border border-primary rounded-md p-1">
+                  <div className="flex items-center gap-2 ml-4">
+                    <div className="flex items-center gap-2 border border-primary rounded-md p-1">
                       <Button
                         variant="ghost"
-                        size="icon"
+                        size="sm"
                         onClick={() => removeFromCart(item.productId, cartId)}
-                        className="h-8 w-8 text-primary hover:bg-primary/5"
+                        className="h-8 w-8 text-primary hover:bg-primary/10"
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
@@ -349,9 +348,9 @@ const CartScreen = () => {
                       </span>
                       <Button
                         variant="ghost"
-                        size="icon"
+                        size="sm"
                         onClick={() => handleAddToCart(item)}
-                        className="h-8 w-8 text-primary hover:bg-primary/5"
+                        className="h-8 w-8 text-primary hover:bg-primary/10"
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
@@ -359,54 +358,30 @@ const CartScreen = () => {
                     
                     <Button
                       variant="ghost"
-                      size="icon"
+                      size="sm"
                       onClick={() => removeItemCompletely(item.productId, cartId)}
-                      className="h-8 w-8 text-red-500 hover:bg-red-50"
+                      className="text-destructive hover:bg-destructive/10"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      Remover
                     </Button>
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Summary */}
-      <div className="bg-white border-t border-gray-200 p-4 space-y-3">
-        <div className="space-y-2">
+      <div className="bg-background border-t border-border p-6 space-y-4">
+        {/* Total */}
+        <div className="p-4 bg-muted rounded-lg">
           <div className="flex justify-between items-center">
-            <span className="text-gray-600">Subtotal:</span>
-            <span className="font-semibold">R$ {getSubtotal(cartId).toFixed(2).replace('.', ',')}</span>
-          </div>
-          
-          <div className="flex justify-between items-center">
-            <button 
-              className="text-primary underline"
-              onClick={() => navigate(isFromMesa ? `/taxas?mesa=${mesaId}` : "/taxas")}
-            >
-              Taxas
-            </button>
-            <span className="font-semibold">R$ {getTaxAmount(cartId).toFixed(2).replace('.', ',')}</span>
-          </div>
-          
-          <div className="flex justify-between items-center">
-            <button 
-              className="text-primary underline"
-              onClick={() => navigate(isFromMesa ? `/desconto?mesa=${mesaId}` : "/desconto")}
-            >
-              Desconto
-            </button>
-            <span className="font-semibold text-red-500">
-              -R$ {getDiscountAmount(cartId).toFixed(2).replace('.', ',')}
+            <span className="text-lg font-medium text-primary">
+              Total da {isFromMesa ? 'Mesa' : 'Compra'}:
             </span>
-          </div>
-          
-          <div className="border-t pt-2 flex justify-between items-center">
-            <span className="text-lg font-bold text-primary">Total:</span>
-            <span className="text-lg font-bold text-primary">
-              R$ {getTotal(cartId).toFixed(2).replace('.', ',')}
+            <span className="text-xl font-bold text-primary">
+              R$ {getTotal(cartId).toFixed(2)}
             </span>
           </div>
         </div>
@@ -414,7 +389,7 @@ const CartScreen = () => {
         <div className="space-y-2">
           <Button 
             variant="outline"
-            className="w-full border-primary text-primary hover:bg-primary/5"
+            className="w-full border-primary text-primary hover:bg-primary/10"
             onClick={() => navigate(isFromMesa ? `/produtos?mesa=${mesaId}` : "/produtos")}
           >
             CONTINUAR COMPRANDO
@@ -423,10 +398,10 @@ const CartScreen = () => {
           {/* Botão Finalizar só aparece se: para mesa = há itens enviados, para balcão = há itens */}
           {shouldShowFinalizarButton && (
             <Button 
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              className="w-full py-4 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={handleFinalizarCompra}
             >
-              FINALIZAR COMPRA
+              FINALIZAR {isFromMesa ? 'PEDIDO' : 'COMPRA'}
             </Button>
           )}
         </div>

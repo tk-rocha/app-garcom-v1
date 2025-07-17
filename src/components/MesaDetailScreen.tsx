@@ -41,14 +41,14 @@ const MesaDetailScreen = () => {
     }
   }, [mesaId]);
 
-  // Converte CartItems para ItemMesa
+  // Converte CartItems para ItemMesa e ordena por mais recente primeiro
   const itens: ItemMesa[] = cartItems.map(item => ({
     id: item.productId,
     nome: item.name,
     quantidade: item.quantity,
     precoUnitario: item.price,
     enviado: item.enviado || false
-  }));
+  })).reverse(); // Reverse to show newest items first
 
   // Debug: Log do estado dos itens para verificar se há itens marcados como enviados
   const itensEnviadosArray = getItensEnviados(cartId);
