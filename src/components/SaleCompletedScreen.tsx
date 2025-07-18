@@ -14,6 +14,7 @@ interface SaleData {
   }>;
   customerCpf?: string;
   mesa?: string;
+  comanda?: string;
 }
 
 const SaleCompletedScreen = () => {
@@ -115,8 +116,9 @@ const SaleCompletedScreen = () => {
     hasProcessed.current = true;
     generateReceipt();
     
-    // Clear the appropriate cart (mesa or balcao)
-    const cartId = saleData.mesa ? `mesa-${saleData.mesa}` : 'balcao';
+    // Clear the appropriate cart (mesa, comanda, or balcao)
+    const cartId = saleData.comanda ? `comanda-${saleData.comanda}` : 
+                  saleData.mesa ? `mesa-${saleData.mesa}` : 'balcao';
     console.log('Clearing cart for:', cartId);
     clearCart(cartId);
 

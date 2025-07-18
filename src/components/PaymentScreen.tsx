@@ -83,6 +83,7 @@ const PaymentScreen = () => {
   const { toast } = useToast();
   
   const mesaId = searchParams.get('mesa') || location.state?.mesa;
+  const comandaId = searchParams.get('comanda') || location.state?.comanda;
   
   console.log('PaymentScreen - Component loaded');
   console.log('PaymentScreen - Location state:', location.state);
@@ -97,8 +98,8 @@ const PaymentScreen = () => {
   // Customer info from previous screen
   const customerCpf = location.state?.cpf || "";
 
-  // Calculate totals - use mesa cart if available
-  const cartId = mesaId ? `mesa-${mesaId}` : undefined;
+  // Calculate totals - use mesa or comanda cart if available
+  const cartId = comandaId ? `comanda-${comandaId}` : mesaId ? `mesa-${mesaId}` : 'balcao';
   const subtotal = getSubtotal(cartId);
   const discountAmount = getDiscountAmount(cartId);
   const taxAmount = getTaxAmount(cartId);
@@ -279,6 +280,7 @@ const PaymentScreen = () => {
         payments,
         customerCpf,
         mesa: mesaId,
+        comanda: comandaId,
       };
       
       console.log('saleData completo:', JSON.stringify(saleData, null, 2));
@@ -316,7 +318,9 @@ const PaymentScreen = () => {
             variant="ghost" 
             size="icon"
             onClick={() => {
-              if (mesaId) {
+              if (comandaId) {
+                navigate(`/cpf?comanda=${comandaId}`);
+              } else if (mesaId) {
                 navigate(`/cpf?mesa=${mesaId}`);
               } else {
                 navigate("/cpf");
@@ -328,7 +332,7 @@ const PaymentScreen = () => {
           </Button>
           
           <h1 className="text-lg font-semibold text-primary">
-            {mesaId ? `PAGAMENTO - MESA ${mesaId}` : "PAGAMENTO"}
+            {comandaId ? `PAGAMENTO - COMANDA ${comandaId}` : mesaId ? `PAGAMENTO - MESA ${mesaId}` : "PAGAMENTO"}
           </h1>
           
           <div className="w-10" />
