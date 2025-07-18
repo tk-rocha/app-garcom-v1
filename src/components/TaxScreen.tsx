@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Check } from "lucide-react";
@@ -15,10 +15,17 @@ interface TaxOption {
 
 const TaxScreen = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
   const { getSubtotal, setTax, tax } = useCart();
   const [selectedTaxId, setSelectedTaxId] = useState<string | null>(null);
 
-  const subtotal = getSubtotal();
+  const mesaId = searchParams.get('mesa') || location.state?.mesa;
+  const comandaId = searchParams.get('comanda') || location.state?.comanda;
+  
+  // Get the correct cart ID and subtotal
+  const cartId = comandaId ? `comanda-${comandaId}` : mesaId ? `mesa-${mesaId}` : 'balcao';
+  const subtotal = getSubtotal(cartId);
 
   // Lista de taxas disponíveis
   const taxOptions: TaxOption[] = [
@@ -71,16 +78,16 @@ const TaxScreen = () => {
         name: selectedTax.name,
         type: selectedTax.type,
         value: selectedTax.value
-      });
+      }, cartId);
     } else {
-      setTax(null);
+      setTax(null, cartId);
     }
     navigate(-1);
   };
 
   const handleRemoveTax = () => {
     setSelectedTaxId(null);
-    setTax(null);
+    setTax(null, cartId);
     navigate(-1);
   };
 
@@ -102,7 +109,9 @@ const TaxScreen = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
-          <h1 className="text-lg font-semibold text-primary">TAXAS</h1>
+          <h1 className="text-lg font-semibold text-primary">
+            {comandaId ? `TAXAS - COMANDA ${comandaId}` : mesaId ? `TAXAS - MESA ${mesaId}` : "TAXAS"}
+          </h1>
           
           <div className="w-10" />
         </div>

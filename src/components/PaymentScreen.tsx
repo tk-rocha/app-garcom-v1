@@ -441,13 +441,23 @@ const PaymentScreen = () => {
                 <span>{formatBRL(subtotal)}</span>
               </div>
               {taxAmount > 0 && (
-                <div className="flex justify-between cursor-pointer" onClick={() => navigate("/taxas")}>
+                <div className="flex justify-between cursor-pointer" onClick={() => {
+                  const params = new URLSearchParams();
+                  if (comandaId) params.set('comanda', comandaId);
+                  else if (mesaId) params.set('mesa', mesaId);
+                  navigate(`/taxas${params.toString() ? '?' + params.toString() : ''}`);
+                }}>
                   <span className="text-gray-600">Taxas:</span>
                   <span>{formatBRL(taxAmount)}</span>
                 </div>
               )}
               {taxAmount === 0 && (
-                <div className="flex justify-between cursor-pointer text-blue-600" onClick={() => navigate("/taxas")}>
+                <div className="flex justify-between cursor-pointer text-blue-600" onClick={() => {
+                  const params = new URLSearchParams();
+                  if (comandaId) params.set('comanda', comandaId);
+                  else if (mesaId) params.set('mesa', mesaId);
+                  navigate(`/taxas${params.toString() ? '?' + params.toString() : ''}`);
+                }}>
                   <span>+ Adicionar Taxa</span>
                 </div>
               )}
