@@ -336,15 +336,6 @@ const MesaDetailScreen = () => {
               </div>
             ))}
             
-            {/* Botão adicionar mais itens */}
-            <Button
-              onClick={handleAdicionarItens}
-              variant="outline"
-              className="w-full border-primary text-primary hover:bg-primary/10 flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              ADICIONAR MAIS ITENS
-            </Button>
           </div>
         )}
       </div>
