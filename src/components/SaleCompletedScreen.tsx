@@ -13,6 +13,7 @@ interface SaleData {
     amount: number;
   }>;
   customerCpf?: string;
+  mesa?: string;
 }
 
 const SaleCompletedScreen = () => {
@@ -113,7 +114,11 @@ const SaleCompletedScreen = () => {
     console.log('Processing sale completion...');
     hasProcessed.current = true;
     generateReceipt();
-    clearCart();
+    
+    // Clear the appropriate cart (mesa or balcao)
+    const cartId = saleData.mesa ? `mesa-${saleData.mesa}` : 'balcao';
+    console.log('Clearing cart for:', cartId);
+    clearCart(cartId);
 
     // Auto redirect after 3 seconds
     console.log('Setting 3-second timer for redirect...');

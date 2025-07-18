@@ -278,6 +278,7 @@ const PaymentScreen = () => {
         total,
         payments,
         customerCpf,
+        mesa: mesaId,
       };
       
       console.log('saleData completo:', JSON.stringify(saleData, null, 2));
