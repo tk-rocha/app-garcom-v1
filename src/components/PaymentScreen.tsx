@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -79,7 +79,7 @@ const PaymentScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { getSubtotal, getDiscountAmount, getTaxAmount, getTotal } = useCart();
+  const { getSubtotal, getDiscountAmount, getTaxAmount, getServiceFeeAmount, getTotal, ensureMesaServiceFee, setServiceFee } = useCart();
   const { toast } = useToast();
   
   const mesaId = searchParams.get('mesa') || location.state?.mesa;
@@ -100,9 +100,18 @@ const PaymentScreen = () => {
 
   // Calculate totals - use mesa or comanda cart if available
   const cartId = comandaId ? `comanda-${comandaId}` : mesaId ? `mesa-${mesaId}` : 'balcao';
+  
+  // Ensure Mesa orders have automatic 10% service fee
+  React.useEffect(() => {
+    if (mesaId) {
+      ensureMesaServiceFee(cartId);
+    }
+  }, [mesaId, cartId, ensureMesaServiceFee]);
+  
   const subtotal = getSubtotal(cartId);
   const discountAmount = getDiscountAmount(cartId);
   const taxAmount = getTaxAmount(cartId);
+  const serviceFeeAmount = getServiceFeeAmount(cartId);
   const total = getTotal(cartId);
   
   console.log('PaymentScreen - Totals:', { subtotal, discountAmount, taxAmount, total });
@@ -276,6 +285,7 @@ const PaymentScreen = () => {
         subtotal,
         discountAmount,
         taxAmount,
+        serviceFeeAmount,
         total,
         payments,
         customerCpf,
@@ -440,6 +450,36 @@ const PaymentScreen = () => {
                 <span className="text-gray-600">Subtotal:</span>
                 <span>{formatBRL(subtotal)}</span>
               </div>
+              {/* Service Fee for Mesa orders */}
+              {mesaId && serviceFeeAmount > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Taxa de Serviço (10%):</span>
+                  <div className="flex items-center space-x-2">
+                    <span>{formatBRL(serviceFeeAmount)}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setServiceFee(null, cartId)}
+                      className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
+                      title="Remover Taxa de Serviço"
+                    >
+                      ×
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {mesaId && serviceFeeAmount === 0 && (
+                <div className="flex justify-between cursor-pointer text-blue-600" onClick={() => {
+                  setServiceFee({
+                    id: 'mesa-service',
+                    name: 'Taxa de Serviço',
+                    type: 'percentage',
+                    value: 10
+                  }, cartId);
+                }}>
+                  <span>+ Adicionar Taxa de Serviço (10%)</span>
+                </div>
+              )}
               {taxAmount > 0 && (
                 <div className="flex justify-between cursor-pointer" onClick={() => {
                   const params = new URLSearchParams();

@@ -23,10 +23,18 @@ interface Tax {
   value: number;
 }
 
+interface ServiceFee {
+  id: string;
+  name: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+}
+
 interface CartContextType {
   cart: CartItem[];
   discount: Discount | null;
   tax: Tax | null;
+  serviceFee: ServiceFee | null;
   getTotalItems: (cartId?: string) => number;
   getProductQuantity: (productId: number, cartId?: string) => number;
   addToCart: (productId: number, productData: { name: string; price: number; image: string }, cartId?: string) => void;
@@ -35,9 +43,11 @@ interface CartContextType {
   getSubtotal: (cartId?: string) => number;
   getDiscountAmount: (cartId?: string) => number;
   getTaxAmount: (cartId?: string) => number;
+  getServiceFeeAmount: (cartId?: string) => number;
   getTotal: (cartId?: string) => number;
   setDiscount: (discount: Discount | null, cartId?: string) => void;
   setTax: (tax: Tax | null, cartId?: string) => void;
+  setServiceFee: (serviceFee: ServiceFee | null, cartId?: string) => void;
   applyDiscount: (amount: number, inputType: 'percentage' | 'value', inputValue: string, cartId?: string) => void;
   getDiscountType: (cartId?: string) => 'percentage' | 'value';
   getDiscountValue: (cartId?: string) => string;
@@ -48,6 +58,7 @@ interface CartContextType {
   getItensEnviados: (cartId?: string) => CartItem[];
   getItensNaoEnviados: (cartId?: string) => CartItem[];
   hasItensEnviados: (cartId?: string) => boolean;
+  ensureMesaServiceFee: (cartId: string) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -71,18 +82,21 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const savedCarts = localStorage.getItem('restaurant-carts');
       const savedDiscounts = localStorage.getItem('restaurant-discounts');
       const savedTaxes = localStorage.getItem('restaurant-taxes');
+      const savedServiceFees = localStorage.getItem('restaurant-service-fees');
       
       return {
         carts: savedCarts ? JSON.parse(savedCarts) : { balcao: [] },
         discounts: savedDiscounts ? JSON.parse(savedDiscounts) : { balcao: null },
-        taxes: savedTaxes ? JSON.parse(savedTaxes) : { balcao: null }
+        taxes: savedTaxes ? JSON.parse(savedTaxes) : { balcao: null },
+        serviceFees: savedServiceFees ? JSON.parse(savedServiceFees) : { balcao: null }
       };
     } catch (error) {
       console.error('Error loading from localStorage:', error);
       return {
         carts: { balcao: [] },
         discounts: { balcao: null },
-        taxes: { balcao: null }
+        taxes: { balcao: null },
+        serviceFees: { balcao: null }
       };
     }
   };
@@ -91,6 +105,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [carts, setCarts] = useState<Record<string, CartItem[]>>(loadFromStorage().carts);
   const [discounts, setDiscounts] = useState<Record<string, Discount | null>>(loadFromStorage().discounts);
   const [taxes, setTaxes] = useState<Record<string, Tax | null>>(loadFromStorage().taxes);
+  const [serviceFees, setServiceFees] = useState<Record<string, ServiceFee | null>>(loadFromStorage().serviceFees);
 
   // Save to localStorage whenever state changes
   React.useEffect(() => {
@@ -105,10 +120,15 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     localStorage.setItem('restaurant-taxes', JSON.stringify(taxes));
   }, [taxes]);
 
-  // Get current cart, discount, and tax (for backward compatibility)
+  React.useEffect(() => {
+    localStorage.setItem('restaurant-service-fees', JSON.stringify(serviceFees));
+  }, [serviceFees]);
+
+  // Get current cart, discount, tax, and service fee (for backward compatibility)
   const cart = carts.balcao || [];
   const discount = discounts.balcao;
   const tax = taxes.balcao;
+  const serviceFee = serviceFees.balcao;
 
   const getCartItems = (cartId: string = 'balcao'): CartItem[] => {
     return carts[cartId] || [];
@@ -207,11 +227,24 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   };
 
+  const getServiceFeeAmount = (cartId: string = 'balcao') => {
+    const currentServiceFee = serviceFees[cartId];
+    if (!currentServiceFee) return 0;
+    const subtotal = getSubtotal(cartId);
+    
+    if (currentServiceFee.type === 'percentage') {
+      return (subtotal * currentServiceFee.value) / 100;
+    } else {
+      return currentServiceFee.value;
+    }
+  };
+
   const getTotal = (cartId: string = 'balcao') => {
     const subtotal = getSubtotal(cartId);
     const discountAmount = getDiscountAmount(cartId);
     const taxAmount = getTaxAmount(cartId);
-    return Math.max(0, subtotal + taxAmount - discountAmount);
+    const serviceFeeAmount = getServiceFeeAmount(cartId);
+    return Math.max(0, subtotal + taxAmount + serviceFeeAmount - discountAmount);
   };
 
   const setDiscount = (newDiscount: Discount | null, cartId: string = 'balcao') => {
@@ -220,6 +253,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const setTax = (newTax: Tax | null, cartId: string = 'balcao') => {
     setTaxes(prev => ({ ...prev, [cartId]: newTax }));
+  };
+
+  const setServiceFee = (newServiceFee: ServiceFee | null, cartId: string = 'balcao') => {
+    setServiceFees(prev => ({ ...prev, [cartId]: newServiceFee }));
   };
 
   const applyDiscount = (amount: number, inputType: 'percentage' | 'value', inputValue: string, cartId: string = 'balcao') => {
@@ -252,6 +289,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setCarts(prev => ({ ...prev, [cartId]: [] }));
     setDiscount(null, cartId);
     setTax(null, cartId);
+    setServiceFee(null, cartId);
     
     // Also clear any saved data for this mesa or comanda
     if (cartId.startsWith('mesa-')) {
@@ -263,6 +301,25 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       localStorage.removeItem(`comanda-${comandaId}-pessoas`);
       localStorage.removeItem(`comanda-${comandaId}-reviewed`);
     }
+  };
+
+  const ensureMesaServiceFee = (cartId: string) => {
+    // Only apply to Mesa orders
+    if (!cartId.startsWith('mesa-')) return;
+    
+    // Check if service fee already exists
+    const currentServiceFee = serviceFees[cartId];
+    if (currentServiceFee) return;
+    
+    // Apply 10% service fee automatically for Mesa orders
+    const defaultServiceFee: ServiceFee = {
+      id: 'mesa-service',
+      name: 'Taxa de Serviço',
+      type: 'percentage',
+      value: 10
+    };
+    
+    setServiceFees(prev => ({ ...prev, [cartId]: defaultServiceFee }));
   };
 
   const markItemsAsEnviado = (cartId: string = 'balcao') => {
@@ -297,6 +354,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     cart,
     discount,
     tax,
+    serviceFee,
     getTotalItems,
     getProductQuantity,
     addToCart,
@@ -305,9 +363,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     getSubtotal,
     getDiscountAmount,
     getTaxAmount,
+    getServiceFeeAmount,
     getTotal,
     setDiscount,
     setTax,
+    setServiceFee,
     applyDiscount,
     getDiscountType,
     getDiscountValue,
@@ -318,6 +378,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     getItensEnviados,
     getItensNaoEnviados,
     hasItensEnviados,
+    ensureMesaServiceFee,
   };
 
   return (
