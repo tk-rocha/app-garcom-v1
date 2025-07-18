@@ -29,7 +29,10 @@ const MesaDetailScreen = () => {
     getItensEnviados,
     getItensNaoEnviados,
     hasItensEnviados: hasItensEnviadosCart,
-    getTotal
+    getSubtotal,
+    getServiceFeeAmount,
+    getTotal,
+    ensureMesaServiceFee
   } = useCart();
   const cartItems = getCartItems(cartId);
   
@@ -149,8 +152,21 @@ const MesaDetailScreen = () => {
     }, cartId);
   };
 
+  // Ensure Mesa has automatic 10% service fee
+  useEffect(() => {
+    ensureMesaServiceFee(cartId);
+  }, [cartId, ensureMesaServiceFee]);
+
   const calcularTotal = () => {
     return getTotal(cartId);
+  };
+
+  const calcularSubtotal = () => {
+    return getSubtotal(cartId);
+  };
+
+  const calcularTaxaServico = () => {
+    return getServiceFeeAmount(cartId);
   };
 
   const hasItensNaoEnviados = itensNaoEnviados.length > 0;
@@ -343,15 +359,20 @@ const MesaDetailScreen = () => {
       {/* Summary - só mostra quando tem itens */}
       {cartItems.length > 0 && (
         <div className="bg-background border-t border-border p-6 space-y-4">
-          {/* Total */}
-          <div className="p-4 bg-muted rounded-lg">
+          {/* Resumo Financeiro Detalhado */}
+          <div className="p-4 bg-muted rounded-lg space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-lg font-medium text-primary">
-                Total da Mesa:
-              </span>
-              <span className="text-xl font-bold text-primary">
-                R$ {calcularTotal().toFixed(2)}
-              </span>
+              <span className="text-sm text-muted-foreground">Subtotal:</span>
+              <span className="text-sm font-medium">R$ {calcularSubtotal().toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Taxa de Serviço (10%):</span>
+              <span className="text-sm font-medium">R$ {calcularTaxaServico().toFixed(2)}</span>
+            </div>
+            <hr className="my-2" />
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-medium text-primary">Total:</span>
+              <span className="text-xl font-bold text-primary">R$ {calcularTotal().toFixed(2)}</span>
             </div>
           </div>
           

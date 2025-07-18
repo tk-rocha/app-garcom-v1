@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,17 +27,26 @@ const CartScreen = () => {
     getSubtotal, 
     getDiscountAmount, 
     getTaxAmount,
+    getServiceFeeAmount,
     getTotal,
     markItemsAsEnviado,
     getItensEnviados,
     getItensNaoEnviados,
-    hasItensEnviados
+    hasItensEnviados,
+    ensureMesaServiceFee
   } = useCart();
 
   const cart = getCartItems(cartId);
   const itensEnviados = getItensEnviados(cartId);
   const itensNaoEnviados = getItensNaoEnviados(cartId);
   const hasItensEnviadosCart = hasItensEnviados(cartId);
+
+  // Ensure Mesa has automatic 10% service fee
+  React.useEffect(() => {
+    if (isFromMesa) {
+      ensureMesaServiceFee(cartId);
+    }
+  }, [isFromMesa, cartId, ensureMesaServiceFee]);
 
   // Debug logs para o CartScreen
   console.log('CartScreen - Cart Items:', cart);
@@ -374,15 +383,22 @@ const CartScreen = () => {
 
       {/* Summary */}
       <div className="bg-background border-t border-border p-6 space-y-4">
-        {/* Total */}
-        <div className="p-4 bg-muted rounded-lg">
+        {/* Resumo Financeiro */}
+        <div className="p-4 bg-muted rounded-lg space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-lg font-medium text-primary">
-              Total da {isFromMesa ? 'Mesa' : 'Compra'}:
-            </span>
-            <span className="text-xl font-bold text-primary">
-              R$ {getTotal(cartId).toFixed(2)}
-            </span>
+            <span className="text-sm text-muted-foreground">Subtotal:</span>
+            <span className="text-sm font-medium">R$ {getSubtotal(cartId).toFixed(2)}</span>
+          </div>
+          {isFromMesa && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Taxa de Serviço (10%):</span>
+              <span className="text-sm font-medium">R$ {getServiceFeeAmount(cartId).toFixed(2)}</span>
+            </div>
+          )}
+          <hr className="my-2" />
+          <div className="flex justify-between items-center">
+            <span className="text-lg font-medium text-primary">Total:</span>
+            <span className="text-xl font-bold text-primary">R$ {getTotal(cartId).toFixed(2)}</span>
           </div>
         </div>
         

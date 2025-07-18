@@ -7,6 +7,7 @@ interface SaleData {
   subtotal: number;
   discountAmount: number;
   taxAmount: number;
+  serviceFeeAmount?: number;
   total: number;
   payments: Array<{
     method: string;
@@ -82,10 +83,11 @@ const SaleCompletedScreen = () => {
           timestamp: now.toISOString(),
           date: now.toLocaleDateString('pt-BR'),
           time: now.toLocaleTimeString('pt-BR'),
-          grossAmount: saleData.subtotal + saleData.taxAmount,
+          grossAmount: saleData.subtotal + saleData.taxAmount + (saleData.serviceFeeAmount || 0),
           netAmount: saleData.total,
           discount: saleData.discountAmount,
           tax: saleData.taxAmount,
+          serviceFee: saleData.serviceFeeAmount || 0,
           payments: saleData.payments,
           customerCpf: saleData.customerCpf,
         };
