@@ -30,18 +30,16 @@ const DiscountScreen = () => {
 
   const formatInputValue = (value: string, isMonetary: boolean) => {
     if (isMonetary) {
-      // Remove tudo que não for número, vírgula ou ponto
-      let cleaned = value.replace(/[^\d.,]/g, '');
-      // Substitui vírgula por ponto
-      cleaned = cleaned.replace(',', '.');
-      // Garante apenas um ponto decimal
-      const parts = cleaned.split('.');
+      // Remove tudo que não for número ou vírgula
+      let cleaned = value.replace(/[^\d,]/g, '');
+      // Garante apenas uma vírgula decimal
+      const parts = cleaned.split(',');
       if (parts.length > 2) {
-        cleaned = parts[0] + '.' + parts.slice(1).join('');
+        cleaned = parts[0] + ',' + parts.slice(1).join('');
       }
       // Limita a 2 casas decimais
       if (parts[1] && parts[1].length > 2) {
-        cleaned = parts[0] + '.' + parts[1].substring(0, 2);
+        cleaned = parts[0] + ',' + parts[1].substring(0, 2);
       }
       return cleaned;
     } else {
@@ -55,8 +53,9 @@ const DiscountScreen = () => {
     const formatted = formatInputValue(value, isMonetary);
     
     if (isMonetary) {
-      const numValue = parseFloat(formatted);
-      if (numValue <= subtotal || formatted === "" || formatted.endsWith(".")) {
+      // Converte vírgula para ponto para validação numérica
+      const numValue = parseFloat(formatted.replace(',', '.'));
+      if (isNaN(numValue) || numValue <= subtotal || formatted === "" || formatted.endsWith(",")) {
         setDiscountValue(formatted);
       }
     } else {
@@ -78,7 +77,8 @@ const DiscountScreen = () => {
       const percentage = parseInt(discountValue);
       return (subtotal * percentage) / 100;
     } else {
-      return parseFloat(discountValue) || 0;
+      // Converte vírgula para ponto antes de fazer o parseFloat
+      return parseFloat(discountValue.replace(',', '.')) || 0;
     }
   };
 
@@ -98,7 +98,7 @@ const DiscountScreen = () => {
   const newTotal = subtotal - discountAmount;
 
   const percentagePresets = ["5", "10", "15", "20"];
-  const valuePresets = ["2.00", "5.00"];
+  const valuePresets = ["2,00", "5,00"];
 
   return (
     <div className="min-h-screen bg-background">
