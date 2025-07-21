@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,20 +9,25 @@ import { useCart } from "@/contexts/CartContext";
 
 const DiscountScreen = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const mesaId = searchParams.get('mesa');
+  const isFromMesa = Boolean(mesaId);
+  const cartId = isFromMesa ? `mesa-${mesaId}` : 'balcao';
+  
   const { getSubtotal, applyDiscount, getDiscountAmount, getDiscountType, getDiscountValue } = useCart();
   const [discountType, setDiscountType] = useState<"percentage" | "value">("percentage");
   const [discountValue, setDiscountValue] = useState("");
 
-  const subtotal = getSubtotal();
-  const currentDiscount = getDiscountAmount();
+  const subtotal = getSubtotal(cartId);
+  const currentDiscount = getDiscountAmount(cartId);
 
   // Carrega os valores salvos quando a tela é aberta
   useEffect(() => {
-    const savedType = getDiscountType();
-    const savedValue = getDiscountValue();
+    const savedType = getDiscountType(cartId);
+    const savedValue = getDiscountValue(cartId);
     setDiscountType(savedType);
     setDiscountValue(savedValue);
-  }, [getDiscountType, getDiscountValue]);
+  }, [getDiscountType, getDiscountValue, cartId]);
 
   const formatCurrency = (value: number) => {
     return `R$ ${value.toFixed(2).replace('.', ',')}`;
@@ -84,12 +89,12 @@ const DiscountScreen = () => {
 
   const handleConfirm = () => {
     const discountAmount = calculateDiscountAmount();
-    applyDiscount(discountAmount, discountType, discountValue);
+    applyDiscount(discountAmount, discountType, discountValue, cartId);
     navigate(-1);
   };
 
   const handleRemoveDiscount = () => {
-    applyDiscount(0, discountType, "0");
+    applyDiscount(0, discountType, "0", cartId);
     setDiscountValue("");
     navigate(-1);
   };
