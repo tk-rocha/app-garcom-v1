@@ -18,7 +18,7 @@ const QuantidadePessoasScreen = () => {
   const cartId = isMesa ? `mesa-${itemId}` : `comanda-${itemId}`;
   const storageKey = isMesa ? `mesa-${itemId}-pessoas` : `comanda-${itemId}-pessoas`;
   
-  const { getSubtotal, getTaxAmount, getTotal } = useCart();
+  const { getSubtotal, getTaxAmount, getTotal, getServiceFeeAmount } = useCart();
   const [numeroPessoas, setNumeroPessoas] = useState(1);
 
   // Load saved number of people on component mount
@@ -30,7 +30,7 @@ const QuantidadePessoasScreen = () => {
   }, [storageKey]);
 
   const subtotal = getSubtotal(cartId);
-  const servicoMesa = getTaxAmount(cartId);
+  const taxa = isMesa ? getServiceFeeAmount(cartId) : getTaxAmount(cartId);
   const total = getTotal(cartId);
   const totalPorPessoa = total / numeroPessoas;
 
@@ -98,12 +98,16 @@ const QuantidadePessoasScreen = () => {
                 </span>
               </div>
               
-              <div className="flex justify-between items-center">
-                <span className="text-[#180F33] font-medium">Serviço de Mesa</span>
-                <span className="text-[#180F33] font-semibold">
-                  R$ {servicoMesa.toFixed(2).replace('.', ',')}
-                </span>
-              </div>
+              {(isMesa || taxa > 0) && (
+                <div className="flex justify-between items-center">
+                  <span className="text-[#180F33] font-medium">
+                    {isMesa ? 'Taxa (10%)' : 'Serviço de Mesa'}
+                  </span>
+                  <span className="text-[#180F33] font-semibold">
+                    R$ {taxa.toFixed(2).replace('.', ',')}
+                  </span>
+                </div>
+              )}
               
               <div className="border-t border-gray-200 pt-4">
                 <div className="flex justify-between items-center">
