@@ -502,13 +502,23 @@ const PaymentScreen = () => {
                 </div>
               )}
               {discountAmount > 0 && (
-                <div className="flex justify-between text-green-600 cursor-pointer" onClick={() => navigate("/desconto")}>
+                <div className="flex justify-between text-green-600 cursor-pointer" onClick={() => {
+                  const params = new URLSearchParams();
+                  if (comandaId) params.set('comanda', comandaId);
+                  else if (mesaId) params.set('mesa', mesaId);
+                  navigate(`/desconto${params.toString() ? '?' + params.toString() : ''}`);
+                }}>
                   <span>Desconto:</span>
                   <span>- {formatBRL(discountAmount)}</span>
                 </div>
               )}
               {discountAmount === 0 && (
-                <div className="flex justify-between cursor-pointer text-blue-600" onClick={() => navigate("/desconto")}>
+                <div className="flex justify-between cursor-pointer text-blue-600" onClick={() => {
+                  const params = new URLSearchParams();
+                  if (comandaId) params.set('comanda', comandaId);
+                  else if (mesaId) params.set('mesa', mesaId);
+                  navigate(`/desconto${params.toString() ? '?' + params.toString() : ''}`);
+                }}>
                   <span>+ Adicionar Desconto</span>
                 </div>
               )}
