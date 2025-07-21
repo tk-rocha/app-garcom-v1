@@ -39,12 +39,38 @@ const MesaDetailScreen = () => {
   const [numeroPessoas, setNumeroPessoas] = useState(1);
   const [showPendingItemsDialog, setShowPendingItemsDialog] = useState(false);
 
-  // Load saved number of people
+  // Load saved number of people and listen for changes
   useEffect(() => {
-    const savedPessoas = localStorage.getItem(`mesa-${mesaId}-pessoas`);
-    if (savedPessoas) {
-      setNumeroPessoas(parseInt(savedPessoas, 10));
-    }
+    const loadPessoas = () => {
+      const savedPessoas = localStorage.getItem(`mesa-${mesaId}-pessoas`);
+      if (savedPessoas) {
+        setNumeroPessoas(parseInt(savedPessoas, 10));
+      }
+    };
+    
+    // Load on mount
+    loadPessoas();
+    
+    // Listen for storage changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === `mesa-${mesaId}-pessoas`) {
+        loadPessoas();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Custom event for same-window changes
+    const handlePessoasChange = () => {
+      loadPessoas();
+    };
+    
+    window.addEventListener('pessoasUpdated', handlePessoasChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('pessoasUpdated', handlePessoasChange);
+    };
   }, [mesaId]);
 
   // Converte CartItems para ItemMesa e ordena por mais recente primeiro

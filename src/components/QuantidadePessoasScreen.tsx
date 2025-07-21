@@ -58,6 +58,10 @@ const QuantidadePessoasScreen = () => {
     const reviewedKey = isMesa ? `mesa-${itemId}-reviewed` : `comanda-${itemId}-reviewed`;
     localStorage.setItem(reviewedKey, 'true');
     console.log(`${isMesa ? 'Mesa' : 'Comanda'} ${itemId} marked as reviewed with ${numeroPessoas} people`);
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new CustomEvent('pessoasUpdated'));
+    
     handleVoltar();
   };
 
@@ -65,6 +69,10 @@ const QuantidadePessoasScreen = () => {
     // Save number of people
     localStorage.setItem(storageKey, numeroPessoas.toString());
     console.log(`${isMesa ? 'Mesa' : 'Comanda'} ${itemId} saved with ${numeroPessoas} people`);
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new CustomEvent('pessoasUpdated'));
+    
     handleVoltar();
   };
 

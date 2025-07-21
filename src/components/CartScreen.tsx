@@ -18,6 +18,42 @@ const CartScreen = () => {
   const isFromMesa = Boolean(mesaId);
   const cartId = isFromMesa ? `mesa-${mesaId}` : 'balcao';
   
+  // Load saved number of people for mesa
+  React.useEffect(() => {
+    if (isFromMesa && mesaId) {
+      const loadPessoas = () => {
+        const savedPessoas = localStorage.getItem(`mesa-${mesaId}-pessoas`);
+        if (savedPessoas) {
+          setNumeroPessoas(parseInt(savedPessoas, 10));
+        }
+      };
+      
+      // Load on mount
+      loadPessoas();
+      
+      // Listen for storage changes
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === `mesa-${mesaId}-pessoas`) {
+          loadPessoas();
+        }
+      };
+      
+      window.addEventListener('storage', handleStorageChange);
+      
+      // Custom event for same-window changes
+      const handlePessoasChange = () => {
+        loadPessoas();
+      };
+      
+      window.addEventListener('pessoasUpdated', handlePessoasChange);
+      
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('pessoasUpdated', handlePessoasChange);
+      };
+    }
+  }, [isFromMesa, mesaId]);
+  
   const { 
     getCartItems,
     getTotalItems, 
