@@ -21,6 +21,16 @@ const DiscountScreen = () => {
   const subtotal = getSubtotal(cartId);
   const currentDiscount = getDiscountAmount(cartId);
 
+  console.log('DiscountScreen Debug:', {
+    mesaId,
+    isFromMesa,
+    cartId,
+    subtotal,
+    currentDiscount,
+    discountValue,
+    discountType
+  });
+
   // Carrega os valores salvos quando a tela é aberta
   useEffect(() => {
     const savedType = getDiscountType(cartId);
