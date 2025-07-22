@@ -22,6 +22,30 @@ const CashOpeningScreen = () => {
     navigate("/balcao");
   };
 
+  const formatCurrency = (value: string) => {
+    // Remove tudo que não for número
+    let numericValue = value.replace(/\D/g, '');
+    
+    // Converte para número e divide por 100 para ter os centavos
+    const number = parseInt(numericValue) / 100;
+    
+    // Se não for um número válido, retorna vazio
+    if (isNaN(number)) return '';
+    
+    // Formata com R$ e vírgula como separador decimal
+    return number.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  };
+
+  const handleCashAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Remove formatação atual para evitar duplicação
+    const rawValue = value.replace(/\D/g, '');
+    setCashAmount(formatCurrency(rawValue));
+  };
+
   return (
     <div className="min-h-screen bg-[#E1E1E5] flex flex-col">
       {/* Header */}
@@ -65,8 +89,9 @@ const CashOpeningScreen = () => {
             type="text"
             placeholder="R$ 0,00"
             value={cashAmount}
-            onChange={(e) => setCashAmount(e.target.value)}
+            onChange={handleCashAmountChange}
             className="h-12 text-base border-input bg-white"
+            inputMode="numeric"
           />
         </div>
       </div>
@@ -83,7 +108,7 @@ const CashOpeningScreen = () => {
           </Button>
           <Button
             onClick={handleConfirm}
-            disabled={!cashAmount}
+            disabled={!cashAmount || cashAmount === 'R$ 0,00'}
             className="h-12 text-base font-semibold bg-primary hover:bg-primary/90 text-white"
           >
             Confirmar
