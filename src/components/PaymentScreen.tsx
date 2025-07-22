@@ -79,7 +79,7 @@ const PaymentScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { getSubtotal, getDiscountAmount, getTaxAmount, getServiceFeeAmount, getTotal, ensureMesaServiceFee, setServiceFee } = useCart();
+  const { getSubtotal, getDiscountAmount, getTaxAmount, getServiceFeeAmount, getTotal, ensureMesaServiceFee, setServiceFee, setTax } = useCart();
   const { toast } = useToast();
   
   const mesaId = searchParams.get('mesa') || location.state?.mesa;
@@ -327,6 +327,38 @@ const PaymentScreen = () => {
     setPayments(prev => prev.filter(p => p.id !== paymentId));
   };
 
+  const removeServiceFee = () => {
+    if (payments.length > 0) {
+      toast({
+        title: "Não é possível remover a taxa",
+        description: "Existem pagamentos registrados. Remova os pagamentos primeiro para alterar a taxa.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setServiceFee(null, cartId);
+    toast({
+      title: "Taxa removida",
+      description: "A taxa de serviço foi removida com sucesso.",
+    });
+  };
+
+  const removeTax = () => {
+    if (payments.length > 0) {
+      toast({
+        title: "Não é possível remover a taxa",
+        description: "Existem pagamentos registrados. Remova os pagamentos primeiro para alterar a taxa.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setTax(null, cartId);
+    toast({
+      title: "Taxa removida",
+      description: "A taxa foi removida com sucesso.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-[#E1E1E5]">
       {/* Header */}
@@ -467,9 +499,9 @@ const PaymentScreen = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setServiceFee(null, cartId)}
-                      className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
-                      title="Remover Taxa de Serviço"
+                      onClick={removeServiceFee}
+                      className={`h-6 w-6 p-0 ${payments.length > 0 ? 'text-gray-400 hover:text-gray-500' : 'text-red-500 hover:text-red-700'}`}
+                      title={payments.length > 0 ? "Remova os pagamentos para poder remover a taxa" : "Remover Taxa de Serviço"}
                     >
                       ×
                     </Button>
@@ -484,19 +516,30 @@ const PaymentScreen = () => {
                     type: 'percentage',
                     value: 10
                   }, cartId);
+                  toast({
+                    title: "Taxa adicionada",
+                    description: "A taxa de serviço de 10% foi adicionada.",
+                  });
                 }}>
                   <span>+ Adicionar Taxa de Serviço (10%)</span>
                 </div>
               )}
+              {/* Other Taxes */}
               {taxAmount > 0 && (
-                <div className="flex justify-between cursor-pointer" onClick={() => {
-                  const params = new URLSearchParams();
-                  if (comandaId) params.set('comanda', comandaId);
-                  else if (mesaId) params.set('mesa', mesaId);
-                  navigate(`/taxas${params.toString() ? '?' + params.toString() : ''}`);
-                }}>
+                <div className="flex justify-between items-center">
                   <span className="text-gray-600">Taxas:</span>
-                  <span>{formatBRL(taxAmount)}</span>
+                  <div className="flex items-center space-x-2">
+                    <span>{formatBRL(taxAmount)}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={removeTax}
+                      className={`h-6 w-6 p-0 ${payments.length > 0 ? 'text-gray-400 hover:text-gray-500' : 'text-red-500 hover:text-red-700'}`}
+                      title={payments.length > 0 ? "Remova os pagamentos para poder remover a taxa" : "Remover Taxa"}
+                    >
+                      ×
+                    </Button>
+                  </div>
                 </div>
               )}
               {taxAmount === 0 && (
@@ -509,6 +552,7 @@ const PaymentScreen = () => {
                   <span>+ Adicionar Taxa</span>
                 </div>
               )}
+              {/* Discount */}
               {discountAmount > 0 && (
                 <div className="flex justify-between text-green-600 cursor-pointer" onClick={() => {
                   const params = new URLSearchParams();
