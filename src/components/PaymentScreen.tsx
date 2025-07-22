@@ -147,6 +147,7 @@ const PaymentScreen = () => {
 
   const handlePaymentMethodSelect = (methodId: string) => {
     setSelectedMethod(methodId);
+    // Não define o valor diretamente, apenas limpa para mostrar o placeholder
     setPaymentAmount("");
     setShowPixQR(false);
   };
@@ -176,10 +177,13 @@ const PaymentScreen = () => {
 
   const processPayment = async () => {
     const method = paymentMethods.find(m => m.id === selectedMethod);
-    if (!method || !paymentAmount) return;
+    if (!method) return;
 
+    // Se não houver valor digitado, usa o valor restante
+    const paymentValue = paymentAmount || formatBRL(remaining);
+    
     // Parse amount from Brazilian currency format (R$ 1.234,56)
-    const numericString = paymentAmount.replace(/[^\d,]/g, '').replace(',', '.');
+    const numericString = paymentValue.replace(/[^\d,]/g, '').replace(',', '.');
     const amount = parseFloat(numericString);
     
     if (isNaN(amount) || amount <= 0) {
@@ -425,15 +429,15 @@ const PaymentScreen = () => {
                   id="amount"
                   value={paymentAmount}
                   onChange={(e) => handleAmountChange(e.target.value)}
-                  placeholder="R$ 0,00"
-                  className="text-lg text-center"
+                  placeholder={`Valor sugerido: ${formatBRL(remaining)}`}
+                  className={`text-lg text-center ${!paymentAmount ? 'placeholder:text-gray-500' : 'text-gray-900'}`}
                   inputMode="numeric"
                 />
               </div>
               
               <Button
                 onClick={processPayment}
-                disabled={!paymentAmount || isProcessing}
+                disabled={isProcessing}
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 {isProcessing ? "Processando..." : "Confirmar Pagamento"}
