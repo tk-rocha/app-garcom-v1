@@ -59,6 +59,7 @@ interface CartContextType {
   getItensNaoEnviados: (cartId?: string) => CartItem[];
   hasItensEnviados: (cartId?: string) => boolean;
   ensureMesaServiceFee: (cartId: string) => void;
+  clearMesaCompletely: (cartId: string) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -83,6 +84,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const savedDiscounts = localStorage.getItem('restaurant-discounts');
       const savedTaxes = localStorage.getItem('restaurant-taxes');
       const savedServiceFees = localStorage.getItem('restaurant-service-fees');
+      
+      // Debug log to verify data persistence
+      console.log('CartContext - Loading from storage:', {
+        carts: savedCarts ? JSON.parse(savedCarts) : null,
+        discounts: savedDiscounts ? JSON.parse(savedDiscounts) : null,
+      });
       
       return {
         carts: savedCarts ? JSON.parse(savedCarts) : { balcao: [] },
@@ -350,6 +357,41 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     return result;
   };
 
+  // Clear mesa data completely (for cancellation or finalization)
+  const clearMesaCompletely = (cartId: string) => {
+    console.log('Clearing mesa completely:', cartId);
+    
+    // Clear cart items
+    setCarts(prev => ({
+      ...prev,
+      [cartId]: []
+    }));
+    
+    // Clear discounts
+    setDiscounts(prev => ({
+      ...prev,
+      [cartId]: null
+    }));
+    
+    // Clear taxes
+    setTaxes(prev => ({
+      ...prev,
+      [cartId]: null
+    }));
+    
+    // Clear service fees
+    setServiceFees(prev => ({
+      ...prev,
+      [cartId]: null
+    }));
+    
+    // Clear number of people if it's a mesa
+    if (cartId.startsWith('mesa-')) {
+      const mesaId = cartId.replace('mesa-', '');
+      localStorage.removeItem(`mesa-${mesaId}-pessoas`);
+    }
+  };
+
   const value = {
     cart,
     discount,
@@ -373,6 +415,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     getDiscountValue,
     applyTax,
     clearCart,
+    clearMesaCompletely,
     getCartItems,
     markItemsAsEnviado,
     getItensEnviados,

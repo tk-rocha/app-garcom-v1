@@ -21,7 +21,7 @@ interface SaleData {
 const SaleCompletedScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { clearCart } = useCart();
+  const { clearMesaCompletely } = useCart();
   const hasProcessed = useRef(false);
   
   const saleData: SaleData = location.state?.saleData || {};
@@ -118,11 +118,11 @@ const SaleCompletedScreen = () => {
     hasProcessed.current = true;
     generateReceipt();
     
-    // Clear the appropriate cart (mesa, comanda, or balcao)
+    // Clear the appropriate cart completely (mesa, comanda, or balcao)
     const cartId = saleData.comanda ? `comanda-${saleData.comanda}` : 
                   saleData.mesa ? `mesa-${saleData.mesa}` : 'balcao';
-    console.log('Clearing cart for:', cartId);
-    clearCart(cartId);
+    console.log('Clearing cart completely for:', cartId);
+    clearMesaCompletely(cartId);
 
     // Auto redirect after 3 seconds
     console.log('Setting 3-second timer for redirect...');
