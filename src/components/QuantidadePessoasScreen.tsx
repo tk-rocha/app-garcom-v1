@@ -79,7 +79,7 @@ const QuantidadePessoasScreen = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4">
+      <div className="bg-white border-b border-gray-200 p-4 flex-shrink-0">
         <div className="flex items-center justify-center relative">
           <Button
             variant="ghost"
@@ -89,12 +89,12 @@ const QuantidadePessoasScreen = () => {
           >
             <ArrowLeft className="h-6 w-6" />
           </Button>
-          <h1 className="text-xl font-bold text-[#180F33]">QUANTIDADE PESSOAS</h1>
+          <h1 className="text-xl font-bold text-[#180F33]">Quantidade Pessoas</h1>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-6 flex flex-col gap-8">
+      <div className="flex-1 p-6 flex flex-col gap-8 overflow-y-auto">
         {/* Card de Resumo */}
         <Card className="border border-gray-200 shadow-sm">
           <CardContent className="p-6">
@@ -109,7 +109,7 @@ const QuantidadePessoasScreen = () => {
               {(isMesa || taxa > 0) && (
                 <div className="flex justify-between items-center">
                   <span className="text-[#180F33] font-medium">
-                    {isMesa ? 'Taxa (10%)' : 'Serviço de Mesa'}
+                    Taxa (10%)
                   </span>
                   <span className="text-[#180F33] font-semibold">
                     R$ {taxa.toFixed(2).replace('.', ',')}
@@ -170,7 +170,7 @@ const QuantidadePessoasScreen = () => {
         <div className="flex-1"></div>
 
         {/* Botões Inferiores */}
-        <div className="space-y-4">
+        <div className="space-y-4 pb-4">
           <Button
             onClick={handleConferenciaMesa}
             className="w-full py-4 text-lg font-semibold bg-[#180F33] text-[#FFC72C] hover:bg-[#180F33]/90"

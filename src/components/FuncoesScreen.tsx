@@ -17,7 +17,17 @@ const FuncoesScreen = () => {
     const loadDailyTotal = () => {
       const today = new Date().toDateString();
       const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
-      setDailyTotal(dailySales[today] || 0);
+      
+      // Reset daily total if it's a new day (prototype behavior)
+      const lastResetDate = localStorage.getItem('lastDailyReset');
+      if (lastResetDate !== today) {
+        // Clear daily sales for new day
+        localStorage.setItem('dailySales', JSON.stringify({ [today]: 0 }));
+        localStorage.setItem('lastDailyReset', today);
+        setDailyTotal(0);
+      } else {
+        setDailyTotal(dailySales[today] || 0);
+      }
     };
     
     loadDailyTotal();
@@ -74,7 +84,7 @@ const FuncoesScreen = () => {
       id: "sair-pdv", 
       label: "Sair PDV", 
       icon: LogOut, 
-      action: () => navigate("/balcao")
+      action: () => navigate("/login")
     },
     { 
       id: "fechar-pdv", 
@@ -87,7 +97,7 @@ const FuncoesScreen = () => {
   return (
     <div className="min-h-screen bg-[#E1E1E5] flex flex-col">
       {/* Header */}
-      <div className="p-6 bg-white flex items-center">
+      <div className="p-6 bg-white flex items-center flex-shrink-0">
         <Button
           variant="ghost"
           size="icon"
@@ -97,12 +107,12 @@ const FuncoesScreen = () => {
           <ArrowLeft className="h-6 w-6" />
         </Button>
         <h1 className="text-xl font-medium text-[#180F33] flex-1 text-center mr-10">
-          FUNÇÕES
+          Funções
         </h1>
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
         {/* Sales Summary Card */}
         <Card className="bg-white shadow-sm">
           <CardContent className="p-6">
@@ -121,7 +131,7 @@ const FuncoesScreen = () => {
         </Card>
 
         {/* Function Buttons Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pb-4">
           {functionItems.map((item) => {
             const Icon = item.icon;
             

@@ -99,17 +99,17 @@ const CancelarCupomScreen = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <div className="p-6 bg-white border-b border-[#E1E1E5] flex items-center">
+      <div className="p-6 bg-white border-b border-[#E1E1E5] flex items-center flex-shrink-0">
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/funcoes")}
           className="mr-4 text-[#180F33]"
         >
           <ArrowLeft className="h-6 w-6" />
         </Button>
         <h1 className="text-xl font-medium text-[#180F33] flex-1 text-center mr-10">
-          CUPONS EMITIDOS
+          Cupons Emitidos
         </h1>
       </div>
 
@@ -133,7 +133,7 @@ const CancelarCupomScreen = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-6 bg-[#E1E1E5]">
+      <div className="flex-1 p-6 bg-[#E1E1E5] overflow-y-auto">
         {cupons.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-gray-600 text-center">

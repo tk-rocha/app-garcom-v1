@@ -240,7 +240,9 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     const subtotal = getSubtotal(cartId);
     
     if (currentServiceFee.type === 'percentage') {
-      return (subtotal * currentServiceFee.value) / 100;
+      const result = (subtotal * currentServiceFee.value) / 100;
+      console.log('Taxa cálculo:', { subtotal, percentage: currentServiceFee.value, result });
+      return result;
     } else {
       return currentServiceFee.value;
     }

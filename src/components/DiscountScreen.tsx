@@ -116,9 +116,9 @@ const DiscountScreen = () => {
   const valuePresets = ["2,00", "5,00"];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#E1E1E5] flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
         <div className="flex items-center justify-between">
           <Button 
             variant="ghost" 
@@ -129,13 +129,13 @@ const DiscountScreen = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
-          <h1 className="text-lg font-semibold text-primary">DESCONTO</h1>
+          <h1 className="text-lg font-semibold text-primary">Desconto</h1>
           
           <div className="w-10" />
         </div>
       </div>
 
-      <div className="p-4 space-y-6">
+      <div className="flex-1 p-4 space-y-6 overflow-y-auto">
         {/* Toggle para tipo de desconto */}
         <Card className="bg-white shadow-sm">
           <CardContent className="p-4">
@@ -240,14 +240,6 @@ const DiscountScreen = () => {
 
         {/* Botões de ação */}
         <div className="space-y-3">
-          <Button
-            onClick={handleConfirm}
-            disabled={!discountValue || discountAmount <= 0}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            Confirmar
-          </Button>
-          
           {currentDiscount > 0 && (
             <Button
               variant="outline"
@@ -257,13 +249,26 @@ const DiscountScreen = () => {
               Remover Desconto
             </Button>
           )}
-          
+        </div>
+      </div>
+
+      {/* Footer with side-by-side buttons */}
+      <div className="p-4 bg-white border-t border-gray-200 flex-shrink-0">
+        <div className="flex gap-4">
           <Button
-            variant="ghost"
             onClick={() => navigate(-1)}
-            className="w-full text-gray-600 hover:bg-gray-100"
+            variant="outline"
+            className="flex-1 py-4 text-lg font-semibold border-[#180F33] text-[#180F33] hover:bg-[#180F33]/10"
           >
             Voltar
+          </Button>
+          
+          <Button
+            onClick={handleConfirm}
+            disabled={!discountValue || discountAmount <= 0}
+            className="flex-1 py-4 text-lg font-semibold bg-[#180F33] text-white hover:bg-[#180F33]/90 disabled:opacity-50"
+          >
+            Confirmar
           </Button>
         </div>
       </div>

@@ -128,8 +128,9 @@ const ConfirmarCancelamentoScreen = () => {
       <div className="p-6 bg-white border-t border-[#E1E1E5]">
         <div className="flex gap-4">
           <Button
-            onClick={() => navigate("/cancelar-cupom")}
-            className="flex-1 h-14 bg-[#180F33] hover:bg-[#180F33]/90 text-white font-medium text-lg rounded-lg"
+            onClick={() => navigate("/funcoes")}
+            variant="outline"
+            className="flex-1 h-14 border-[#180F33] text-[#180F33] hover:bg-[#180F33]/10 font-medium text-lg rounded-lg"
           >
             Voltar
           </Button>
