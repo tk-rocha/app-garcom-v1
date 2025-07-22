@@ -114,7 +114,15 @@ const PaymentScreen = () => {
   const serviceFeeAmount = getServiceFeeAmount(cartId);
   const total = getTotal(cartId);
   
-  console.log('PaymentScreen - Totals:', { subtotal, discountAmount, taxAmount, total });
+  console.log('PaymentScreen - Valores detalhados:', {
+    subtotal,
+    serviceFeeAmount,
+    discountAmount,
+    taxAmount,
+    total,
+    cartId,
+    isMesa: cartId.startsWith('mesa-')
+  });
   
   const totalPaid = payments.reduce((sum, payment) => sum + payment.amount, 0);
   

@@ -120,6 +120,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   }, [carts]);
 
   React.useEffect(() => {
+    console.log('CartContext - Salvando descontos:', discounts);
     localStorage.setItem('restaurant-discounts', JSON.stringify(discounts));
   }, [discounts]);
 
@@ -212,14 +213,26 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const getDiscountAmount = (cartId: string = 'balcao') => {
     const currentDiscount = discounts[cartId];
+    console.log('getDiscountAmount - Desconto atual:', { cartId, currentDiscount });
+    
     if (!currentDiscount) return 0;
     const subtotal = getSubtotal(cartId);
     
+    let discountAmount = 0;
     if (currentDiscount.type === 'percentage') {
-      return (subtotal * currentDiscount.value) / 100;
+      discountAmount = (subtotal * currentDiscount.value) / 100;
     } else {
-      return Math.min(currentDiscount.value, subtotal);
+      discountAmount = Math.min(currentDiscount.value, subtotal);
     }
+    
+    console.log('getDiscountAmount - Cálculo:', { 
+      subtotal,
+      discountType: currentDiscount.type,
+      discountValue: currentDiscount.value,
+      calculatedAmount: discountAmount
+    });
+    
+    return discountAmount;
   };
 
   const getTaxAmount = (cartId: string = 'balcao') => {
@@ -253,7 +266,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     const discountAmount = getDiscountAmount(cartId);
     const taxAmount = getTaxAmount(cartId);
     const serviceFeeAmount = getServiceFeeAmount(cartId);
-    return Math.max(0, subtotal + taxAmount + serviceFeeAmount - discountAmount);
+    
+    // Aplica o desconto no subtotal e depois adiciona as taxas
+    const subtotalWithDiscount = Math.max(0, subtotal - discountAmount);
+    return subtotalWithDiscount + taxAmount + serviceFeeAmount;
   };
 
   const setDiscount = (newDiscount: Discount | null, cartId: string = 'balcao') => {
@@ -269,16 +285,21 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   const applyDiscount = (amount: number, inputType: 'percentage' | 'value', inputValue: string, cartId: string = 'balcao') => {
+    console.log('applyDiscount - Parâmetros:', { amount, inputType, inputValue, cartId });
+    
     if (amount <= 0) {
+      console.log('applyDiscount - Removendo desconto');
       setDiscount(null, cartId);
     } else {
-      const discountType = inputType === 'percentage' ? 'percentage' : 'fixed';
-      setDiscount({ 
+      const discountType = inputType === 'percentage' ? 'percentage' as const : 'fixed' as const;
+      const newDiscount: Discount = { 
         type: discountType, 
         value: amount,
         inputType,
         inputValue
-      }, cartId);
+      };
+      console.log('applyDiscount - Aplicando novo desconto:', newDiscount);
+      setDiscount(newDiscount, cartId);
     }
   };
 

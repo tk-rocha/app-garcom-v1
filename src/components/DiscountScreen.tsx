@@ -98,8 +98,15 @@ const DiscountScreen = () => {
   };
 
   const handleConfirm = () => {
-    const discountAmount = calculateDiscountAmount();
-    applyDiscount(discountAmount, discountType, discountValue, cartId);
+    if (discountType === "percentage") {
+      // Para desconto percentual, passa a porcentagem
+      const percentage = parseInt(discountValue);
+      applyDiscount(percentage, discountType, discountValue, cartId);
+    } else {
+      // Para desconto em valor, passa o valor em reais
+      const value = parseFloat(discountValue.replace(',', '.')) || 0;
+      applyDiscount(value, discountType, discountValue, cartId);
+    }
     navigate(-1);
   };
 
