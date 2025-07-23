@@ -346,14 +346,14 @@ const CartScreen = () => {
                   : "bg-card border-border shadow-sm"
               }`}
             >
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3">
                 <div className="flex-1">
                   <h3 className={`font-medium ${
                     item.enviado ? "text-muted-foreground" : "text-primary"
                   }`}>
                     {item.name}
                   </h3>
-                  <div className="flex items-center gap-4 mt-1">
+                  <div className="flex flex-wrap items-center justify-between mt-1">
                     <span className={`text-sm ${
                       item.enviado ? "text-muted-foreground" : "text-foreground"
                     }`}>
@@ -378,7 +378,7 @@ const CartScreen = () => {
                 </div>
                 
                 {!item.enviado && (
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 border border-primary rounded-md p-1">
                       <Button
                         variant="ghost"

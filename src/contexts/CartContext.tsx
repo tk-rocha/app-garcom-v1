@@ -247,50 +247,18 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   };
 
-  const setServiceFee = (newServiceFee: ServiceFee | null, cartId: string = 'balcao') => {
-    console.log('setServiceFee - Antes:', { 
-      cartId, 
-      newServiceFee, 
-      currentServiceFees: serviceFees 
-    });
-
-    setServiceFees(prev => {
-      const updated = { ...prev, [cartId]: newServiceFee };
-      console.log('setServiceFee - Depois:', {
-        cartId,
-        newServiceFee,
-        updatedServiceFees: updated
-      });
-      return updated;
-    });
-
-    // Força a atualização do localStorage
-    const updatedServiceFees = { ...serviceFees, [cartId]: newServiceFee };
-    localStorage.setItem('restaurant-service-fees', JSON.stringify(updatedServiceFees));
-  };
-
   const getServiceFeeAmount = (cartId: string = 'balcao') => {
     const currentServiceFee = serviceFees[cartId];
-    console.log('getServiceFeeAmount:', { cartId, currentServiceFee });
-    
     if (!currentServiceFee) return 0;
     const subtotal = getSubtotal(cartId);
     
-    let result = 0;
     if (currentServiceFee.type === 'percentage') {
-      result = (subtotal * currentServiceFee.value) / 100;
+      const result = (subtotal * currentServiceFee.value) / 100;
+      console.log('Taxa cálculo:', { subtotal, percentage: currentServiceFee.value, result });
+      return result;
     } else {
-      result = currentServiceFee.value;
+      return currentServiceFee.value;
     }
-    
-    console.log('getServiceFeeAmount - Cálculo:', { 
-      subtotal, 
-      type: currentServiceFee.type,
-      value: currentServiceFee.value,
-      result 
-    });
-    
-    return result;
   };
 
   const getTotal = (cartId: string = 'balcao') => {
@@ -310,6 +278,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const setTax = (newTax: Tax | null, cartId: string = 'balcao') => {
     setTaxes(prev => ({ ...prev, [cartId]: newTax }));
+  };
+
+  const setServiceFee = (newServiceFee: ServiceFee | null, cartId: string = 'balcao') => {
+    setServiceFees(prev => ({ ...prev, [cartId]: newServiceFee }));
   };
 
   const applyDiscount = (amount: number, inputType: 'percentage' | 'value', inputValue: string, cartId: string = 'balcao') => {
@@ -367,20 +339,9 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     
     // Check if service fee already exists
     const currentServiceFee = serviceFees[cartId];
+    if (currentServiceFee) return;
     
-    console.log('ensureMesaServiceFee - Verificando:', {
-      cartId,
-      currentServiceFee,
-      allServiceFees: serviceFees
-    });
-    
-    // Se já existe uma taxa (mesmo que seja null), não faz nada
-    if (currentServiceFee !== undefined) {
-      console.log('ensureMesaServiceFee - Taxa já definida (ou removida), não aplicando automaticamente');
-      return;
-    }
-    
-    // Apply 10% service fee automatically for Mesa orders only if no fee was ever set
+    // Apply 10% service fee automatically for Mesa orders
     const defaultServiceFee: ServiceFee = {
       id: 'mesa-service',
       name: 'Taxa de Serviço',
@@ -388,7 +349,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       value: 10
     };
     
-    console.log('ensureMesaServiceFee - Aplicando taxa padrão:', defaultServiceFee);
     setServiceFees(prev => ({ ...prev, [cartId]: defaultServiceFee }));
   };
 

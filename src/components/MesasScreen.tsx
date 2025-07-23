@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Home, Table, QrCode, Puzzle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Home, Table, QrCode, Puzzle, Search, X } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 
 interface Mesa {
@@ -12,6 +13,8 @@ const MesasScreen = () => {
   const navigate = useNavigate();
   const [activeTab] = useState("mesa");
   const { getCartItems, hasItensEnviados } = useCart();
+  const [searchTerm, setSearchTerm] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   
   // Initialize 9 tables
   const [mesas] = useState<Mesa[]>(
@@ -19,6 +22,30 @@ const MesasScreen = () => {
       id: i + 1,
     }))
   );
+
+  // Filtrar mesas baseado no termo de busca
+  const filteredMesas = mesas.filter(mesa => {
+    const mesaNumber = mesa.id.toString().padStart(2, '0');
+    return mesaNumber.includes(searchTerm);
+  });
+
+  // Limpar busca com Esc
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSearchTerm("");
+        searchInputRef.current?.blur();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Auto focus no campo de busca
+  useEffect(() => {
+    searchInputRef.current?.focus();
+  }, []);
 
   const getMesaStatus = (mesaId: number) => {
     const cartId = `mesa-${mesaId}`;
@@ -75,8 +102,31 @@ const MesasScreen = () => {
         <div className="w-10" />
       </div>
 
-      {/* Action Buttons */}
-      <div className="p-4 bg-background border-b border-border">
+      {/* Action Buttons and Search */}
+      <div className="p-4 space-y-4 bg-background border-b border-border">
+        {/* Search Input */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <Input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Buscar mesa..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9 pr-9"
+            autoFocus
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2"
+            >
+              <X className="h-4 w-4 text-gray-500" />
+            </button>
+          )}
+        </div>
+
+        {/* Action Buttons */}
         <div className="flex gap-4">
           <Button className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90">
             Fechamento Parcial
@@ -90,7 +140,7 @@ const MesasScreen = () => {
       {/* Content */}
       <div className="flex-1 p-6">
         <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
-          {mesas.map((mesa) => (
+          {filteredMesas.map((mesa) => (
             <div
               key={mesa.id}
               className={`aspect-square rounded-lg border-2 flex items-center justify-center shadow-sm cursor-pointer hover:shadow-md transition-all ${getStatusColor(mesa.id)}`}
