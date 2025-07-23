@@ -93,7 +93,7 @@ const MesasScreen = () => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/balcao")}
           className="text-primary hover:bg-muted"
         >
           <ArrowLeft className="h-6 w-6" />
