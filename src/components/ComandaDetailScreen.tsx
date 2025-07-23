@@ -4,6 +4,7 @@ import { ArrowLeft, User, Search, ScanLine, ShoppingBag, Users, ChefHat, Plus } 
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ItemComanda {
   id: number;
@@ -32,6 +33,7 @@ const ComandaDetailScreen = () => {
   
   const [numeroPessoas, setNumeroPessoas] = useState(1);
   const [showPendingItemsDialog, setShowPendingItemsDialog] = useState(false);
+  const { user } = useAuth();
 
   // Load saved number of people
   useEffect(() => {
@@ -171,8 +173,12 @@ const ComandaDetailScreen = () => {
             </Button>
             <h1 className="text-xl font-bold text-primary">COMANDA {comandaId}</h1>
           </div>
-          
           <div className="flex items-center gap-2">
+            {user && (
+              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
+                {user.id}
+              </div>
+            )}
             <Button
               variant="ghost"
               size="icon"

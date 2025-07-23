@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Mock data for products
 const productCategories = [
@@ -43,6 +44,7 @@ const ProductListScreen = () => {
   const isFromMesa = Boolean(mesaId);
   
   const { getTotalItems, getProductQuantity, addToCart, removeFromCart } = useCart();
+  const { user } = useAuth();
 
   const handleProductClick = (product: any) => {
     const targetUrl = `/produto/${product.id}${isFromMesa ? `?mesa=${mesaId}` : ''}`;
@@ -77,12 +79,15 @@ const ProductListScreen = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          
           <h1 className="text-lg font-semibold text-primary">
             {isFromMesa ? `MESA ${mesaId}` : 'Balcão'}
           </h1>
-          
           <div className="flex items-center space-x-2">
+            {user && (
+              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
+                {user.id}
+              </div>
+            )}
             <Button 
               variant="ghost" 
               size="icon" 

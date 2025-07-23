@@ -4,14 +4,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus, Trash2, Users, ChefHat } from "lucide-react";
+import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus, Trash2, Users, ChefHat, Pencil, Check } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const CartScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [numeroPessoas, setNumeroPessoas] = useState(1);
   const [showPendingItemsDialog, setShowPendingItemsDialog] = useState(false);
+  const [editingObservationId, setEditingObservationId] = useState<number | null>(null);
   
   // Check if we're in mesa context
   const mesaId = searchParams.get('mesa');
@@ -69,7 +71,8 @@ const CartScreen = () => {
     getItensEnviados,
     getItensNaoEnviados,
     hasItensEnviados,
-    ensureMesaServiceFee
+    ensureMesaServiceFee,
+    updateObservation
   } = useCart();
 
   const cart = getCartItems(cartId);
@@ -167,6 +170,10 @@ const CartScreen = () => {
     }
   };
 
+  const handleObservationChange = (productId: number, value: string) => {
+    updateObservation(productId, value, cartId);
+  };
+
   // Para mesa: só mostrar botão se há itens enviados
   // Para balcão: sempre mostrar se há itens
   const shouldShowFinalizarButton = isFromMesa ? hasItensEnviadosCart : cart.length > 0;
@@ -181,6 +188,8 @@ const CartScreen = () => {
     hasItensNaoEnviadosCart,
     shouldShowFinalizarButton
   });
+
+  const { user } = useAuth();
 
   if (cart.length === 0) {
     return (
@@ -274,8 +283,12 @@ const CartScreen = () => {
               {isFromMesa ? `MESA ${mesaId}` : 'BALCÃO'}
             </h1>
           </div>
-          
           <div className="flex items-center gap-2">
+            {user && (
+              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
+                {user.id}
+              </div>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -407,15 +420,48 @@ const CartScreen = () => {
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
-                    
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeItemCompletely(item.productId, cartId)}
-                      className="text-destructive hover:bg-destructive/10"
-                    >
-                      Remover
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      {editingObservationId === item.productId && (item.observacao || "").length > 0 ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingObservationId(null)}
+                          className="text-green-600 hover:bg-green-100"
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingObservationId(editingObservationId === item.productId ? null : item.productId)}
+                          className="text-muted-foreground hover:bg-muted/10"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeItemCompletely(item.productId, cartId)}
+                        className="text-destructive hover:bg-destructive/10"
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {editingObservationId === item.productId && (
+                  <div className="mt-2">
+                    <input
+                      type="text"
+                      maxLength={40}
+                      value={item.observacao || ""}
+                      onChange={e => handleObservationChange(item.productId, e.target.value)}
+                      className="w-full border rounded px-2 py-1 text-sm"
+                      placeholder="Observação (ex: Sem gelo, Com limão...)"
+                    />
+                    <div className="text-xs text-muted-foreground text-right">{(item.observacao || "").length}/40</div>
                   </div>
                 )}
               </div>

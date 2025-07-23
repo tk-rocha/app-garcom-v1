@@ -11,6 +11,7 @@ interface CartItem {
     id: string;
     name: string;
   };
+  observacao?: string;
 }
 
 interface Discount {
@@ -64,6 +65,7 @@ interface CartContextType {
   hasItensEnviados: (cartId?: string) => boolean;
   ensureMesaServiceFee: (cartId: string) => void;
   clearMesaCompletely: (cartId: string) => void;
+  updateObservation: (productId: number, observacao: string, cartId?: string) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -179,7 +181,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
           price: productData.price,
           image: productData.image,
           enviado: false,
-          operator: operator ? { id: operator.id, name: operator.name } : undefined
+          operator: operator ? { id: operator.id, name: operator.name } : undefined,
+          observacao: ""
         };
         return { ...prev, [cartId]: [...currentCart, newItem] };
       }
@@ -209,6 +212,16 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setCarts(prev => {
       const currentCart = prev[cartId] || [];
       const updatedCart = currentCart.filter(item => item.productId !== productId);
+      return { ...prev, [cartId]: updatedCart };
+    });
+  };
+
+  const updateObservation = (productId: number, observacao: string, cartId: string = 'balcao') => {
+    setCarts(prev => {
+      const currentCart = prev[cartId] || [];
+      const updatedCart = currentCart.map(item =>
+        item.productId === productId ? { ...item, observacao: observacao.slice(0, 40) } : item
+      );
       return { ...prev, [cartId]: updatedCart };
     });
   };
@@ -452,6 +465,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     getItensNaoEnviados,
     hasItensEnviados,
     ensureMesaServiceFee,
+    updateObservation,
   };
 
   return (
