@@ -348,11 +348,18 @@ const CartScreen = () => {
             >
               <div className="flex flex-col gap-3">
                 <div className="flex-1">
-                  <h3 className={`font-medium ${
-                    item.enviado ? "text-muted-foreground" : "text-primary"
-                  }`}>
-                    {item.name}
-                  </h3>
+                  <div className="flex justify-between items-center w-full">
+                    <h3 className={`font-medium ${
+                      item.enviado ? "text-muted-foreground" : "text-primary"
+                    }`}>
+                      {item.name}
+                    </h3>
+                    {item.operator && (
+                      <span className="inline-flex items-center px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full ml-2">
+                        {item.operator.name.split(' ')[0]}
+                      </span>
+                    )}
+                  </div>
                   <div className="flex flex-wrap items-center justify-between mt-1">
                     <span className={`text-sm ${
                       item.enviado ? "text-muted-foreground" : "text-foreground"

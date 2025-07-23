@@ -7,6 +7,10 @@ interface CartItem {
   price: number;
   image: string;
   enviado?: boolean; // Para rastrear se o item foi enviado para a cozinha
+  operator?: {
+    id: string;
+    name: string;
+  };
 }
 
 interface Discount {
@@ -154,6 +158,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   const addToCart = (productId: number, productData: { name: string; price: number; image: string }, cartId: string = 'balcao') => {
+    const operator = JSON.parse(localStorage.getItem('auth-user') || 'null');
+
     setCarts(prev => {
       const currentCart = prev[cartId] || [];
       const existingItem = currentCart.find(item => item.productId === productId);
@@ -172,7 +178,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
           name: productData.name,
           price: productData.price,
           image: productData.image,
-          enviado: false
+          enviado: false,
+          operator: operator ? { id: operator.id, name: operator.name } : undefined
         };
         return { ...prev, [cartId]: [...currentCart, newItem] };
       }

@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import waiterBackground from "@/assets/waiter-background.jpg";
+import { useAuth } from "@/contexts/AuthContext";
 
 const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedUser, setSelectedUser] = useState("ER");
   const [password, setPassword] = useState("");
+  const { login } = useAuth();
 
   const users = [
     { id: "CH", name: "Charles Comege", color: "bg-gray-400" },
@@ -18,6 +20,10 @@ const LoginScreen = () => {
   const handleLogin = () => {
     // Login logic here
     console.log("Login attempt:", { user: selectedUser, password });
+    const user = users.find(u => u.id === selectedUser);
+    if (user) {
+      login(user.id, user.name);
+    }
     // Navigate to cash opening screen
     window.location.href = "/abertura-caixa";
   };
