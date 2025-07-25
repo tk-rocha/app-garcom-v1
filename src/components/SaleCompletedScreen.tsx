@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Check } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
@@ -23,86 +23,114 @@ const SaleCompletedScreen = () => {
   const location = useLocation();
   const { clearMesaCompletely } = useCart();
   const hasProcessed = useRef(false);
+  const isMounted = useRef(true);
   
   const saleData: SaleData = location.state?.saleData || {};
 
+  // Memoize the redirect function to avoid re-creating it
+  const redirectToBalcao = useCallback(() => {
+    if (isMounted.current) {
+      console.log('🔄 Redirecting to balcao at:', new Date().toISOString());
+      navigate("/balcao");
+    }
+  }, [navigate]);
+
   useEffect(() => {
+    // Mark component as mounted
+    isMounted.current = true;
+    
     // Prevent multiple executions
     if (hasProcessed.current) {
-      console.log('Sale already processed, skipping...');
+      console.log('⚠️ Sale already processed, skipping...');
       return;
     }
 
-    console.log('Processing sale completion - start:', new Date().toISOString());
+    console.log('🚀 Processing sale completion - start:', new Date().toISOString());
     hasProcessed.current = true;
 
-    // Async receipt generation to avoid blocking main thread
-    const generateReceiptAsync = async () => {
-      try {
-        console.log('Starting async receipt generation...');
-        
-        const now = new Date();
-        const receipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
-        
-        // Simple duplicate prevention - find next receipt number
-        let receiptNumber = 700;
-        if (receipts.length > 0) {
-          const maxNumber = Math.max(...receipts.map((r: any) => parseInt(r.number) || 699));
-          receiptNumber = maxNumber + 1;
-        }
-        
-        const receipt = {
-          id: `${now.getTime()}-${Math.random().toString(36).substring(2)}`,
-          number: receiptNumber,
-          timestamp: now.toISOString(),
-          date: now.toLocaleDateString('pt-BR'),
-          time: now.toLocaleTimeString('pt-BR'),
-          grossAmount: saleData.subtotal + saleData.taxAmount + (saleData.serviceFeeAmount || 0),
-          netAmount: saleData.total,
-          discount: saleData.discountAmount,
-          tax: saleData.taxAmount,
-          serviceFee: saleData.serviceFeeAmount || 0,
-          payments: saleData.payments,
-          customerCpf: saleData.customerCpf,
-        };
-
-        receipts.push(receipt);
-        localStorage.setItem('fiscalReceipts', JSON.stringify(receipts));
-
-        // Update daily sales
-        const today = new Date().toDateString();
-        const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
-        dailySales[today] = (dailySales[today] || 0) + saleData.total;
-        localStorage.setItem('dailySales', JSON.stringify(dailySales));
-
-        console.log('Receipt generated successfully:', receiptNumber);
-      } catch (error) {
-        console.error('Error generating receipt:', error);
-        // Don't let receipt errors prevent redirect
-      }
-    };
-
-    // Clear cart
+    // Clear cart immediately
     const cartId = saleData.comanda ? `comanda-${saleData.comanda}` : 
                   saleData.mesa ? `mesa-${saleData.mesa}` : 'balcao';
-    console.log('Clearing cart for:', cartId);
-    clearMesaCompletely(cartId);
+    console.log('🧹 Clearing cart for:', cartId);
+    
+    try {
+      clearMesaCompletely(cartId);
+      console.log('✅ Cart cleared successfully');
+    } catch (error) {
+      console.error('❌ Error clearing cart:', error);
+    }
 
-    // Generate receipt asynchronously (non-blocking)
-    Promise.resolve().then(generateReceiptAsync);
-
-    // Create redirect timer immediately (robust timer)
-    console.log('Setting redirect timer - start:', new Date().toISOString());
-    const timer = setTimeout(() => {
-      console.log('Redirect timer fired:', new Date().toISOString());
-      navigate("/balcao");
+    // Create primary redirect timer immediately
+    console.log('⏰ Setting primary redirect timer at:', new Date().toISOString());
+    const primaryTimer = setTimeout(() => {
+      console.log('🎯 Primary timer fired at:', new Date().toISOString());
+      redirectToBalcao();
     }, 3000);
 
-    return () => {
-      console.log('Cleanup timer');
-      clearTimeout(timer);
+    // Create failsafe timer (backup)
+    console.log('🛡️ Setting failsafe timer');
+    const failsafeTimer = setTimeout(() => {
+      console.log('🚨 Failsafe timer fired at:', new Date().toISOString());
+      redirectToBalcao();
+    }, 3500);
+
+    // Generate receipt asynchronously (completely non-blocking)
+    const generateReceiptAsync = () => {
+      setTimeout(async () => {
+        try {
+          console.log('📄 Starting receipt generation...');
+          
+          const now = new Date();
+          const receipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
+          
+          // Find next receipt number efficiently
+          let receiptNumber = 700;
+          if (receipts.length > 0) {
+            const lastReceipt = receipts[receipts.length - 1];
+            receiptNumber = (parseInt(lastReceipt.number) || 699) + 1;
+          }
+          
+          const receipt = {
+            id: `${now.getTime()}-${Math.random().toString(36).substring(2)}`,
+            number: receiptNumber,
+            timestamp: now.toISOString(),
+            date: now.toLocaleDateString('pt-BR'),
+            time: now.toLocaleTimeString('pt-BR'),
+            grossAmount: saleData.subtotal + saleData.taxAmount + (saleData.serviceFeeAmount || 0),
+            netAmount: saleData.total,
+            discount: saleData.discountAmount,
+            tax: saleData.taxAmount,
+            serviceFee: saleData.serviceFeeAmount || 0,
+            payments: saleData.payments,
+            customerCpf: saleData.customerCpf,
+          };
+
+          receipts.push(receipt);
+          localStorage.setItem('fiscalReceipts', JSON.stringify(receipts));
+
+          // Update daily sales
+          const today = new Date().toDateString();
+          const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
+          dailySales[today] = (dailySales[today] || 0) + saleData.total;
+          localStorage.setItem('dailySales', JSON.stringify(dailySales));
+
+          console.log('✅ Receipt generated successfully:', receiptNumber);
+        } catch (error) {
+          console.error('❌ Error generating receipt:', error);
+        }
+      }, 100); // Small delay to ensure it's completely async
     };
-  }, [navigate, clearMesaCompletely, saleData]);
+
+    // Start receipt generation (non-blocking)
+    generateReceiptAsync();
+
+    return () => {
+      console.log('🧹 Cleanup - clearing timers');
+      isMounted.current = false;
+      clearTimeout(primaryTimer);
+      clearTimeout(failsafeTimer);
+    };
+  }, []); // Remove all dependencies to prevent re-execution
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-6 md:p-8">
