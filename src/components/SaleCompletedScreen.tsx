@@ -27,58 +27,32 @@ const SaleCompletedScreen = () => {
   const saleData: SaleData = location.state?.saleData || {};
 
   useEffect(() => {
-    // Prevent multiple executions with stronger safeguards
+    // Prevent multiple executions
     if (hasProcessed.current) {
       console.log('Sale already processed, skipping...');
       return;
     }
 
-    // Generate unique receipt with lock mechanism
-    const generateReceipt = () => {
-      const now = new Date();
-      const lockKey = 'receipts_generating_lock';
-      const timestampKey = 'last_receipt_timestamp';
-      
-      // Check if we're already generating a receipt (within 5 seconds)
-      const lastTimestamp = localStorage.getItem(timestampKey);
-      const timeDiff = lastTimestamp ? now.getTime() - parseInt(lastTimestamp) : Infinity;
-      
-      if (timeDiff < 5000) {
-        console.log('Recibo já sendo gerado recentemente, pulando...');
-        return;
-      }
+    console.log('Processing sale completion - start:', new Date().toISOString());
+    hasProcessed.current = true;
 
-      // Set lock
-      localStorage.setItem(lockKey, 'true');
-      localStorage.setItem(timestampKey, now.getTime().toString());
-      
+    // Async receipt generation to avoid blocking main thread
+    const generateReceiptAsync = async () => {
       try {
-        // Clean duplicates first
-        const rawReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
-        console.log('Raw receipts before cleaning:', rawReceipts.length);
+        console.log('Starting async receipt generation...');
         
-        // Remove duplicates based on number AND timestamp similarity (within 10 seconds)
-        const cleanReceipts = rawReceipts.filter((receipt: any, index: number) => {
-          const firstOccurrence = rawReceipts.findIndex((r: any) => {
-            const timeDiff = Math.abs(new Date(r.timestamp).getTime() - new Date(receipt.timestamp).getTime());
-            return r.number === receipt.number && timeDiff < 10000;
-          });
-          return firstOccurrence === index;
-        });
+        const now = new Date();
+        const receipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
         
-        console.log('Cleaned receipts:', cleanReceipts.length, 'removed:', rawReceipts.length - cleanReceipts.length);
-        
-        // Find the highest coupon number and increment
+        // Simple duplicate prevention - find next receipt number
         let receiptNumber = 700;
-        if (cleanReceipts.length > 0) {
-          const maxNumber = Math.max(...cleanReceipts.map((r: any) => parseInt(r.number) || 699));
+        if (receipts.length > 0) {
+          const maxNumber = Math.max(...receipts.map((r: any) => parseInt(r.number) || 699));
           receiptNumber = maxNumber + 1;
         }
         
-        // Create unique receipt with stronger ID
-        const uniqueId = `${now.getTime()}-${Math.random().toString(36).substring(2)}`;
         const receipt = {
-          id: uniqueId,
+          id: `${now.getTime()}-${Math.random().toString(36).substring(2)}`,
           number: receiptNumber,
           timestamp: now.toISOString(),
           date: now.toLocaleDateString('pt-BR'),
@@ -92,50 +66,43 @@ const SaleCompletedScreen = () => {
           customerCpf: saleData.customerCpf,
         };
 
-        // Store updated receipts
-        cleanReceipts.push(receipt);
-        localStorage.setItem('fiscalReceipts', JSON.stringify(cleanReceipts));
+        receipts.push(receipt);
+        localStorage.setItem('fiscalReceipts', JSON.stringify(receipts));
 
-        // Update daily sales total
+        // Update daily sales
         const today = new Date().toDateString();
         const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
-        const currentDailyTotal = dailySales[today] || 0;
-        const newDailyTotal = currentDailyTotal + saleData.total;
-        dailySales[today] = newDailyTotal;
+        dailySales[today] = (dailySales[today] || 0) + saleData.total;
         localStorage.setItem('dailySales', JSON.stringify(dailySales));
 
-        console.log('Recibo gerado com sucesso:', receipt);
-        console.log('Total de recibos após geração:', cleanReceipts.length);
-        console.log('Total diário atualizado:', { anterior: currentDailyTotal, novo: newDailyTotal, venda: saleData.total });
-        
-      } finally {
-        // Always remove lock
-        localStorage.removeItem(lockKey);
+        console.log('Receipt generated successfully:', receiptNumber);
+      } catch (error) {
+        console.error('Error generating receipt:', error);
+        // Don't let receipt errors prevent redirect
       }
     };
 
-    console.log('Processing sale completion...');
-    hasProcessed.current = true;
-    generateReceipt();
-    
-    // Clear the appropriate cart completely (mesa, comanda, or balcao)
+    // Clear cart
     const cartId = saleData.comanda ? `comanda-${saleData.comanda}` : 
                   saleData.mesa ? `mesa-${saleData.mesa}` : 'balcao';
-    console.log('Clearing cart completely for:', cartId);
+    console.log('Clearing cart for:', cartId);
     clearMesaCompletely(cartId);
 
-    // Auto redirect after 3 seconds
-    console.log('Setting 3-second timer for redirect...');
+    // Generate receipt asynchronously (non-blocking)
+    Promise.resolve().then(generateReceiptAsync);
+
+    // Create redirect timer immediately (robust timer)
+    console.log('Setting redirect timer - start:', new Date().toISOString());
     const timer = setTimeout(() => {
-      console.log('Timer fired, redirecting to /balcao');
+      console.log('Redirect timer fired:', new Date().toISOString());
       navigate("/balcao");
     }, 3000);
 
     return () => {
-      console.log('Cleaning up timer');
+      console.log('Cleanup timer');
       clearTimeout(timer);
     };
-  }, []); // Empty dependencies to run only once
+  }, [navigate, clearMesaCompletely, saleData]);
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-6 md:p-8">
