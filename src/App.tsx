@@ -18,7 +18,7 @@ import CustomerScreen from "./components/CustomerScreen";
 import PaymentScreen from "./components/PaymentScreen";
 import ProductSearchScreen from "./components/ProductSearchScreen";
 import BarcodeScannerScreen from "./components/BarcodeScannerScreen";
-import SaleCompletedScreen from "./components/SaleCompletedScreen";
+
 import FuncoesScreen from "./components/FuncoesScreen";
 import MesasScreen from "./components/MesasScreen";
 import ComandasScreen from "./components/ComandasScreen";
@@ -61,7 +61,7 @@ const App = () => (
             <Route path="/codigo-barras" element={<BarcodeScannerScreen />} />
             <Route path="/pesquisar" element={<ProductSearchScreen />} />
             <Route path="/scanner" element={<BarcodeScannerScreen />} />
-            <Route path="/venda-finalizada" element={<SaleCompletedScreen />} />
+            
             <Route path="/funcoes" element={<FuncoesScreen />} />
           <Route path="/mesas" element={<MesasScreen />} />
           <Route path="/mesa/:id" element={<MesaDetailScreen />} />

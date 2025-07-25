@@ -79,7 +79,7 @@ const PaymentScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { getSubtotal, getDiscountAmount, getTaxAmount, getServiceFeeAmount, getTotal, ensureMesaServiceFee, setServiceFee, setTax } = useCart();
+  const { getSubtotal, getDiscountAmount, getTaxAmount, getServiceFeeAmount, getTotal, ensureMesaServiceFee, setServiceFee, setTax, clearMesaCompletely } = useCart();
   const { toast } = useToast();
   
   const mesaId = searchParams.get('mesa') || location.state?.mesa;
@@ -292,26 +292,77 @@ const PaymentScreen = () => {
     setIsFinalizingOrder(true);
     
     try {
-      // Prepare sale data for the completion screen
-      const saleData = {
-        subtotal,
-        discountAmount,
-        taxAmount,
-        serviceFeeAmount,
-        total,
-        payments,
-        customerCpf,
-        mesa: mesaId,
-        comanda: comandaId,
-      };
+      console.log('🚀 Processando finalização da venda...');
       
-      console.log('saleData completo:', JSON.stringify(saleData, null, 2));
-      console.log('Navegando para /venda-finalizada...');
+      // Clear cart immediately
+      const cartId = comandaId ? `comanda-${comandaId}` : 
+                    mesaId ? `mesa-${mesaId}` : 'balcao';
+      console.log('🧹 Limpando carrinho:', cartId);
       
-      // Navigate to sale completed screen with data
-      navigate("/venda-finalizada", { state: { saleData } });
+      try {
+        clearMesaCompletely(cartId);
+        console.log('✅ Carrinho limpo com sucesso');
+      } catch (error) {
+        console.error('❌ Erro ao limpar carrinho:', error);
+      }
+
+      // Generate receipt asynchronously (non-blocking)
+      setTimeout(async () => {
+        try {
+          console.log('📄 Gerando cupom fiscal...');
+          
+          const now = new Date();
+          const receipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
+          
+          // Find next receipt number efficiently
+          let receiptNumber = 700;
+          if (receipts.length > 0) {
+            const lastReceipt = receipts[receipts.length - 1];
+            receiptNumber = (parseInt(lastReceipt.number) || 699) + 1;
+          }
+          
+          const receipt = {
+            id: `${now.getTime()}-${Math.random().toString(36).substring(2)}`,
+            number: receiptNumber,
+            timestamp: now.toISOString(),
+            date: now.toLocaleDateString('pt-BR'),
+            time: now.toLocaleTimeString('pt-BR'),
+            grossAmount: subtotal + taxAmount + (serviceFeeAmount || 0),
+            netAmount: total,
+            discount: discountAmount,
+            tax: taxAmount,
+            serviceFee: serviceFeeAmount || 0,
+            payments: payments,
+            customerCpf: customerCpf,
+          };
+
+          receipts.push(receipt);
+          localStorage.setItem('fiscalReceipts', JSON.stringify(receipts));
+
+          // Update daily sales
+          const today = new Date().toDateString();
+          const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
+          dailySales[today] = (dailySales[today] || 0) + total;
+          localStorage.setItem('dailySales', JSON.stringify(dailySales));
+
+          console.log('✅ Cupom fiscal gerado:', receiptNumber);
+        } catch (error) {
+          console.error('❌ Erro ao gerar cupom fiscal:', error);
+        }
+      }, 100);
+
+      // Show success toast
+      toast({
+        title: "Venda finalizada com sucesso",
+        description: `Total: ${formatBRL(total)}`,
+      });
+
+      console.log('✅ Venda finalizada com sucesso');
       
-      console.log('Navegação executada com sucesso');
+      // Redirect to balcao after a brief delay
+      setTimeout(() => {
+        navigate("/balcao");
+      }, 3000);
       
     } catch (error) {
       console.error('ERRO durante a navegação:', error);
