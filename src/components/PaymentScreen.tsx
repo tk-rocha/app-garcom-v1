@@ -357,18 +357,21 @@ const PaymentScreen = () => {
         }
       }, 100);
 
-      // Show success toast
-      toast({
-        title: "Venda finalizada com sucesso",
-        description: `Total: ${formatBRL(total)}`,
+      // Navigate to success screen with details
+      const params = new URLSearchParams({
+        total: total.toString(),
+        cartId: cartId
       });
-
-      console.log('✅ Venda finalizada com sucesso');
       
-      // Redirect to balcao after a brief delay
-      setTimeout(() => {
-        navigate("/balcao");
-      }, 3000);
+      if (mesaId) {
+        params.set('mesa', mesaId);
+      }
+      if (comandaId) {
+        params.set('comanda', comandaId);
+      }
+      
+      console.log('✅ Venda finalizada com sucesso - navegando para tela de sucesso');
+      navigate(`/venda-finalizada?${params.toString()}`);
       
     } catch (error) {
       console.error('ERRO durante a navegação:', error);
