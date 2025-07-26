@@ -402,36 +402,49 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   // Clear mesa data completely (for cancellation or finalization)
   const clearMesaCompletely = (cartId: string) => {
-    console.log('Clearing mesa completely:', cartId);
+    console.log('🧹 clearMesaCompletely - Iniciando limpeza da mesa:', cartId);
     
     // Clear cart items
-    setCarts(prev => ({
-      ...prev,
-      [cartId]: []
-    }));
+    setCarts(prev => {
+      const updated = { ...prev, [cartId]: [] };
+      console.log('🧹 clearMesaCompletely - Limpando itens do carrinho:', cartId);
+      return updated;
+    });
     
     // Clear discounts
-    setDiscounts(prev => ({
-      ...prev,
-      [cartId]: null
-    }));
+    setDiscounts(prev => {
+      const updated = { ...prev, [cartId]: null };
+      console.log('🧹 clearMesaCompletely - Limpando descontos:', cartId);
+      return updated;
+    });
     
     // Clear taxes
-    setTaxes(prev => ({
-      ...prev,
-      [cartId]: null
-    }));
+    setTaxes(prev => {
+      const updated = { ...prev, [cartId]: null };
+      console.log('🧹 clearMesaCompletely - Limpando taxas:', cartId);
+      return updated;
+    });
     
     // Clear service fees
-    setServiceFees(prev => ({
-      ...prev,
-      [cartId]: null
-    }));
+    setServiceFees(prev => {
+      const updated = { ...prev, [cartId]: null };
+      console.log('🧹 clearMesaCompletely - Limpando taxa de serviço:', cartId);
+      return updated;
+    });
     
-    // Clear number of people if it's a mesa
+    // Clear localStorage data for mesa
     if (cartId.startsWith('mesa-')) {
       const mesaId = cartId.replace('mesa-', '');
+      console.log('🧹 clearMesaCompletely - Limpando dados do localStorage da mesa:', mesaId);
+      
+      // Remove all mesa-related data from localStorage
       localStorage.removeItem(`mesa-${mesaId}-pessoas`);
+      localStorage.removeItem(`mesa-${mesaId}-reviewed`);
+      
+      console.log('🧹 clearMesaCompletely - Mesa completamente limpa:', cartId);
+      
+      // Trigger storage event to update MesasScreen
+      window.dispatchEvent(new Event('storage'));
     }
   };
 

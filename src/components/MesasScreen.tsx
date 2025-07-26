@@ -47,6 +47,21 @@ const MesasScreen = () => {
     searchInputRef.current?.focus();
   }, []);
 
+  // Listen for localStorage changes to update mesa status
+  useEffect(() => {
+    const handleStorageChange = () => {
+      console.log('🔄 MesasScreen - Detectada mudança no localStorage, forçando re-render');
+      // Force re-render by updating a dummy state
+      setSearchTerm(prev => prev);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   const getMesaStatus = (mesaId: number) => {
     const cartId = `mesa-${mesaId}`;
     const cartItems = getCartItems(cartId);

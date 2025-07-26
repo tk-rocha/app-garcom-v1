@@ -21,10 +21,49 @@ const FuncoesScreen = () => {
       // Reset daily total if it's a new day (prototype behavior)
       const lastResetDate = localStorage.getItem('lastDailyReset');
       if (lastResetDate !== today) {
+        console.log('🌅 Novo dia detectado - resetando dados diários');
+        
         // Clear daily sales for new day
         localStorage.setItem('dailySales', JSON.stringify({ [today]: 0 }));
         localStorage.setItem('lastDailyReset', today);
+        
+        // Clear all mesa data for new day (mesas 1-9)
+        for (let mesaId = 1; mesaId <= 9; mesaId++) {
+          console.log(`🌅 Resetando mesa ${mesaId} para novo dia`);
+          
+          // Remove mesa cart data
+          const cartData = localStorage.getItem('cartData');
+          if (cartData) {
+            try {
+              const parsed = JSON.parse(cartData);
+              if (parsed.carts) {
+                delete parsed.carts[`mesa-${mesaId}`];
+              }
+              if (parsed.discounts) {
+                delete parsed.discounts[`mesa-${mesaId}`];
+              }
+              if (parsed.taxes) {
+                delete parsed.taxes[`mesa-${mesaId}`];
+              }
+              if (parsed.serviceFees) {
+                delete parsed.serviceFees[`mesa-${mesaId}`];
+              }
+              localStorage.setItem('cartData', JSON.stringify(parsed));
+            } catch (e) {
+              console.error('Erro ao limpar dados do carrinho:', e);
+            }
+          }
+          
+          // Remove mesa specific data
+          localStorage.removeItem(`mesa-${mesaId}-pessoas`);
+          localStorage.removeItem(`mesa-${mesaId}-reviewed`);
+        }
+        
+        console.log('🌅 Reset diário completo - todas as mesas foram limpas');
         setDailyTotal(0);
+        
+        // Trigger storage event to update all screens
+        window.dispatchEvent(new Event('storage'));
       } else {
         setDailyTotal(dailySales[today] || 0);
       }

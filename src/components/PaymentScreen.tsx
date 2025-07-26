@@ -79,7 +79,7 @@ const PaymentScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { getSubtotal, getDiscountAmount, getTaxAmount, getServiceFeeAmount, getTotal, ensureMesaServiceFee, setServiceFee, setTax, clearMesaCompletely } = useCart();
+  const { getSubtotal, getDiscountAmount, getTaxAmount, getServiceFeeAmount, getTotal, ensureMesaServiceFee, setServiceFee, setTax, clearCart, clearMesaCompletely } = useCart();
   const { toast } = useToast();
   
   const mesaId = searchParams.get('mesa') || location.state?.mesa;
@@ -300,7 +300,13 @@ const PaymentScreen = () => {
       console.log('🧹 Limpando carrinho:', cartId);
       
       try {
-        clearMesaCompletely(cartId);
+        if (mesaId) {
+          console.log('🧹 Limpando mesa completamente:', cartId);
+          clearMesaCompletely(cartId);
+        } else {
+          console.log('🧹 Limpando carrinho normal:', cartId);
+          clearCart(cartId);
+        }
         console.log('✅ Carrinho limpo com sucesso');
       } catch (error) {
         console.error('❌ Erro ao limpar carrinho:', error);
