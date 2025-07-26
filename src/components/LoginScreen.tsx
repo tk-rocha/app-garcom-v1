@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, Lock } from "lucide-react";
@@ -6,6 +7,7 @@ import waiterBackground from "@/assets/waiter-background.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 
 const LoginScreen = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [selectedUser, setSelectedUser] = useState("ER");
   const [password, setPassword] = useState("");
@@ -25,7 +27,7 @@ const LoginScreen = () => {
       login(user.id, user.name);
     }
     // Navigate to cash opening screen
-    window.location.href = "/abertura-caixa";
+    navigate("/abertura-caixa");
   };
 
   return (
