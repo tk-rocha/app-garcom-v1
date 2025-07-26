@@ -47,10 +47,13 @@ const LoginScreen = () => {
         <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm">
           {/* Title */}
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800 flex items-center justify-center gap-2">
-              <span>Garçom</span>
-              <span className="text-2xl">🧑‍🍳</span>
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">
+              Sistema PDV
             </h1>
+            <p className="text-lg text-gray-600 flex items-center justify-center gap-2">
+              <span>Garçom</span>
+              <span className="text-xl">🧑‍🍳</span>
+            </p>
           </div>
 
           {/* User Selection */}
