@@ -35,6 +35,8 @@ import ConfiguracoesBancoDadosScreen from "./components/ConfiguracoesBancoDadosS
 import ConfiguracoesSistemaScreen from "./components/ConfiguracoesSistemaScreen";
 import ConfiguracoesInstalacaoScreen from "./components/ConfiguracoesInstalacaoScreen";
 import SaleCompletedScreen from "./components/SaleCompletedScreen";
+import FundoCaixaScreen from "./components/FundoCaixaScreen";
+import FechamentoPDVScreen from "./components/FechamentoPDVScreen";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +83,8 @@ const App = () => (
             <Route path="/configuracoes-sistema" element={<ConfiguracoesSistemaScreen />} />
             <Route path="/configuracoes-instalacao" element={<ConfiguracoesInstalacaoScreen />} />
             <Route path="/venda-finalizada" element={<SaleCompletedScreen />} />
+            <Route path="/fundo-caixa" element={<FundoCaixaScreen />} />
+            <Route path="/fechamento-pdv" element={<FechamentoPDVScreen />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -129,7 +129,7 @@ const FuncoesScreen = () => {
       id: "fechar-pdv", 
       label: "Fechar PDV", 
       icon: DollarSign, 
-      action: () => console.log("Fechar PDV - Em desenvolvimento")
+      action: () => navigate("/fundo-caixa")
     },
   ];
 
