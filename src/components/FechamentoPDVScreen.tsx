@@ -119,6 +119,8 @@ const FechamentoPDVScreen = () => {
       return;
     }
 
+    console.log('🔒 Iniciando fechamento do PDV - limpeza completa do sistema');
+
     // Save closing data
     const closingData = {
       date: new Date().toISOString(),
@@ -137,15 +139,105 @@ const FechamentoPDVScreen = () => {
     localStorage.setItem('pdvClosed', 'true');
     localStorage.setItem('lastClosingDate', new Date().toDateString());
 
-    // Clear temporary closing data
-    localStorage.removeItem('fundoCaixaFechamento');
+    // COMPLETE SYSTEM CLEANUP - Clear all tables, commands, and counter cart
+    console.log('🧹 Limpando todas as mesas e comandas');
+    
+    // Clear all mesa data (mesas 1-9)
+    for (let mesaId = 1; mesaId <= 9; mesaId++) {
+      console.log(`🧹 Limpando mesa ${mesaId}`);
+      
+      // Remove mesa specific data
+      localStorage.removeItem(`mesa-${mesaId}-pessoas`);
+      localStorage.removeItem(`mesa-${mesaId}-reviewed`);
+    }
 
-    // Clear current session data (if needed)
+    // Clear all comanda data
+    for (let comandaId = 1; comandaId <= 20; comandaId++) {
+      console.log(`🧹 Limpando comanda ${comandaId}`);
+      
+      // Remove comanda specific data
+      localStorage.removeItem(`comanda-${comandaId}-pessoas`);
+      localStorage.removeItem(`comanda-${comandaId}-reviewed`);
+    }
+
+    // Clear all cart data (mesas, comandas, and balcao)
+    console.log('🧹 Limpando todos os carrinhos');
+    const cartData = localStorage.getItem('cartData');
+    if (cartData) {
+      try {
+        const parsed = JSON.parse(cartData);
+        
+        // Clear all carts
+        if (parsed.carts) {
+          // Clear mesa carts
+          for (let mesaId = 1; mesaId <= 9; mesaId++) {
+            delete parsed.carts[`mesa-${mesaId}`];
+          }
+          // Clear comanda carts
+          for (let comandaId = 1; comandaId <= 20; comandaId++) {
+            delete parsed.carts[`comanda-${comandaId}`];
+          }
+          // Clear balcao cart
+          delete parsed.carts['balcao'];
+        }
+        
+        // Clear all discounts
+        if (parsed.discounts) {
+          for (let mesaId = 1; mesaId <= 9; mesaId++) {
+            delete parsed.discounts[`mesa-${mesaId}`];
+          }
+          for (let comandaId = 1; comandaId <= 20; comandaId++) {
+            delete parsed.discounts[`comanda-${comandaId}`];
+          }
+          delete parsed.discounts['balcao'];
+        }
+        
+        // Clear all taxes
+        if (parsed.taxes) {
+          for (let mesaId = 1; mesaId <= 9; mesaId++) {
+            delete parsed.taxes[`mesa-${mesaId}`];
+          }
+          for (let comandaId = 1; comandaId <= 20; comandaId++) {
+            delete parsed.taxes[`comanda-${comandaId}`];
+          }
+          delete parsed.taxes['balcao'];
+        }
+        
+        // Clear all service fees
+        if (parsed.serviceFees) {
+          for (let mesaId = 1; mesaId <= 9; mesaId++) {
+            delete parsed.serviceFees[`mesa-${mesaId}`];
+          }
+          for (let comandaId = 1; comandaId <= 20; comandaId++) {
+            delete parsed.serviceFees[`comanda-${comandaId}`];
+          }
+          delete parsed.serviceFees['balcao'];
+        }
+        
+        localStorage.setItem('cartData', JSON.stringify(parsed));
+      } catch (e) {
+        console.error('Erro ao limpar dados do carrinho:', e);
+        // In case of error, completely reset cart data
+        localStorage.removeItem('cartData');
+      }
+    }
+
+    // Clear temporary closing data and session data
+    localStorage.removeItem('fundoCaixaFechamento');
     localStorage.removeItem('currentShiftStarted');
+
+    // Reset daily sales total (optional - depends on business logic)
+    // const today = new Date().toDateString();
+    // localStorage.setItem('dailySales', JSON.stringify({ [today]: 0 }));
+
+    console.log('🔒 Fechamento do PDV concluído - sistema completamente limpo');
+
+    // Force all screens to update
+    window.dispatchEvent(new Event('storage'));
 
     toast({
       title: "PDV fechado com sucesso",
-      description: "O sistema será redirecionado para o login."
+      description: "Sistema limpo e redirecionando para o login."
     });
 
     // Redirect to login after a short delay
