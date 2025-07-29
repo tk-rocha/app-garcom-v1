@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, User, Search, ScanLine, ShoppingBag, Users, ChefHat, Plus, Minus } from "lucide-react";
+import { ArrowLeft, User, Search, ScanLine, ShoppingBag, Users, ChefHat, Plus, Minus, Pencil, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useCart } from "@/contexts/CartContext";
@@ -33,12 +33,14 @@ const MesaDetailScreen = () => {
     getSubtotal,
     getServiceFeeAmount,
     getTotal,
-    ensureMesaServiceFee
+    ensureMesaServiceFee,
+    updateObservation
   } = useCart();
   const cartItems = getCartItems(cartId);
   
   const [numeroPessoas, setNumeroPessoas] = useState(1);
   const [showPendingItemsDialog, setShowPendingItemsDialog] = useState(false);
+  const [editingObservationId, setEditingObservationId] = useState<number | null>(null);
   const { user } = useAuth();
 
   // Load saved number of people and listen for changes
@@ -180,6 +182,10 @@ const MesaDetailScreen = () => {
     }, cartId);
   };
 
+  const handleObservationChange = (productId: number, value: string) => {
+    updateObservation(productId, value, cartId);
+  };
+
   // Ensure Mesa has automatic 10% service fee
   useEffect(() => {
     ensureMesaServiceFee(cartId);
@@ -315,14 +321,21 @@ const MesaDetailScreen = () => {
                     : "bg-card border-border shadow-sm"
                 }`}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-3">
                   <div className="flex-1">
-                    <h3 className={`font-medium ${
-                      item.enviado ? "text-muted-foreground" : "text-primary"
-                    }`}>
-                      {item.name}
-                    </h3>
-                    <div className="flex items-center gap-4 mt-1">
+                    <div className="flex justify-between items-center w-full">
+                      <h3 className={`font-medium ${
+                        item.enviado ? "text-muted-foreground" : "text-primary"
+                      }`}>
+                        {item.name}
+                      </h3>
+                      {item.operator && (
+                        <span className="inline-flex items-center px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full ml-2">
+                          {item.operator.name.split(' ')[0]}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center justify-between mt-1">
                       <span className={`text-sm ${
                         item.enviado ? "text-muted-foreground" : "text-foreground"
                       }`}>
@@ -347,7 +360,7 @@ const MesaDetailScreen = () => {
                   </div>
                   
                   {!item.enviado && (
-                    <div className="flex items-center gap-2 ml-4">
+                    <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 border border-primary rounded-md p-1">
                         <Button
                           variant="ghost"
@@ -369,15 +382,47 @@ const MesaDetailScreen = () => {
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeItemCompletely(item.productId, cartId)}
-                        className="text-destructive hover:bg-destructive/10"
-                      >
-                        Remover
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        {editingObservationId === item.productId && (item.observacao || "").length > 0 ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditingObservationId(null)}
+                            className="text-green-600 hover:bg-green-100"
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditingObservationId(editingObservationId === item.productId ? null : item.productId)}
+                            className="text-muted-foreground hover:bg-muted/10"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeItemCompletely(item.productId, cartId)}
+                          className="text-destructive hover:bg-destructive/10"
+                        >
+                          Remover
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  {editingObservationId === item.productId && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        maxLength={40}
+                        value={item.observacao || ""}
+                        onChange={e => handleObservationChange(item.productId, e.target.value)}
+                        className="w-full border rounded px-2 py-1 text-sm"
+                        placeholder="Observação (ex: Sem gelo, Com limão...)"
+                      />
                     </div>
                   )}
                 </div>
