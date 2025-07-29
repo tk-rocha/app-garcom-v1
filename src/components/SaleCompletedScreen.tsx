@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
@@ -8,6 +8,7 @@ const SaleCompletedScreen = () => {
   const [searchParams] = useSearchParams();
   const [countdown, setCountdown] = useState(3);
   const { clearCart, clearMesaCompletely } = useCart();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   const total = searchParams.get('total') || '0';
   const cartId = searchParams.get('cartId') || 'balcao';
@@ -23,18 +24,23 @@ const SaleCompletedScreen = () => {
     dailySales[today] = newTotal;
     localStorage.setItem('dailySales', JSON.stringify(dailySales));
 
-    // Clear cart/mesa data
+    // Clear cart/mesa data immediately
     if (mesaId) {
       clearMesaCompletely(cartId);
     } else {
       clearCart(cartId);
     }
+  }, []); // Run only once on mount
 
-    // Countdown timer
-    const timer = setInterval(() => {
+  useEffect(() => {
+    // Start countdown timer
+    timerRef.current = setInterval(() => {
       setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
+        if (prev === 1) {
+          // Clear timer and navigate when countdown reaches 1
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+          }
           navigate('/balcao');
           return 0;
         }
@@ -42,8 +48,13 @@ const SaleCompletedScreen = () => {
       });
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [total, cartId, mesaId, clearCart, clearMesaCompletely, navigate]);
+    // Cleanup function
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []); // Run only once on mount
 
   const formatBRL = (value: string | number) => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
