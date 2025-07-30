@@ -201,13 +201,6 @@ const TaxScreen = () => {
 
         {/* Botões de Ação */}
         <div className="space-y-3">
-          <Button
-            onClick={handleConfirm}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            Confirmar
-          </Button>
-          
           {tax && (
             <Button
               variant="outline"
@@ -218,13 +211,22 @@ const TaxScreen = () => {
             </Button>
           )}
           
-          <Button
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="w-full text-gray-600 hover:bg-gray-100"
-          >
-            Voltar
-          </Button>
+          <div className="flex gap-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate(-1)}
+              className="flex-1 text-gray-600 hover:bg-gray-100"
+            >
+              Voltar
+            </Button>
+            
+            <Button
+              onClick={handleConfirm}
+              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              Confirmar
+            </Button>
+          </div>
         </div>
       </div>
     </div>
