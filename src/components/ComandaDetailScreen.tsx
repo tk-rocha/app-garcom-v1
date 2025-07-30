@@ -309,6 +309,12 @@ const ComandaDetailScreen = () => {
                         Total: R$ {(item.quantity * item.price).toFixed(2)}
                       </span>
                     </div>
+                    {/* Exibir observação quando existir */}
+                    {item.observacao && (
+                      <div className="text-xs text-muted-foreground italic mt-2 pl-2 border-l-2 border-muted">
+                        "{item.observacao}"
+                      </div>
+                    )}
                     {item.enviado && (
                       <span className="text-xs text-muted-foreground mt-1 block">
                         ✓ Enviado para cozinha
