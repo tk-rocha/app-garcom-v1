@@ -19,6 +19,21 @@ const CashOpeningScreen = () => {
     if (!cashAmount) {
       return; // Could add toast notification here
     }
+    
+    // Save opening data
+    const today = new Date().toDateString();
+    const openingData = {
+      date: today,
+      shift: shift,
+      cashAmount: cashAmount,
+      timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('lastOpeningDate', today);
+    localStorage.setItem('currentOpening', JSON.stringify(openingData));
+    localStorage.removeItem('pdvClosed'); // Ensure PDV is marked as open
+    
+    console.log("PDV aberto com sucesso:", openingData);
     navigate("/balcao");
   };
 

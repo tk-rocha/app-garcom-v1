@@ -71,10 +71,14 @@ const FuncoesScreen = () => {
       action: () => navigate("/autorizacao")
     },
     { 
-      id: "sair-pdv", 
-      label: "Sair PDV", 
+      id: "sair", 
+      label: "Sair", 
       icon: LogOut, 
-      action: () => navigate("/login")
+      action: () => {
+        // Apenas logout do usuário, mantém PDV aberto
+        localStorage.removeItem('auth-user');
+        navigate("/login");
+      }
     },
     { 
       id: "fechar-pdv", 

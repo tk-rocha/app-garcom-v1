@@ -27,19 +27,19 @@ const LoginScreen = () => {
       login(user.id, user.name);
     }
     
-    // Check if PDV was properly closed
+    // Check if PDV needs to be opened
     const pdvClosed = localStorage.getItem('pdvClosed');
-    const lastClosingDate = localStorage.getItem('lastClosingDate');
+    const lastOpeningDate = localStorage.getItem('lastOpeningDate');
     const today = new Date().toDateString();
     
     // If PDV was closed or it's a new day, require cash opening
-    if (pdvClosed === 'true' || lastClosingDate !== today) {
-      console.log("PDV foi fechado ou é um novo dia - redirecionando para abertura de caixa");
+    if (pdvClosed === 'true' || !lastOpeningDate || lastOpeningDate !== today) {
+      console.log("PDV precisa ser aberto - redirecionando para abertura de caixa");
       localStorage.removeItem('pdvClosed'); // Clear the flag
       navigate("/abertura-caixa");
     } else {
-      // PDV wasn't properly closed, go directly to balcao
-      console.log("PDV não foi fechado - redirecionando para balcão");
+      // PDV is already open for today, go directly to balcao
+      console.log("PDV já está aberto - redirecionando para balcão");
       navigate("/balcao");
     }
   };
