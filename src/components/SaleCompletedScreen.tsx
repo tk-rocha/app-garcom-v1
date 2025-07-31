@@ -16,15 +16,7 @@ const SaleCompletedScreen = () => {
   const comandaId = searchParams.get('comanda');
 
   useEffect(() => {
-    // Update daily sales total
-    const today = new Date().toDateString();
-    const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
-    const newTotal = (dailySales[today] || 0) + parseFloat(total);
-    
-    dailySales[today] = newTotal;
-    localStorage.setItem('dailySales', JSON.stringify(dailySales));
-
-    // Clear cart/mesa data immediately
+    // Clear cart/mesa data immediately (dailySales is already updated in PaymentScreen)
     if (mesaId) {
       clearMesaCompletely(cartId);
     } else {

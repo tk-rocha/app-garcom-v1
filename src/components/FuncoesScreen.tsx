@@ -15,9 +15,8 @@ const FuncoesScreen = () => {
   // Load daily sales total - refresh on every render to catch updates
   useEffect(() => {
     const loadDailyTotal = () => {
-      const today = new Date().toDateString();
-      const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
-      setDailyTotal(dailySales[today] || 0);
+      const { getValidatedDailySalesTotal } = require('@/utils/salesCalculations');
+      setDailyTotal(getValidatedDailySalesTotal());
     };
     
     loadDailyTotal();

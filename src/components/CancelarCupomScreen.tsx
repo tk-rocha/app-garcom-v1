@@ -85,10 +85,11 @@ const CancelarCupomScreen = () => {
     setCupons(cleanAndLoadReceipts());
   }, []);
 
-  // Calculate total sales for today using same logic as FuncoesScreen
-  const today = new Date().toDateString();
-  const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
-  const totalVendasHoje = dailySales[today] || 0;
+  // Calculate total sales for today using validated data
+  const totalVendasHoje = (() => {
+    const { getValidatedDailySalesTotal } = require('@/utils/salesCalculations');
+    return getValidatedDailySalesTotal();
+  })();
 
   const handleCancelCupom = (cupom: Cupom) => {
     navigate("/confirmar-cancelamento", { state: { cupom } });

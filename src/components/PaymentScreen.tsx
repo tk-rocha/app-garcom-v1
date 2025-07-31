@@ -345,11 +345,17 @@ const PaymentScreen = () => {
           receipts.push(receipt);
           localStorage.setItem('fiscalReceipts', JSON.stringify(receipts));
 
-          // Update daily sales
+          // Update daily sales (only place where dailySales is incremented)
           const today = new Date().toDateString();
           const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
           dailySales[today] = (dailySales[today] || 0) + total;
           localStorage.setItem('dailySales', JSON.stringify(dailySales));
+          
+          console.log('💰 Daily sales updated:', {
+            previousTotal: dailySales[today] - total,
+            saleAmount: total,
+            newTotal: dailySales[today]
+          });
 
           console.log('✅ Cupom fiscal gerado:', receiptNumber);
         } catch (error) {
