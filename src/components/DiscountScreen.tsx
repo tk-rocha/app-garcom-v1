@@ -136,7 +136,7 @@ const DiscountScreen = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
-          <h1 className="text-lg font-semibold text-primary">Desconto</h1>
+          <h1 className="text-lg font-semibold text-primary">DESCONTO</h1>
           
           <div className="w-10" />
         </div>

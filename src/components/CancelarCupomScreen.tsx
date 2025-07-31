@@ -85,16 +85,16 @@ const CancelarCupomScreen = () => {
     setCupons(cleanAndLoadReceipts());
   }, []);
 
-  // Calculate total sales for today (excluding cancelled coupons)
-  const totalVendasHoje = cupons
-    .filter(cupom => !cupom.cancelado)
-    .reduce((total, cupom) => total + (cupom.valorLiquido || 0), 0);
+  // Calculate total sales for today using same logic as FuncoesScreen
+  const today = new Date().toDateString();
+  const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
+  const totalVendasHoje = dailySales[today] || 0;
 
   const handleCancelCupom = (cupom: Cupom) => {
     navigate("/confirmar-cancelamento", { state: { cupom } });
   };
 
-  const today = new Date().toLocaleDateString('pt-BR');
+  const todayFormatted = new Date().toLocaleDateString('pt-BR');
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -109,7 +109,7 @@ const CancelarCupomScreen = () => {
           <ArrowLeft className="h-6 w-6" />
         </Button>
         <h1 className="text-xl font-medium text-[#180F33] flex-1 text-center mr-10">
-          Cupons Emitidos
+          CUPONS EMITIDOS
         </h1>
       </div>
 
@@ -120,7 +120,7 @@ const CancelarCupomScreen = () => {
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <h2 className="text-lg font-semibold text-gray-800">Total Vendas Hoje</h2>
-                <p className="text-sm text-gray-600">{today}</p>
+                <p className="text-sm text-gray-600">{todayFormatted}</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-primary">

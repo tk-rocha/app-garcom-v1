@@ -259,7 +259,7 @@ const FechamentoPDVScreen = () => {
           <ArrowLeft className="h-6 w-6" />
         </Button>
         <h1 className="text-xl font-medium text-[#180F33] flex-1 text-center mr-10">
-          Fechar PDV
+          FECHAR PDV
         </h1>
       </div>
 

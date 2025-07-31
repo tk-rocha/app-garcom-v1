@@ -95,13 +95,13 @@ const FuncoesScreen = () => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/balcao")}
           className="mr-4"
         >
           <ArrowLeft className="h-6 w-6" />
         </Button>
         <h1 className="text-xl font-medium text-[#180F33] flex-1 text-center mr-10">
-          Funções
+          FUNÇÕES
         </h1>
       </div>
 

@@ -80,7 +80,7 @@ const ProductListScreen = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-lg font-semibold text-primary">
-            {isFromMesa ? `MESA ${mesaId}` : 'Balcão'}
+            {isFromMesa ? `MESA ${mesaId}` : 'BALCÃO'}
           </h1>
           <div className="flex items-center space-x-2">
             {user && (

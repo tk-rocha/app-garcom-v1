@@ -67,7 +67,7 @@ const ProductDetailScreen = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
-          <h1 className="text-lg font-semibold text-primary">Balcão</h1>
+          <h1 className="text-lg font-semibold text-primary">BALCÃO</h1>
           
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/5">

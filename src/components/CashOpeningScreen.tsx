@@ -71,7 +71,7 @@ const CashOpeningScreen = () => {
         >
           <ArrowLeft className="h-6 w-6 text-gray-600" />
         </button>
-        <h1 className="text-xl font-bold text-gray-800">ABERTURA</h1>
+        <h1 className="text-xl font-bold text-gray-800">ABERTURA DE CAIXA</h1>
         <div className="w-10" /> {/* Spacer for centering */}
       </div>
 

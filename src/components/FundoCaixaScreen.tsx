@@ -65,7 +65,7 @@ const FundoCaixaScreen = () => {
           <ArrowLeft className="h-6 w-6" />
         </Button>
         <h1 className="text-xl font-medium text-[#180F33] flex-1 text-center mr-10">
-          Fundo de Caixa
+          FUNDO DE CAIXA
         </h1>
       </div>
 

@@ -89,7 +89,7 @@ const QuantidadePessoasScreen = () => {
           >
             <ArrowLeft className="h-6 w-6" />
           </Button>
-          <h1 className="text-xl font-bold text-[#180F33]">Quantidade Pessoas</h1>
+          <h1 className="text-xl font-bold text-[#180F33]">QUANTIDADE PESSOAS</h1>
         </div>
       </div>
 
