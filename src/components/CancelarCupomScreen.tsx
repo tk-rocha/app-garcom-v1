@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { getValidatedDailySalesTotal } from "@/utils/salesCalculations";
 
 interface Cupom {
   id: string;
@@ -86,10 +87,7 @@ const CancelarCupomScreen = () => {
   }, []);
 
   // Calculate total sales for today using validated data
-  const totalVendasHoje = (() => {
-    const { getValidatedDailySalesTotal } = require('@/utils/salesCalculations');
-    return getValidatedDailySalesTotal();
-  })();
+  const totalVendasHoje = getValidatedDailySalesTotal();
 
   const handleCancelCupom = (cupom: Cupom) => {
     navigate("/confirmar-cancelamento", { state: { cupom } });
