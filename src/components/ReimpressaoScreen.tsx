@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { ArrowLeft, Printer, Calendar } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
 
 interface Cupom {
-  id: number;
+  id: string;
   numero: string;
   timestamp: string;
   valorBruto: number;
@@ -22,39 +23,48 @@ const ReimpressaoScreen = () => {
   const [filtroData, setFiltroData] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
-    // Load cupons from localStorage
-    const storedCupons = JSON.parse(localStorage.getItem('cupons') || '[]');
+    // Load cupons from fiscalReceipts (correct source)
+    const storedReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
     
     // Filter cupons by selected date
     const selectedDate = new Date(filtroData).toDateString();
-    const filteredCupons = storedCupons.filter((cupom: Cupom) => {
-      const cupomDate = new Date(cupom.timestamp).toDateString();
-      return cupomDate === selectedDate;
-    });
+    const filteredCupons = storedReceipts
+      .filter((receipt: any) => {
+        if (!receipt || !receipt.timestamp) return false;
+        const receiptDate = new Date(receipt.timestamp);
+        if (isNaN(receiptDate.getTime())) return false;
+        return receiptDate.toDateString() === selectedDate;
+      })
+      .map((receipt: any, index: number) => ({
+        id: receipt.id || `${receipt.number || 'unknown'}-${receipt.timestamp}-${index}`,
+        numero: (receipt.number || 0).toString(),
+        timestamp: receipt.timestamp,
+        valorBruto: receipt.grossAmount || 0,
+        valorLiquido: receipt.netAmount || 0,
+        cancelado: receipt.cancelado || false
+      }))
+      .sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
 
     setCupons(filteredCupons);
   }, [filtroData]);
 
   const handleReimprimir = (cupom: Cupom) => {
-    // Show confirmation dialog
-    if (window.confirm(`Deseja reimprimir o cupom ${cupom.numero}?`)) {
-      // Simulate reprint
-      toast({
-        title: "Cupom reimpresso",
-        description: `Cupom ${cupom.numero} enviado para impressão`
-      });
-    }
+    // Simulate reprint
+    toast({
+      title: "✅ Cupom reenviado com sucesso",
+      description: `Cupom #${cupom.numero} enviado para impressão`
+    });
   };
 
   return (
     <div className="min-h-screen bg-[#E1E1E5] flex flex-col">
       {/* Header */}
-      <div className="p-6 bg-white flex items-center">
+      <div className="p-6 bg-white flex items-center border-b border-[#E1E1E5]">
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate(-1)}
-          className="mr-4"
+          onClick={() => navigate("/funcoes")}
+          className="mr-4 text-[#180F33]"
         >
           <ArrowLeft className="h-6 w-6" />
         </Button>
@@ -93,37 +103,67 @@ const ReimpressaoScreen = () => {
               >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center space-x-4">
-                        <span className="font-medium text-[#180F33]">
-                          Nº {cupom.numero}
-                        </span>
-                        <span className="text-sm text-gray-600">
-                          {new Date(cupom.timestamp).toLocaleString('pt-BR')}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-4 text-sm">
-                        <span>
-                          Bruto: {formatCurrency(cupom.valorBruto)}
-                        </span>
-                        <span>
-                          Líquido: {formatCurrency(cupom.valorLiquido)}
-                        </span>
-                      </div>
-                      {cupom.cancelado && (
-                        <span className="text-red-500 text-sm font-medium">
-                          CANCELADO
-                        </span>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleReimprimir(cupom)}
-                      className="text-blue-500 hover:text-blue-600 hover:bg-blue-50"
-                    >
-                      <Printer className="h-5 w-5" />
-                    </Button>
+                     <div className="flex items-center space-x-4">
+                       <Printer className="h-5 w-5 text-gray-400" />
+                       <div className="flex-1 space-y-1">
+                         <div className="flex items-center space-x-4">
+                           <span className="font-medium text-[#180F33]">
+                             #CUPOM {cupom.numero.padStart(6, '0')}
+                           </span>
+                           {cupom.cancelado && (
+                             <span className="text-red-500 text-xs font-medium bg-red-50 px-2 py-1 rounded">
+                               CANCELADO
+                             </span>
+                           )}
+                         </div>
+                         <div className="text-sm text-gray-600">
+                           {new Date(cupom.timestamp).toLocaleDateString('pt-BR')} – {new Date(cupom.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                         </div>
+                         <div className="text-lg font-medium text-[#180F33]">
+                           {formatCurrency(cupom.valorLiquido)}
+                         </div>
+                         <div className="text-sm text-gray-500">
+                           Status: {cupom.cancelado ? 'Cancelado' : 'Válido'}
+                         </div>
+                       </div>
+                     </div>
+                     {!cupom.cancelado && (
+                       <AlertDialog>
+                         <AlertDialogTrigger asChild>
+                           <Button
+                             variant="outline"
+                             className="bg-[#FFC72C] text-[#180F33] border-[#FFC72C] hover:bg-[#FFD700] font-medium"
+                           >
+                             <Printer className="h-4 w-4 mr-2" />
+                             Reimprimir
+                           </Button>
+                         </AlertDialogTrigger>
+                         <AlertDialogContent className="bg-white">
+                           <AlertDialogHeader>
+                             <AlertDialogTitle className="text-[#180F33] flex items-center">
+                               <Printer className="h-5 w-5 mr-2" />
+                               Reimprimir Cupom Fiscal
+                             </AlertDialogTitle>
+                             <AlertDialogDescription className="text-gray-600">
+                               Deseja reimprimir o cupom fiscal <strong>#{cupom.numero.padStart(6, '0')}</strong>?
+                               <br />
+                               Essa ação enviará novamente o comando à impressora.
+                             </AlertDialogDescription>
+                           </AlertDialogHeader>
+                           <AlertDialogFooter>
+                             <AlertDialogCancel className="text-gray-600 hover:text-gray-800">
+                               Cancelar
+                             </AlertDialogCancel>
+                             <AlertDialogAction 
+                               onClick={() => handleReimprimir(cupom)}
+                               className="bg-[#FFC72C] text-[#180F33] hover:bg-[#FFD700]"
+                             >
+                               Reimprimir
+                             </AlertDialogAction>
+                           </AlertDialogFooter>
+                         </AlertDialogContent>
+                       </AlertDialog>
+                     )}
                   </div>
                 </CardContent>
               </Card>
