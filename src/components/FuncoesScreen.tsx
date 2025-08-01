@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Minus, Plus, Trash2, Printer, Settings, LogOut, DollarSign } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { getValidatedDailySalesTotal } from "@/utils/salesCalculations";
 
 const FuncoesScreen = () => {
   const navigate = useNavigate();
@@ -15,7 +16,6 @@ const FuncoesScreen = () => {
   // Load daily sales total - refresh on every render to catch updates
   useEffect(() => {
     const loadDailyTotal = () => {
-      const { getValidatedDailySalesTotal } = require('@/utils/salesCalculations');
       setDailyTotal(getValidatedDailySalesTotal());
     };
     
