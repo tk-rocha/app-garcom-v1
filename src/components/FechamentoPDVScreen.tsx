@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, DollarSign } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
+import { getValidatedDailySalesTotal } from "@/utils/salesCalculations";
 
 interface PaymentTotal {
   id: string;
@@ -31,14 +32,27 @@ const FechamentoPDVScreen = () => {
   ];
 
   useEffect(() => {
-    // Calculate actual sales totals by payment method
+    // Calculate actual sales totals by payment method - only from valid (non-cancelled) receipts
     const receipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
     const today = new Date().toDateString();
     
-    // Filter today's receipts
+    console.log('📊 Calculando totais do fechamento PDV:', {
+      totalReceipts: receipts.length,
+      today
+    });
+    
+    // Filter today's valid (non-cancelled) receipts
     const todayReceipts = receipts.filter((receipt: any) => {
       const receiptDate = new Date(receipt.timestamp).toDateString();
-      return receiptDate === today;
+      const isToday = receiptDate === today;
+      const isValid = !receipt.cancelado; // Exclude cancelled receipts
+      
+      return isToday && isValid;
+    });
+
+    console.log('📊 Cupons válidos de hoje:', {
+      totalValid: todayReceipts.length,
+      validReceipts: todayReceipts.map(r => ({ id: r.id, number: r.number, netAmount: r.netAmount }))
     });
 
     // Calculate totals by payment method
@@ -60,11 +74,24 @@ const FechamentoPDVScreen = () => {
           else if (methodName.includes('crédito pos')) methodId = 'credit_pos';
           
           if (methodId) {
-            methodTotals[methodId] = (methodTotals[methodId] || 0) + payment.amount;
+            // For cash payments, subtract the change given
+            let effectiveAmount = payment.amount;
+            if (methodId === 'cash' && payment.change) {
+              effectiveAmount = payment.amount - payment.change;
+              console.log('💰 Dinheiro com troco:', {
+                valorPago: payment.amount,
+                troco: payment.change,
+                valorEfetivo: effectiveAmount
+              });
+            }
+            
+            methodTotals[methodId] = (methodTotals[methodId] || 0) + effectiveAmount;
           }
         });
       }
     });
+
+    console.log('💰 Totais calculados por método:', methodTotals);
 
     // Initialize payment totals
     const initialTotals = paymentMethods.map(method => ({
