@@ -9,35 +9,81 @@ import { useAuth } from "@/contexts/AuthContext";
 
 // Mock data for products
 const productCategories = [
+  { id: "prato-do-dia", name: "Prato do Dia" },
+  { id: "executivo", name: "Executivo" },
+  { id: "massas", name: "Massas" },
+  { id: "lanches", name: "Lanches" },
   { id: "bebidas", name: "Bebidas" },
-  { id: "doces", name: "Doces" },
-  { id: "combos", name: "Combos" },
+  { id: "cafes", name: "Cafés" },
   { id: "porcoes", name: "Porções" },
   { id: "sobremesas", name: "Sobremesas" },
-  { id: "refeicoes", name: "Refeições" },
 ];
 
 const mockProducts = {
+  "prato-do-dia": [
+    { id: 1, name: "Virado à Paulista", price: 28.00, image: "/api/placeholder/80/80" },
+    { id: 2, name: "Bife à Rolê", price: 28.00, image: "/api/placeholder/80/80" },
+    { id: 3, name: "Feijoada", price: 32.00, image: "/api/placeholder/80/80" },
+    { id: 4, name: "Macarrão à Bolonhesa", price: 25.00, image: "/api/placeholder/80/80" },
+    { id: 5, name: "Peixe Empanado", price: 28.00, image: "/api/placeholder/80/80" },
+    { id: 6, name: "Churrasco", price: 34.00, image: "/api/placeholder/80/80" },
+  ],
+  executivo: [
+    { id: 7, name: "Bife à Parmegiana", price: 32.00, image: "/api/placeholder/80/80" },
+    { id: 8, name: "Frango com Fritas", price: 32.00, image: "/api/placeholder/80/80" },
+    { id: 9, name: "Bife com Fritas", price: 32.00, image: "/api/placeholder/80/80" },
+    { id: 10, name: "Panquecas", price: 30.00, image: "/api/placeholder/80/80" },
+    { id: 11, name: "Omelete", price: 25.00, image: "/api/placeholder/80/80" },
+  ],
+  massas: [
+    { id: 12, name: "Lasanha", price: 34.00, image: "/api/placeholder/80/80" },
+    { id: 13, name: "Ravioli", price: 34.00, image: "/api/placeholder/80/80" },
+    { id: 14, name: "Cappelletti", price: 38.00, image: "/api/placeholder/80/80" },
+    { id: 15, name: "Gnocchi", price: 44.00, image: "/api/placeholder/80/80" },
+    { id: 16, name: "Rondelli", price: 44.00, image: "/api/placeholder/80/80" },
+    { id: 17, name: "Sorrentini", price: 45.00, image: "/api/placeholder/80/80" },
+  ],
+  lanches: [
+    { id: 18, name: "Combo X-Salada", price: 29.99, image: "/api/placeholder/80/80" },
+    { id: 19, name: "Combo X-Bacon", price: 31.00, image: "/api/placeholder/80/80" },
+    { id: 20, name: "Combo X-Tudo", price: 36.99, image: "/api/placeholder/80/80" },
+    { id: 21, name: "Combo Pastel", price: 19.99, image: "/api/placeholder/80/80" },
+    { id: 22, name: "Misto Quente", price: 22.00, image: "/api/placeholder/80/80" },
+  ],
   bebidas: [
-    { id: 1, name: "Coca Cola", price: 8.00, image: "/api/placeholder/80/80" },
-    { id: 2, name: "Sprite", price: 7.50, image: "/api/placeholder/80/80" },
-    { id: 3, name: "Fanta Laranja", price: 7.50, image: "/api/placeholder/80/80" },
-    { id: 4, name: "Água Mineral", price: 4.00, image: "/api/placeholder/80/80" },
+    { id: 23, name: "Suco de Laranja", price: 15.00, image: "/api/placeholder/80/80" },
+    { id: 24, name: "Suco de Maracujá", price: 15.00, image: "/api/placeholder/80/80" },
+    { id: 25, name: "Suco de Abacaxi", price: 15.00, image: "/api/placeholder/80/80" },
+    { id: 26, name: "Sprite", price: 9.00, image: "/api/placeholder/80/80" },
+    { id: 27, name: "Coca-Cola", price: 9.00, image: "/api/placeholder/80/80" },
+    { id: 28, name: "Fanta Laranja", price: 9.90, image: "/api/placeholder/80/80" },
   ],
-  doces: [
-    { id: 5, name: "Chocolate", price: 12.00, image: "/api/placeholder/80/80" },
-    { id: 6, name: "Bala de Goma", price: 3.50, image: "/api/placeholder/80/80" },
+  cafes: [
+    { id: 29, name: "Café Expresso", price: 8.00, image: "/api/placeholder/80/80" },
+    { id: 30, name: "Macchiato", price: 9.90, image: "/api/placeholder/80/80" },
+    { id: 31, name: "Carioca", price: 7.90, image: "/api/placeholder/80/80" },
+    { id: 32, name: "Café Coado", price: 10.00, image: "/api/placeholder/80/80" },
+    { id: 33, name: "Latte", price: 7.90, image: "/api/placeholder/80/80" },
+    { id: 34, name: "Prensa Francesa", price: 9.99, image: "/api/placeholder/80/80" },
+    { id: 35, name: "Mocaccino", price: 14.00, image: "/api/placeholder/80/80" },
   ],
-  combos: [
-    { id: 7, name: "Combo Família", price: 45.00, image: "/api/placeholder/80/80" },
-    { id: 8, name: "Combo Kids", price: 25.00, image: "/api/placeholder/80/80" },
+  porcoes: [
+    { id: 36, name: "Batata Frita", price: 28.00, image: "/api/placeholder/80/80" },
+    { id: 37, name: "Batata com Cheddar", price: 37.00, image: "/api/placeholder/80/80" },
+    { id: 38, name: "Mandioca Frita", price: 29.90, image: "/api/placeholder/80/80" },
+    { id: 39, name: "Calabresa", price: 32.00, image: "/api/placeholder/80/80" },
+  ],
+  sobremesas: [
+    { id: 40, name: "Fondant de Chocolate", price: 13.00, image: "/api/placeholder/80/80" },
+    { id: 41, name: "Mousse de Limão", price: 14.00, image: "/api/placeholder/80/80" },
+    { id: 42, name: "Tiramisù", price: 21.00, image: "/api/placeholder/80/80" },
   ],
 };
 
 const ProductListScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [activeCategory, setActiveCategory] = useState("bebidas");
+  const [activeCategory, setActiveCategory] = useState("prato-do-dia");
   
   // Check if we're in mesa context
   const mesaId = searchParams.get('mesa');
