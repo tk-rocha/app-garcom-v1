@@ -390,6 +390,23 @@ const CartScreen = () => {
                       Total: R$ {(item.quantity * item.price).toFixed(2)}
                      </span>
                    </div>
+                   
+                   {/* Exibir customizações quando existirem */}
+                   {item.customizations && item.customizations.length > 0 && (
+                     <div className="text-xs text-muted-foreground mt-2 pl-2 border-l-2 border-primary/30">
+                       {item.customizations.map((customization, index) => (
+                         <div key={index} className="flex justify-between">
+                           <span>{customization.phase}: {customization.option}</span>
+                           {customization.price > 0 && (
+                             <span className="text-primary font-medium">
+                               + R$ {customization.price.toFixed(2).replace('.', ',')}
+                             </span>
+                           )}
+                         </div>
+                       ))}
+                     </div>
+                   )}
+                   
                    {/* Exibir observação quando existir */}
                    {item.observacao && (
                      <div className="text-xs text-muted-foreground italic mt-2 pl-2 border-l-2 border-muted">
