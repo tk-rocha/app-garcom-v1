@@ -29,10 +29,10 @@ const PHASE_CONFIG = {
   "combo-x-tudo": {
     phases: ["meat", "soda", "additional"]
   },
+  // Products with 2 phases (same as Misto Quente)
   "combo-pastel": {
-    phases: ["meat", "soda", "additional"]
+    phases: ["drink", "additional"]
   },
-  // Product with 2 phases
   "misto-quente": {
     phases: ["drink", "additional"]
   }
@@ -161,14 +161,9 @@ export const ProductPhaseSelector = ({ isOpen, onClose, product, onAddToCart }: 
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-lg font-semibold">
-              {product.name}
-            </DialogTitle>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle className="text-lg font-semibold">
+            {product.name}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
