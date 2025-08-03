@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { ProductPhaseSelector } from "./ProductPhaseSelector";
 
 // Mock data for products
 const productCategories = [
@@ -84,6 +85,8 @@ const ProductListScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [activeCategory, setActiveCategory] = useState("prato-do-dia");
+  const [showPhaseSelector, setShowPhaseSelector] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
   
   // Check if we're in mesa context
   const mesaId = searchParams.get('mesa');
@@ -103,10 +106,34 @@ const ProductListScreen = () => {
   };
 
   const handleAddToCart = (product: any) => {
+    // Check if product is from LANCHES category and needs phase selection
+    if (activeCategory === "lanches" && product.name !== "Misto Quente") {
+      setSelectedProduct(product);
+      setShowPhaseSelector(true);
+      return;
+    }
+    
+    // For Misto Quente, also use phase selector but with different config
+    if (product.name === "Misto Quente") {
+      setSelectedProduct(product);
+      setShowPhaseSelector(true);
+      return;
+    }
+    
+    // For other products, add directly to cart
     addToCart(product.id, {
       name: product.name,
       price: product.price,
       image: product.image
+    }, isFromMesa ? `mesa-${mesaId}` : 'balcao');
+  };
+
+  const handlePhaseSelectionComplete = (productData: any) => {
+    addToCart(productData.id, {
+      name: productData.name,
+      price: productData.price,
+      image: productData.image,
+      customizations: productData.customizations
     }, isFromMesa ? `mesa-${mesaId}` : 'balcao');
   };
 
@@ -271,6 +298,19 @@ const ProductListScreen = () => {
           );
         })}
       </div>
+
+      {/* Phase Selection Modal */}
+      {selectedProduct && (
+        <ProductPhaseSelector
+          isOpen={showPhaseSelector}
+          onClose={() => {
+            setShowPhaseSelector(false);
+            setSelectedProduct(null);
+          }}
+          product={selectedProduct}
+          onAddToCart={handlePhaseSelectionComplete}
+        />
+      )}
     </div>
   );
 };

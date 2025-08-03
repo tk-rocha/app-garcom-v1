@@ -12,6 +12,11 @@ interface CartItem {
     name: string;
   };
   observacao?: string;
+  customizations?: Array<{
+    phase: string;
+    option: string;
+    price: number;
+  }>;
 }
 
 interface Discount {
@@ -42,7 +47,7 @@ interface CartContextType {
   serviceFee: ServiceFee | null;
   getTotalItems: (cartId?: string) => number;
   getProductQuantity: (productId: number, cartId?: string) => number;
-  addToCart: (productId: number, productData: { name: string; price: number; image: string }, cartId?: string) => void;
+  addToCart: (productId: number, productData: { name: string; price: number; image: string; customizations?: Array<{ phase: string; option: string; price: number; }> }, cartId?: string) => void;
   removeFromCart: (productId: number, cartId?: string) => void;
   removeItemCompletely: (productId: number, cartId?: string) => void;
   getSubtotal: (cartId?: string) => number;
@@ -159,7 +164,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     return item ? item.quantity : 0;
   };
 
-  const addToCart = (productId: number, productData: { name: string; price: number; image: string }, cartId: string = 'balcao') => {
+  const addToCart = (productId: number, productData: { name: string; price: number; image: string; customizations?: Array<{ phase: string; option: string; price: number; }> }, cartId: string = 'balcao') => {
     const operator = JSON.parse(localStorage.getItem('auth-user') || 'null');
 
     setCarts(prev => {
@@ -182,7 +187,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
           image: productData.image,
           enviado: false,
           operator: operator ? { id: operator.id, name: operator.name } : undefined,
-          observacao: ""
+          observacao: "",
+          customizations: productData.customizations
         };
         return { ...prev, [cartId]: [...currentCart, newItem] };
       }
