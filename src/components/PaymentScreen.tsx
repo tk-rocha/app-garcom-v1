@@ -13,6 +13,7 @@ interface Payment {
   id: string;
   method: string;
   amount: number;
+  change?: number;
 }
 
 interface PaymentMethod {
@@ -225,6 +226,11 @@ const PaymentScreen = () => {
         method: method.name,
         amount: amount,
       };
+
+      // For cash payments, calculate and store change if applicable
+      if (selectedMethod === 'cash' && amount > remaining) {
+        newPayment.change = amount - remaining;
+      }
 
       setPayments(prev => [...prev, newPayment]);
       setSelectedMethod("");
