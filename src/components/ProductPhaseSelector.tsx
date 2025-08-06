@@ -29,9 +29,9 @@ const PHASE_CONFIG = {
   "combo-x-tudo": {
     phases: ["meat", "soda", "additional"]
   },
-  // Products with 2 phases (same as Misto Quente)
+  // Products with 3 phases (Combo Pastel with flavor selection)
   "combo-pastel": {
-    phases: ["drink", "additional"]
+    phases: ["flavor", "drink", "additional"]
   },
   "misto-quente": {
     phases: ["drink", "additional"]
@@ -39,6 +39,12 @@ const PHASE_CONFIG = {
 };
 
 const PHASE_OPTIONS = {
+  flavor: [
+    { id: "carne", name: "Carne", price: 0 },
+    { id: "queijo", name: "Queijo", price: 0 },
+    { id: "pizza", name: "Pizza", price: 0 },
+    { id: "palmito", name: "Palmito", price: 0 }
+  ],
   meat: [
     { id: "mal-passada", name: "Mal passada", price: 0 },
     { id: "ao-ponto", name: "Ao ponto", price: 0 },
@@ -65,6 +71,7 @@ const PHASE_OPTIONS = {
 };
 
 const PHASE_TITLES = {
+  flavor: "Sabor do Pastel",
   meat: "Ponto da Carne",
   soda: "Refrigerante",
   drink: "Bebida",
