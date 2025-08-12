@@ -286,7 +286,7 @@ const CartScreen = () => {
           <div className="flex items-center gap-2">
             {user && (
               <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
-                {user.id}
+                {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
               </div>
             )}
             <Button
