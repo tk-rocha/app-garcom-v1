@@ -286,7 +286,7 @@ const CartScreen = () => {
           <div className="flex items-center gap-2">
             {user && (
               <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
-                {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                {user.name?.split(' ')?.map(n => n[0])?.join('')?.toUpperCase() || 'U'}
               </div>
             )}
             <Button
@@ -369,7 +369,7 @@ const CartScreen = () => {
                     </h3>
                     {item.operator && (
                       <span className="inline-flex items-center px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full ml-2">
-                        {item.operator.name.split(' ')[0]}
+                        {item.operator.name?.split(' ')?.[0] || 'OP'}
                       </span>
                     )}
                   </div>

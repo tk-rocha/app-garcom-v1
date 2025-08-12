@@ -55,14 +55,24 @@ const ProductListScreen = () => {
     
     // Check if product is from LANCHES category and needs phase selection
     if (categoryName === "LANCHES" && product.nome !== "Misto Quente") {
-      setSelectedProduct(product);
+      setSelectedProduct({
+        id: getNumericId(product.id),
+        name: product.nome,
+        price: product.preco,
+        image: product.imagem_url || "/api/placeholder/80/80"
+      });
       setShowPhaseSelector(true);
       return;
     }
     
     // For Misto Quente, also use phase selector but with different config
     if (product.nome === "Misto Quente") {
-      setSelectedProduct(product);
+      setSelectedProduct({
+        id: getNumericId(product.id),
+        name: product.nome,
+        price: product.preco,
+        image: product.imagem_url || "/api/placeholder/80/80"
+      });
       setShowPhaseSelector(true);
       return;
     }
@@ -114,7 +124,7 @@ const ProductListScreen = () => {
           <div className="flex items-center space-x-2">
             {user && (
               <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
-                {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                {user.name?.split(' ')?.map(n => n[0])?.join('')?.toUpperCase() || 'U'}
               </div>
             )}
             <Button 
@@ -212,7 +222,7 @@ const ProductListScreen = () => {
                   >
                     <h3 className="font-medium text-gray-900">{product.nome}</h3>
                     <p className="text-lg font-semibold text-primary">
-                      R$ {product.preco.toFixed(2).replace('.', ',')}
+                      R$ {(product.preco || 0).toFixed(2).replace('.', ',')}
                     </p>
                   </div>
                   

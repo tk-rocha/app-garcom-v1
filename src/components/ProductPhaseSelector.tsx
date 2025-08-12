@@ -13,7 +13,7 @@ interface ProductPhaseSelectorProps {
     name: string;
     price: number;
     image: string;
-  };
+  } | null;
   onAddToCart: (productData: any) => void;
 }
 
@@ -81,35 +81,35 @@ const PHASE_TITLES = {
 export const ProductPhaseSelector = ({ isOpen, onClose, product, onAddToCart }: ProductPhaseSelectorProps) => {
   const [currentPhase, setCurrentPhase] = useState(0);
   const [selections, setSelections] = useState<Record<string, any>>({});
-  const [finalPrice, setFinalPrice] = useState(product.price);
+  const [finalPrice, setFinalPrice] = useState(product?.price || 0);
 
   // Get product key for configuration
-  const productKey = product.name.toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-');
+  const productKey = product?.name?.toLowerCase()
+    ?.replace(/[^a-z0-9\s-]/g, '')
+    ?.replace(/\s+/g, '-') || '';
 
   const config = PHASE_CONFIG[productKey as keyof typeof PHASE_CONFIG];
   
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && product) {
       setCurrentPhase(0);
       setSelections({});
-      setFinalPrice(product.price);
+      setFinalPrice(product.price || 0);
     }
-  }, [isOpen, product.price]);
+  }, [isOpen, product?.price]);
 
   useEffect(() => {
     // Calculate final price based on selections
-    let newPrice = product.price;
+    let newPrice = product?.price || 0;
     Object.values(selections).forEach((selection: any) => {
       if (selection && selection.price) {
         newPrice += selection.price;
       }
     });
     setFinalPrice(newPrice);
-  }, [selections, product.price]);
+  }, [selections, product?.price]);
 
-  if (!config) return null;
+  if (!config || !product) return null;
 
   const currentPhaseType = config.phases[currentPhase];
   const isLastPhase = currentPhase === config.phases.length - 1;

@@ -34,7 +34,7 @@ const ProductSearchScreen = () => {
       setFilteredProducts(products);
     } else {
       const filtered = products.filter(product =>
-        product.nome.toLowerCase().includes(searchQuery.toLowerCase())
+        product?.nome?.toLowerCase()?.includes(searchQuery.toLowerCase())
       );
       setFilteredProducts(filtered);
     }
@@ -59,14 +59,24 @@ const ProductSearchScreen = () => {
   const handleAddToCart = (product: any) => {
     // Check if product is from LANCHES category and needs phase selection
     if (product.categoria?.nome === "LANCHES" && product.nome !== "Misto Quente") {
-      setSelectedProduct(product);
+      setSelectedProduct({
+        id: getNumericId(product.id),
+        name: product.nome,
+        price: product.preco,
+        image: product.imagem_url || "/api/placeholder/80/80"
+      });
       setShowPhaseSelector(true);
       return;
     }
     
     // For Misto Quente, also use phase selector
     if (product.nome === "Misto Quente") {
-      setSelectedProduct(product);
+      setSelectedProduct({
+        id: getNumericId(product.id),
+        name: product.nome,
+        price: product.preco,
+        image: product.imagem_url || "/api/placeholder/80/80"
+      });
       setShowPhaseSelector(true);
       return;
     }
@@ -167,7 +177,7 @@ const ProductSearchScreen = () => {
                     >
                       <h3 className="font-medium text-gray-900">{product.nome}</h3>
                       <p className="text-lg font-semibold text-primary">
-                        R$ {product.preco.toFixed(2).replace('.', ',')}
+                        R$ {(product.preco || 0).toFixed(2).replace('.', ',')}
                       </p>
                     </div>
                     
