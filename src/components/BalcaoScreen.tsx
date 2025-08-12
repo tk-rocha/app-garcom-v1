@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Home, Table, QrCode, Puzzle } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import UserHeader from "@/components/ui/user-header";
 
 const BalcaoScreen = () => {
   const navigate = useNavigate();
@@ -44,9 +45,7 @@ const BalcaoScreen = () => {
   return (
     <div className="min-h-screen bg-[#E1E1E5] flex flex-col">
       {/* Header */}
-      <div className="p-6 bg-white">
-        <h1 className="text-xl font-medium text-gray-800">Olá, Ester</h1>
-      </div>
+      <UserHeader />
 
       {/* Content */}
       <div className="flex-1 p-6 space-y-6">
