@@ -3,88 +3,17 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus } from "lucide-react";
+import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus, Loader2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProductPhaseSelector } from "./ProductPhaseSelector";
-
-// Mock data for products
-const productCategories = [
-  { id: "prato-do-dia", name: "Prato do Dia" },
-  { id: "executivo", name: "Executivo" },
-  { id: "massas", name: "Massas" },
-  { id: "lanches", name: "Lanches" },
-  { id: "bebidas", name: "Bebidas" },
-  { id: "cafes", name: "Cafés" },
-  { id: "porcoes", name: "Porções" },
-  { id: "sobremesas", name: "Sobremesas" },
-];
-
-const mockProducts = {
-  "prato-do-dia": [
-    { id: 1, name: "Virado à Paulista", price: 28.00, image: "/api/placeholder/80/80" },
-    { id: 2, name: "Bife à Rolê", price: 28.00, image: "/api/placeholder/80/80" },
-    { id: 3, name: "Feijoada", price: 32.00, image: "/api/placeholder/80/80" },
-    { id: 4, name: "Macarrão à Bolonhesa", price: 25.00, image: "/api/placeholder/80/80" },
-    { id: 5, name: "Peixe Empanado", price: 28.00, image: "/api/placeholder/80/80" },
-    { id: 6, name: "Churrasco", price: 34.00, image: "/api/placeholder/80/80" },
-  ],
-  executivo: [
-    { id: 7, name: "Bife à Parmegiana", price: 32.00, image: "/api/placeholder/80/80" },
-    { id: 8, name: "Frango com Fritas", price: 32.00, image: "/api/placeholder/80/80" },
-    { id: 9, name: "Bife com Fritas", price: 32.00, image: "/api/placeholder/80/80" },
-    { id: 10, name: "Panquecas", price: 30.00, image: "/api/placeholder/80/80" },
-    { id: 11, name: "Omelete", price: 25.00, image: "/api/placeholder/80/80" },
-  ],
-  massas: [
-    { id: 12, name: "Lasanha", price: 34.00, image: "/api/placeholder/80/80" },
-    { id: 13, name: "Ravioli", price: 34.00, image: "/api/placeholder/80/80" },
-    { id: 14, name: "Cappelletti", price: 38.00, image: "/api/placeholder/80/80" },
-    { id: 15, name: "Gnocchi", price: 44.00, image: "/api/placeholder/80/80" },
-    { id: 16, name: "Rondelli", price: 44.00, image: "/api/placeholder/80/80" },
-    { id: 17, name: "Sorrentini", price: 45.00, image: "/api/placeholder/80/80" },
-  ],
-  lanches: [
-    { id: 18, name: "Combo X-Salada", price: 29.99, image: "/api/placeholder/80/80" },
-    { id: 19, name: "Combo X-Bacon", price: 31.00, image: "/api/placeholder/80/80" },
-    { id: 20, name: "Combo X-Tudo", price: 36.99, image: "/api/placeholder/80/80" },
-    { id: 21, name: "Combo Pastel", price: 19.99, image: "/api/placeholder/80/80" },
-    { id: 22, name: "Misto Quente", price: 22.00, image: "/api/placeholder/80/80" },
-  ],
-  bebidas: [
-    { id: 23, name: "Suco de Laranja", price: 15.00, image: "/api/placeholder/80/80" },
-    { id: 24, name: "Suco de Maracujá", price: 15.00, image: "/api/placeholder/80/80" },
-    { id: 25, name: "Suco de Abacaxi", price: 15.00, image: "/api/placeholder/80/80" },
-    { id: 26, name: "Sprite", price: 9.00, image: "/api/placeholder/80/80" },
-    { id: 27, name: "Coca-Cola", price: 9.00, image: "/api/placeholder/80/80" },
-    { id: 28, name: "Fanta Laranja", price: 9.90, image: "/api/placeholder/80/80" },
-  ],
-  cafes: [
-    { id: 29, name: "Café Expresso", price: 8.00, image: "/api/placeholder/80/80" },
-    { id: 30, name: "Macchiato", price: 9.90, image: "/api/placeholder/80/80" },
-    { id: 31, name: "Carioca", price: 7.90, image: "/api/placeholder/80/80" },
-    { id: 32, name: "Café Coado", price: 10.00, image: "/api/placeholder/80/80" },
-    { id: 33, name: "Latte", price: 7.90, image: "/api/placeholder/80/80" },
-    { id: 34, name: "Prensa Francesa", price: 9.99, image: "/api/placeholder/80/80" },
-    { id: 35, name: "Mocaccino", price: 14.00, image: "/api/placeholder/80/80" },
-  ],
-  porcoes: [
-    { id: 36, name: "Batata Frita", price: 28.00, image: "/api/placeholder/80/80" },
-    { id: 37, name: "Batata com Cheddar", price: 37.00, image: "/api/placeholder/80/80" },
-    { id: 38, name: "Mandioca Frita", price: 29.90, image: "/api/placeholder/80/80" },
-    { id: 39, name: "Calabresa", price: 32.00, image: "/api/placeholder/80/80" },
-  ],
-  sobremesas: [
-    { id: 40, name: "Fondant de Chocolate", price: 13.00, image: "/api/placeholder/80/80" },
-    { id: 41, name: "Mousse de Limão", price: 14.00, image: "/api/placeholder/80/80" },
-    { id: 42, name: "Tiramisù", price: 21.00, image: "/api/placeholder/80/80" },
-  ],
-};
+import { useCategories } from "@/hooks/useCategories";
+import { useProducts } from "@/hooks/useProducts";
+import { getNumericId } from "@/utils/productUtils";
 
 const ProductListScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [activeCategory, setActiveCategory] = useState("prato-do-dia");
   const [showPhaseSelector, setShowPhaseSelector] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   
@@ -94,37 +23,55 @@ const ProductListScreen = () => {
   
   const { getTotalItems, getProductQuantity, addToCart, removeFromCart } = useCart();
   const { user } = useAuth();
+  const { categories, loading: categoriesLoading } = useCategories();
+  
+  // Set the first category as default when categories load
+  const [activeCategory, setActiveCategory] = useState<string>("");
+  const { products, loading: productsLoading } = useProducts(activeCategory);
+
+  // Set active category to first category when categories load
+  if (!activeCategory && categories.length > 0) {
+    setActiveCategory(categories[0].id);
+  }
 
   const handleProductClick = (product: any) => {
     const targetUrl = `/produto/${product.id}${isFromMesa ? `?mesa=${mesaId}` : ''}`;
     navigate(targetUrl, { 
       state: { 
-        product, 
+        product: {
+          id: product.id,
+          name: product.nome,
+          price: product.preco,
+          image: product.imagem_url || "/api/placeholder/80/80",
+          description: product.descricao
+        }, 
         category: activeCategory
       } 
     });
   };
 
   const handleAddToCart = (product: any) => {
+    const categoryName = categories.find(cat => cat.id === activeCategory)?.nome || '';
+    
     // Check if product is from LANCHES category and needs phase selection
-    if (activeCategory === "lanches" && product.name !== "Misto Quente") {
+    if (categoryName === "LANCHES" && product.nome !== "Misto Quente") {
       setSelectedProduct(product);
       setShowPhaseSelector(true);
       return;
     }
     
     // For Misto Quente, also use phase selector but with different config
-    if (product.name === "Misto Quente") {
+    if (product.nome === "Misto Quente") {
       setSelectedProduct(product);
       setShowPhaseSelector(true);
       return;
     }
     
     // For other products, add directly to cart
-    addToCart(product.id, {
-      name: product.name,
-      price: product.price,
-      image: product.image
+    addToCart(getNumericId(product.id), {
+      name: product.nome,
+      price: product.preco,
+      image: product.imagem_url || "/api/placeholder/80/80"
     }, isFromMesa ? `mesa-${mesaId}` : 'balcao');
   };
 
@@ -137,7 +84,16 @@ const ProductListScreen = () => {
     }, isFromMesa ? `mesa-${mesaId}` : 'balcao');
   };
 
-  const currentProducts = mockProducts[activeCategory as keyof typeof mockProducts] || [];
+  if (categoriesLoading || productsLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Carregando produtos...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -213,7 +169,7 @@ const ProductListScreen = () => {
       {/* Category Carousel */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <div className="flex space-x-3 overflow-x-auto">
-          {productCategories.map((category) => (
+          {categories.map((category) => (
             <Button
               key={category.id}
               variant={activeCategory === category.id ? "default" : "outline"}
@@ -224,7 +180,7 @@ const ProductListScreen = () => {
               }`}
               onClick={() => setActiveCategory(category.id)}
             >
-              {category.name}
+              {category.nome}
             </Button>
           ))}
         </div>
@@ -232,8 +188,8 @@ const ProductListScreen = () => {
 
       {/* Products List */}
       <div className="p-4 space-y-3">
-        {currentProducts.map((product) => {
-          const quantity = getProductQuantity(product.id, isFromMesa ? `mesa-${mesaId}` : 'balcao');
+        {products.map((product) => {
+          const quantity = getProductQuantity(getNumericId(product.id), isFromMesa ? `mesa-${mesaId}` : 'balcao');
           
           return (
             <Card key={product.id} className="bg-white shadow-sm">
@@ -244,8 +200,8 @@ const ProductListScreen = () => {
                     onClick={() => handleProductClick(product)}
                   >
                     <img
-                      src={product.image}
-                      alt={product.name}
+                      src={product.imagem_url || "/api/placeholder/80/80"}
+                      alt={product.nome}
                       className="w-16 h-16 rounded-lg object-cover bg-gray-100"
                     />
                   </div>
@@ -254,9 +210,9 @@ const ProductListScreen = () => {
                     className="flex-1 cursor-pointer"
                     onClick={() => handleProductClick(product)}
                   >
-                    <h3 className="font-medium text-gray-900">{product.name}</h3>
+                    <h3 className="font-medium text-gray-900">{product.nome}</h3>
                     <p className="text-lg font-semibold text-primary">
-                      R$ {product.price.toFixed(2).replace('.', ',')}
+                      R$ {product.preco.toFixed(2).replace('.', ',')}
                     </p>
                   </div>
                   
@@ -273,7 +229,7 @@ const ProductListScreen = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => removeFromCart(product.id, isFromMesa ? `mesa-${mesaId}` : 'balcao')}
+                          onClick={() => removeFromCart(getNumericId(product.id), isFromMesa ? `mesa-${mesaId}` : 'balcao')}
                           className="h-8 w-8 text-primary hover:bg-primary/5"
                         >
                           <Minus className="h-4 w-4" />
