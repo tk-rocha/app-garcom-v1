@@ -45,7 +45,7 @@ const ProductListScreen = () => {
           image: product.imagem_url || "/api/placeholder/80/80",
           description: product.descricao
         }, 
-        category: activeCategory
+        categoryId: activeCategory
       } 
     });
   };

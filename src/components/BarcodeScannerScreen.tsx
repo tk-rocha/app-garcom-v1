@@ -46,7 +46,7 @@ const BarcodeScannerScreen = () => {
     navigate(`/produto/${product.id}`, { 
       state: { 
         product, 
-        category: "scanned"
+        categoryId: null // Scanner não tem categoria específica
       } 
     });
   };

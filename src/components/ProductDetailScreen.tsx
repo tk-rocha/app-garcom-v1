@@ -6,24 +6,24 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus, Edit3, Home } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useCategories } from "@/hooks/useCategories";
 
 const ProductDetailScreen = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
-  const { product, category } = location.state || {};
+  const { product, categoryId } = location.state || {};
   
   const [observation, setObservation] = useState("");
   const [showObservation, setShowObservation] = useState(false);
   const { getTotalItems, getProductQuantity, addToCart, removeFromCart } = useCart();
+  const { categories } = useCategories();
 
-  const categoryNames: { [key: string]: string } = {
-    bebidas: "Bebidas",
-    doces: "Doces",
-    combos: "Combos",
-    porcoes: "Porções",
-    sobremesas: "Sobremesas",
-    refeicoes: "Refeições",
+  // Encontrar o nome da categoria pelo ID
+  const getCategoryName = (catId: string | null) => {
+    if (!catId) return 'Categoria';
+    const category = categories.find(cat => cat.id === catId);
+    return category?.nome || 'Categoria';
   };
 
 
@@ -31,7 +31,7 @@ const ProductDetailScreen = () => {
     if (section === "home") {
       navigate("/balcao");
     } else if (section === "category") {
-      navigate("/produtos", { state: { activeCategory: category } });
+      navigate("/produtos", { state: { activeCategory: categoryId } });
     }
   };
 
@@ -61,7 +61,7 @@ const ProductDetailScreen = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={() => navigate("/produtos", { state: { activeCategory: category } })}
+            onClick={() => navigate("/produtos", { state: { activeCategory: categoryId } })}
             className="text-primary hover:bg-primary/5"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -110,7 +110,7 @@ const ProductDetailScreen = () => {
             onClick={() => handleBreadcrumbClick("category")}
             className="text-primary hover:underline"
           >
-            {categoryNames[category] || category}
+            {getCategoryName(categoryId)}
           </button>
           <span className="text-gray-400">/</span>
           <span className="text-gray-600">{product.name}</span>

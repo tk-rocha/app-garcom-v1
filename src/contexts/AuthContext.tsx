@@ -65,9 +65,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // Login successful
+      // Extrair apenas o primeiro nome
+      const firstName = garcons.nome.split(' ')[0];
       const userData: User = {
         id: garcons.id,
-        name: garcons.nome,
+        name: firstName,
         usuario: garcons.usuario
       };
       

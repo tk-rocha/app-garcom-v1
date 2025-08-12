@@ -51,7 +51,7 @@ const ProductSearchScreen = () => {
           image: product.imagem_url || "/api/placeholder/80/80",
           description: product.descricao
         }, 
-        category: product.categoria?.nome
+        categoryId: product.categoria_id
       } 
     });
   };

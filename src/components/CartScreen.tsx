@@ -104,7 +104,7 @@ const CartScreen = () => {
           price: item.price,
           image: item.image
         },
-        fromCart: true
+        categoryId: null // Carrinho não tem categoria específica
       } 
     });
   };
