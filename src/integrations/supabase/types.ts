@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      categorias: {
+        Row: {
+          criado_em: string | null
+          id: string
+          nome: string
+        }
+        Insert: {
+          criado_em?: string | null
+          id?: string
+          nome: string
+        }
+        Update: {
+          criado_em?: string | null
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
       garcons: {
         Row: {
           ativo: boolean | null
@@ -40,6 +58,83 @@ export type Database = {
           usuario?: string
         }
         Relationships: []
+      }
+      produto_componentes: {
+        Row: {
+          componente_id: string
+          id: string
+          produto_id: string
+          quantidade: number | null
+        }
+        Insert: {
+          componente_id: string
+          id?: string
+          produto_id: string
+          quantidade?: number | null
+        }
+        Update: {
+          componente_id?: string
+          id?: string
+          produto_id?: string
+          quantidade?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produto_componentes_componente_id_fkey"
+            columns: ["componente_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "produto_componentes_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      produtos: {
+        Row: {
+          ativo: boolean | null
+          categoria_id: string | null
+          criado_em: string | null
+          descricao: string | null
+          id: string
+          imagem_url: string | null
+          nome: string
+          preco: number
+        }
+        Insert: {
+          ativo?: boolean | null
+          categoria_id?: string | null
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          imagem_url?: string | null
+          nome: string
+          preco: number
+        }
+        Update: {
+          ativo?: boolean | null
+          categoria_id?: string | null
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          imagem_url?: string | null
+          nome?: string
+          preco?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produtos_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
