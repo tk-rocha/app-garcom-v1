@@ -59,6 +59,81 @@ export type Database = {
         }
         Relationships: []
       }
+      itens_venda: {
+        Row: {
+          criado_em: string | null
+          enviado_em: string | null
+          id: string
+          observacao: string | null
+          preco_unitario: number
+          produto_id: string
+          quantidade: number | null
+          status: string | null
+          venda_id: string
+        }
+        Insert: {
+          criado_em?: string | null
+          enviado_em?: string | null
+          id?: string
+          observacao?: string | null
+          preco_unitario: number
+          produto_id: string
+          quantidade?: number | null
+          status?: string | null
+          venda_id: string
+        }
+        Update: {
+          criado_em?: string | null
+          enviado_em?: string | null
+          id?: string
+          observacao?: string | null
+          preco_unitario?: number
+          produto_id?: string
+          quantidade?: number | null
+          status?: string | null
+          venda_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itens_venda_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_venda_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "vendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mesas: {
+        Row: {
+          ativo: boolean | null
+          criado_em: string | null
+          descricao: string | null
+          id: string
+          numero: number
+        }
+        Insert: {
+          ativo?: boolean | null
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          numero: number
+        }
+        Update: {
+          ativo?: boolean | null
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          numero?: number
+        }
+        Relationships: []
+      }
       produto_componentes: {
         Row: {
           componente_id: string
@@ -132,6 +207,54 @@ export type Database = {
             columns: ["categoria_id"]
             isOneToOne: false
             referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendas: {
+        Row: {
+          atualizado_em: string | null
+          criado_em: string | null
+          garcom_id: string | null
+          id: string
+          mesa_id: string | null
+          numero_pedido: number
+          status: string | null
+          valor_total: number | null
+        }
+        Insert: {
+          atualizado_em?: string | null
+          criado_em?: string | null
+          garcom_id?: string | null
+          id?: string
+          mesa_id?: string | null
+          numero_pedido?: number
+          status?: string | null
+          valor_total?: number | null
+        }
+        Update: {
+          atualizado_em?: string | null
+          criado_em?: string | null
+          garcom_id?: string | null
+          id?: string
+          mesa_id?: string | null
+          numero_pedido?: number
+          status?: string | null
+          valor_total?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendas_garcom_id_fkey"
+            columns: ["garcom_id"]
+            isOneToOne: false
+            referencedRelation: "garcons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendas_mesa_id_fkey"
+            columns: ["mesa_id"]
+            isOneToOne: false
+            referencedRelation: "mesas"
             referencedColumns: ["id"]
           },
         ]
