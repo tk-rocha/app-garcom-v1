@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import bcrypt from 'bcryptjs';
 
 interface User {
   id: string;
@@ -39,6 +38,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (usuario: string, senha: string): Promise<boolean> => {
     setIsLoading(true);
     try {
+      console.log('Tentando login com:', { usuario, senha });
+      
       // Fetch user from database
       const { data: garcons, error } = await supabase
         .from('garcons')
@@ -47,13 +48,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .eq('ativo', true)
         .single();
 
+      console.log('Resposta do banco:', { garcons, error });
+
       if (error || !garcons) {
         console.error('User not found or inactive:', error);
         return false;
       }
 
-      // Verify password
-      const passwordValid = bcrypt.compareSync(senha, garcons.senha_hash);
+      // Verify password (simple string comparison)
+      const passwordValid = senha === garcons.senha;
+      console.log('Verificação de senha:', { senha, garconsSenha: garcons.senha, passwordValid });
+      
       if (!passwordValid) {
         console.error('Invalid password');
         return false;

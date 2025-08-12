@@ -28,11 +28,14 @@ const LoginScreen = () => {
   useEffect(() => {
     const loadGarcons = async () => {
       try {
+        console.log('Carregando garçons do banco...');
         const { data, error } = await supabase
           .from('garcons')
           .select('id, nome, usuario, ativo')
           .eq('ativo', true)
           .order('nome');
+
+        console.log('Resposta da consulta garçons:', { data, error });
 
         if (error) {
           console.error('Error loading garcons:', error);
@@ -40,9 +43,11 @@ const LoginScreen = () => {
           return;
         }
 
+        console.log('Garçons carregados:', data);
         setGarcons(data || []);
         if (data && data.length > 0) {
           setSelectedUser(data[0].usuario);
+          console.log('Usuário selecionado automaticamente:', data[0].usuario);
         }
       } catch (error) {
         console.error('Error loading garcons:', error);

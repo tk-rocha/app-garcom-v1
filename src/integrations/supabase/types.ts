@@ -20,7 +20,7 @@ export type Database = {
           criado_em: string | null
           id: string
           nome: string
-          senha_hash: string
+          senha: string
           usuario: string
         }
         Insert: {
@@ -28,7 +28,7 @@ export type Database = {
           criado_em?: string | null
           id?: string
           nome: string
-          senha_hash: string
+          senha: string
           usuario: string
         }
         Update: {
@@ -36,7 +36,7 @@ export type Database = {
           criado_em?: string | null
           id?: string
           nome?: string
-          senha_hash?: string
+          senha?: string
           usuario?: string
         }
         Relationships: []
