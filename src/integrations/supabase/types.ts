@@ -134,6 +134,41 @@ export type Database = {
         }
         Relationships: []
       }
+      opcoes_fase: {
+        Row: {
+          ativo: boolean | null
+          criado_em: string | null
+          id: string
+          nome: string
+          preco_adicional: number | null
+          tipo_fase_id: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          criado_em?: string | null
+          id?: string
+          nome: string
+          preco_adicional?: number | null
+          tipo_fase_id?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          criado_em?: string | null
+          id?: string
+          nome?: string
+          preco_adicional?: number | null
+          tipo_fase_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opcoes_fase_tipo_fase_id_fkey"
+            columns: ["tipo_fase_id"]
+            isOneToOne: false
+            referencedRelation: "tipos_fase"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       produto_componentes: {
         Row: {
           componente_id: string
@@ -166,6 +201,48 @@ export type Database = {
             columns: ["produto_id"]
             isOneToOne: false
             referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      produto_fases: {
+        Row: {
+          criado_em: string | null
+          id: string
+          obrigatorio: boolean | null
+          ordem: number
+          produto_id: string | null
+          tipo_fase_id: string | null
+        }
+        Insert: {
+          criado_em?: string | null
+          id?: string
+          obrigatorio?: boolean | null
+          ordem: number
+          produto_id?: string | null
+          tipo_fase_id?: string | null
+        }
+        Update: {
+          criado_em?: string | null
+          id?: string
+          obrigatorio?: boolean | null
+          ordem?: number
+          produto_id?: string | null
+          tipo_fase_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produto_fases_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "produto_fases_tipo_fase_id_fkey"
+            columns: ["tipo_fase_id"]
+            isOneToOne: false
+            referencedRelation: "tipos_fase"
             referencedColumns: ["id"]
           },
         ]
@@ -210,6 +287,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tipos_fase: {
+        Row: {
+          criado_em: string | null
+          id: string
+          nome: string
+          opcional: boolean | null
+          titulo: string
+        }
+        Insert: {
+          criado_em?: string | null
+          id?: string
+          nome: string
+          opcional?: boolean | null
+          titulo: string
+        }
+        Update: {
+          criado_em?: string | null
+          id?: string
+          nome?: string
+          opcional?: boolean | null
+          titulo?: string
+        }
+        Relationships: []
       }
       vendas: {
         Row: {
