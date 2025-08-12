@@ -14,7 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      garcons: {
+        Row: {
+          ativo: boolean | null
+          criado_em: string | null
+          id: string
+          nome: string
+          senha_hash: string
+          usuario: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          criado_em?: string | null
+          id?: string
+          nome: string
+          senha_hash: string
+          usuario: string
+        }
+        Update: {
+          ativo?: boolean | null
+          criado_em?: string | null
+          id?: string
+          nome?: string
+          senha_hash?: string
+          usuario?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
