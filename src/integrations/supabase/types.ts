@@ -208,6 +208,45 @@ export type Database = {
           },
         ]
       }
+      pagamentos_venda: {
+        Row: {
+          criado_em: string | null
+          id: string
+          id_forma_pagamento: string
+          id_venda: string
+          valor_pago: number
+        }
+        Insert: {
+          criado_em?: string | null
+          id?: string
+          id_forma_pagamento: string
+          id_venda: string
+          valor_pago: number
+        }
+        Update: {
+          criado_em?: string | null
+          id?: string
+          id_forma_pagamento?: string
+          id_venda?: string
+          valor_pago?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_venda_id_forma_pagamento_fkey"
+            columns: ["id_forma_pagamento"]
+            isOneToOne: false
+            referencedRelation: "formas_pagamento"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_venda_id_venda_fkey"
+            columns: ["id_venda"]
+            isOneToOne: false
+            referencedRelation: "vendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       produto_componentes: {
         Row: {
           componente_id: string
