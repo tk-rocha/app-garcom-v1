@@ -17,12 +17,17 @@ const SaleCompletedScreen = () => {
 
   useEffect(() => {
     // Clear cart/mesa data immediately (dailySales is already updated in PaymentScreen)
-    if (mesaId) {
-      clearMesaCompletely(cartId);
-    } else {
-      clearCart(cartId);
-    }
-  }, []); // Run only once on mount
+    // Only run if data is available to avoid rendering warning
+    const timer = setTimeout(() => {
+      if (mesaId) {
+        clearMesaCompletely(cartId);
+      } else {
+        clearCart(cartId);
+      }
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [mesaId, cartId, clearCart, clearMesaCompletely]); // Add dependencies
 
   useEffect(() => {
     // Start countdown timer

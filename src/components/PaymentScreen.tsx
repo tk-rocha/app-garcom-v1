@@ -8,6 +8,7 @@ import { ArrowLeft, CreditCard, Smartphone, Banknote } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency as formatBRL } from "@/lib/utils";
+import { useSales } from "@/hooks/useSales";
 
 interface Payment {
   id: string;
@@ -80,8 +81,9 @@ const PaymentScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { getSubtotal, getDiscountAmount, getTaxAmount, getServiceFeeAmount, getTotal, ensureMesaServiceFee, setServiceFee, setTax, clearCart, clearMesaCompletely } = useCart();
+  const { getSubtotal, getDiscountAmount, getTaxAmount, getServiceFeeAmount, getTotal, ensureMesaServiceFee, setServiceFee, setTax, clearCart, clearMesaCompletely, getCartItems } = useCart();
   const { toast } = useToast();
+  const { createSale, isLoading: isSaleLoading } = useSales();
   
   const mesaId = searchParams.get('mesa') || location.state?.mesa;
   const comandaId = searchParams.get('comanda') || location.state?.comanda;
@@ -223,7 +225,7 @@ const PaymentScreen = () => {
       // Add payment to list
       const newPayment: Payment = {
         id: Date.now().toString(),
-        method: method.name,
+        method: selectedMethod, // Use method ID instead of name for better mapping
         amount: amount,
       };
 
@@ -251,7 +253,7 @@ const PaymentScreen = () => {
     }
   };
 
-  const handleFinalizeOrder = () => {
+  const handleFinalizeOrder = async () => {
     if (!canFinalize || isFinalizingOrder) return;
     
     console.log('=== FINALIZAR COMPRA - DEBUG INICIO ===');
@@ -300,11 +302,39 @@ const PaymentScreen = () => {
     try {
       console.log('🚀 Processando finalização da venda...');
       
-      // Clear cart immediately
       const cartId = comandaId ? `comanda-${comandaId}` : 
                     mesaId ? `mesa-${mesaId}` : 'balcao';
-      console.log('🧹 Limpando carrinho:', cartId);
       
+      // Obter itens do carrinho antes de limpar
+      const cartItems = getCartItems(cartId);
+      console.log('📦 Itens do carrinho:', cartItems);
+      
+      // Preparar dados da venda para o banco
+      const saleData = {
+        total,
+        subtotal,
+        discountAmount,
+        taxAmount,
+        serviceFeeAmount,
+        payments,
+        customerCpf,
+        items: cartItems,
+        mesaId,
+        comandaId
+      };
+      
+      // Criar venda no banco de dados
+      console.log('💾 Salvando venda no banco...');
+      const saleResult = await createSale(saleData);
+      
+      if (!saleResult.success) {
+        throw new Error(saleResult.error || 'Erro ao salvar venda no banco');
+      }
+      
+      console.log('✅ Venda salva no banco com sucesso:', saleResult);
+      
+      // Limpar carrinho após sucesso no banco
+      console.log('🧹 Limpando carrinho:', cartId);
       try {
         if (mesaId) {
           console.log('🧹 Limpando mesa completamente:', cartId);
@@ -317,57 +347,6 @@ const PaymentScreen = () => {
       } catch (error) {
         console.error('❌ Erro ao limpar carrinho:', error);
       }
-
-      // Generate receipt asynchronously (non-blocking)
-      setTimeout(async () => {
-        try {
-          console.log('📄 Gerando cupom fiscal...');
-          
-          const now = new Date();
-          const receipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
-          
-          // Find next receipt number efficiently
-          let receiptNumber = 700;
-          if (receipts.length > 0) {
-            const lastReceipt = receipts[receipts.length - 1];
-            receiptNumber = (parseInt(lastReceipt.number) || 699) + 1;
-          }
-          
-          const receipt = {
-            id: `${now.getTime()}-${Math.random().toString(36).substring(2)}`,
-            number: receiptNumber,
-            timestamp: now.toISOString(),
-            date: now.toLocaleDateString('pt-BR'),
-            time: now.toLocaleTimeString('pt-BR'),
-            grossAmount: subtotal + taxAmount + (serviceFeeAmount || 0),
-            netAmount: total,
-            discount: discountAmount,
-            tax: taxAmount,
-            serviceFee: serviceFeeAmount || 0,
-            payments: payments,
-            customerCpf: customerCpf,
-          };
-
-          receipts.push(receipt);
-          localStorage.setItem('fiscalReceipts', JSON.stringify(receipts));
-
-          // Update daily sales (only place where dailySales is incremented)
-          const today = new Date().toDateString();
-          const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
-          dailySales[today] = (dailySales[today] || 0) + total;
-          localStorage.setItem('dailySales', JSON.stringify(dailySales));
-          
-          console.log('💰 Daily sales updated:', {
-            previousTotal: dailySales[today] - total,
-            saleAmount: total,
-            newTotal: dailySales[today]
-          });
-
-          console.log('✅ Cupom fiscal gerado:', receiptNumber);
-        } catch (error) {
-          console.error('❌ Erro ao gerar cupom fiscal:', error);
-        }
-      }, 100);
 
       // Navigate to success screen with details
       const params = new URLSearchParams({
@@ -536,9 +515,9 @@ const PaymentScreen = () => {
             <CardContent className="p-4">
               <h3 className="font-semibold text-gray-900 mb-3">Pagamentos Realizados</h3>
               <div className="space-y-2">
-                {payments.map((payment) => (
-                  <div key={payment.id} className="flex justify-between items-center py-2 border-b">
-                    <span className="text-gray-700">{payment.method}</span>
+                 {payments.map((payment) => (
+                   <div key={payment.id} className="flex justify-between items-center py-2 border-b">
+                     <span className="text-gray-700">{paymentMethods.find(m => m.id === payment.method)?.name || payment.method}</span>
                     <div className="flex items-center space-x-2">
                       <span className="font-medium">{formatBRL(payment.amount)}</span>
                       <Button
@@ -680,14 +659,14 @@ const PaymentScreen = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4" style={{paddingBottom: "env(safe-area-inset-bottom)"}}>
         <Button
           onClick={handleFinalizeOrder}
-          disabled={!canFinalize || isFinalizingOrder}
+          disabled={!canFinalize || isFinalizingOrder || isSaleLoading}
           className={`w-full py-4 text-lg font-semibold ${
-            canFinalize && !isFinalizingOrder
+            canFinalize && !isFinalizingOrder && !isSaleLoading
               ? "bg-[#180F33] text-[#FFC72C] hover:bg-[#180F33]/90"
               : "bg-gray-300 text-gray-500 cursor-not-allowed"
           }`}
         >
-          {isFinalizingOrder ? "FINALIZANDO..." : "FINALIZAR COMPRA"}
+          {isFinalizingOrder || isSaleLoading ? "FINALIZANDO..." : "FINALIZAR COMPRA"}
         </Button>
       </div>
     </div>
