@@ -315,47 +315,64 @@ export type Database = {
       vendas: {
         Row: {
           atualizado_em: string | null
+          cpf_cliente: string | null
+          cpf_fidelidade: string | null
           criado_em: string | null
-          garcom_id: string | null
+          finalizado_em: string | null
           id: string
-          mesa_id: string | null
-          numero_pedido: number
+          numero_cupom: number
+          numero_mesa_comanda: number | null
           status: string | null
-          valor_total: number | null
+          tipo: string
+          valor_bruto: number
+          valor_desconto: number | null
+          valor_liquido: number
+          valor_taxa: number | null
+          valor_troco: number | null
+          vendedor_id: string | null
         }
         Insert: {
           atualizado_em?: string | null
+          cpf_cliente?: string | null
+          cpf_fidelidade?: string | null
           criado_em?: string | null
-          garcom_id?: string | null
+          finalizado_em?: string | null
           id?: string
-          mesa_id?: string | null
-          numero_pedido?: number
+          numero_cupom?: number
+          numero_mesa_comanda?: number | null
           status?: string | null
-          valor_total?: number | null
+          tipo?: string
+          valor_bruto?: number
+          valor_desconto?: number | null
+          valor_liquido?: number
+          valor_taxa?: number | null
+          valor_troco?: number | null
+          vendedor_id?: string | null
         }
         Update: {
           atualizado_em?: string | null
+          cpf_cliente?: string | null
+          cpf_fidelidade?: string | null
           criado_em?: string | null
-          garcom_id?: string | null
+          finalizado_em?: string | null
           id?: string
-          mesa_id?: string | null
-          numero_pedido?: number
+          numero_cupom?: number
+          numero_mesa_comanda?: number | null
           status?: string | null
-          valor_total?: number | null
+          tipo?: string
+          valor_bruto?: number
+          valor_desconto?: number | null
+          valor_liquido?: number
+          valor_taxa?: number | null
+          valor_troco?: number | null
+          vendedor_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "vendas_garcom_id_fkey"
-            columns: ["garcom_id"]
+            foreignKeyName: "vendas_vendedor_id_fkey"
+            columns: ["vendedor_id"]
             isOneToOne: false
             referencedRelation: "garcons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendas_mesa_id_fkey"
-            columns: ["mesa_id"]
-            isOneToOne: false
-            referencedRelation: "mesas"
             referencedColumns: ["id"]
           },
         ]
