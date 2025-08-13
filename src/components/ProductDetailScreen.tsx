@@ -1,10 +1,8 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
+import { useNavigate, useParams, useLocation, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus, Edit3, Home } from "lucide-react";
+import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus, Home } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useCategories } from "@/hooks/useCategories";
 import { ProductPhaseSelector } from "./ProductPhaseSelector";
@@ -13,11 +11,14 @@ const ProductDetailScreen = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { product, categoryId } = location.state || {};
   
-  const [observation, setObservation] = useState("");
-  const [showObservation, setShowObservation] = useState(false);
   const [showPhaseSelector, setShowPhaseSelector] = useState(false);
+  
+  // Determinar se está em contexto de mesa
+  const mesaId = searchParams.get('mesa');
+  const isFromMesa = !!mesaId;
   const { getTotalItems, getProductQuantity, addToCart, removeFromCart } = useCart();
   const { categories } = useCategories();
 
@@ -31,9 +32,17 @@ const ProductDetailScreen = () => {
 
   const handleBreadcrumbClick = (section: string) => {
     if (section === "home") {
-      navigate("/balcao");
+      if (isFromMesa) {
+        navigate(`/mesa/${mesaId}`);
+      } else {
+        navigate("/balcao");
+      }
     } else if (section === "category") {
-      navigate("/produtos", { state: { activeCategory: categoryId } });
+      if (isFromMesa) {
+        navigate(`/produtos?mesa=${mesaId}`, { state: { activeCategory: categoryId } });
+      } else {
+        navigate("/produtos", { state: { activeCategory: categoryId } });
+      }
     }
   };
 
@@ -96,7 +105,13 @@ const ProductDetailScreen = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={() => navigate("/produtos", { state: { activeCategory: categoryId } })}
+            onClick={() => {
+              if (isFromMesa) {
+                navigate(`/produtos?mesa=${mesaId}`, { state: { activeCategory: categoryId } });
+              } else {
+                navigate("/produtos", { state: { activeCategory: categoryId } });
+              }
+            }}
             className="text-primary hover:bg-primary/5"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -217,30 +232,6 @@ const ProductDetailScreen = () => {
           </p>
         </div>
 
-        {/* Observation Button */}
-        <div className="space-y-3">
-          <Button
-            variant="outline"
-            onClick={() => setShowObservation(!showObservation)}
-            className="w-full py-3 text-primary border-primary hover:bg-primary/5 flex items-center justify-center space-x-2"
-          >
-            <Edit3 className="h-4 w-4" />
-            <span>Observação</span>
-          </Button>
-          
-          {showObservation && (
-            <Card className="mt-3">
-              <CardContent className="p-4">
-                <Textarea
-                  placeholder="Digite suas observações aqui (ex: sem gelo, gelado, etc.)"
-                  value={observation}
-                  onChange={(e) => setObservation(e.target.value)}
-                  className="min-h-[100px] border-gray-300 focus:border-primary"
-                />
-              </CardContent>
-            </Card>
-          )}
-        </div>
       </div>
 
       {/* Phase Selection Modal */}
