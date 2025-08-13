@@ -91,9 +91,13 @@ export const useSales = () => {
         valor_troco: saleData.payments.reduce((total, p) => total + (p.change || 0), 0),
         cpf_cliente: saleData.customerCpf || null,
         vendedor_id: authUser.id || null,
-        status: 'finalizada',
+        status: 'ativo',
         finalizado_em: new Date().toISOString()
       };
+
+      console.log('🔍 DEBUGGING - Dados da venda antes do insert:', JSON.stringify(vendaData, null, 2));
+      console.log('🔍 DEBUGGING - Status value:', vendaData.status, typeof vendaData.status);
+      console.log('🔍 DEBUGGING - Tipo value:', vendaData.tipo, typeof vendaData.tipo);
 
       console.log('💾 Criando venda:', vendaData);
 
