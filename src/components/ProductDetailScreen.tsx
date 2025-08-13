@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, User, Search, Scan, ShoppingBag, Plus, Minus, Edit3, Home } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useCategories } from "@/hooks/useCategories";
+import { ProductPhaseSelector } from "./ProductPhaseSelector";
 
 const ProductDetailScreen = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const ProductDetailScreen = () => {
   
   const [observation, setObservation] = useState("");
   const [showObservation, setShowObservation] = useState(false);
+  const [showPhaseSelector, setShowPhaseSelector] = useState(false);
   const { getTotalItems, getProductQuantity, addToCart, removeFromCart } = useCart();
   const { categories } = useCategories();
 
@@ -45,11 +47,44 @@ const ProductDetailScreen = () => {
 
   const quantity = getProductQuantity(product.id);
 
+  // Check if product needs phase selection
+  const needsPhaseSelection = (productName: string) => {
+    const productKey = productName?.toLowerCase()
+      ?.replace(/[^a-z0-9\s-]/g, '')
+      ?.replace(/\s+/g, '-') || '';
+    
+    const phaseConfig = {
+      "combo-x-salada": true,
+      "combo-x-bacon": true,
+      "combo-x-tudo": true,
+      "combo-pastel": true,
+      "misto-quente": true,
+      "hamburguer-classico": true
+    };
+    
+    return phaseConfig[productKey as keyof typeof phaseConfig] || false;
+  };
+
   const handleAddToCart = () => {
+    // Check if product needs phase selection
+    if (needsPhaseSelection(product.name)) {
+      setShowPhaseSelector(true);
+      return;
+    }
+    
     addToCart(product.id, {
       name: product.name,
       price: product.price,
       image: product.image
+    });
+  };
+
+  const handlePhaseSelectionComplete = (productData: any) => {
+    addToCart(productData.id, {
+      name: productData.name,
+      price: productData.price,
+      image: productData.image,
+      customizations: productData.customizations
     });
   };
 
@@ -207,6 +242,14 @@ const ProductDetailScreen = () => {
           )}
         </div>
       </div>
+
+      {/* Phase Selection Modal */}
+      <ProductPhaseSelector
+        isOpen={showPhaseSelector}
+        onClose={() => setShowPhaseSelector(false)}
+        product={product}
+        onAddToCart={handlePhaseSelectionComplete}
+      />
     </div>
   );
 };

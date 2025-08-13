@@ -51,22 +51,25 @@ const ProductListScreen = () => {
   };
 
   const handleAddToCart = (product: any) => {
-    const categoryName = categories.find(cat => cat.id === activeCategory)?.nome || '';
+    // Check if product needs phase selection
+    const needsPhaseSelection = (productName: string) => {
+      const productKey = productName?.toLowerCase()
+        ?.replace(/[^a-z0-9\s-]/g, '')
+        ?.replace(/\s+/g, '-') || '';
+      
+      const phaseConfig = {
+        "combo-x-salada": true,
+        "combo-x-bacon": true,
+        "combo-x-tudo": true,
+        "combo-pastel": true,
+        "misto-quente": true,
+        "hamburguer-classico": true
+      };
+      
+      return phaseConfig[productKey as keyof typeof phaseConfig] || false;
+    };
     
-    // Check if product is from LANCHES category and needs phase selection
-    if (categoryName === "LANCHES" && product.nome !== "Misto Quente") {
-      setSelectedProduct({
-        id: getNumericId(product.id),
-        name: product.nome,
-        price: product.preco,
-        image: product.imagem_url || "/api/placeholder/80/80"
-      });
-      setShowPhaseSelector(true);
-      return;
-    }
-    
-    // For Misto Quente, also use phase selector but with different config
-    if (product.nome === "Misto Quente") {
+    if (needsPhaseSelection(product.nome)) {
       setSelectedProduct({
         id: getNumericId(product.id),
         name: product.nome,

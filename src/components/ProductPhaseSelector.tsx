@@ -35,6 +35,10 @@ const PHASE_CONFIG = {
   },
   "misto-quente": {
     phases: ["drink", "additional"]
+  },
+  // Hamburguer classico with meat point selection
+  "hamburguer-classico": {
+    phases: ["meat", "additional"]
   }
 };
 
