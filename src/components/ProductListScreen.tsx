@@ -57,6 +57,9 @@ const ProductListScreen = () => {
         ?.replace(/[^a-z0-9\s-]/g, '')
         ?.replace(/\s+/g, '-') || '';
       
+      console.log('Product Name:', productName);
+      console.log('Product Key:', productKey);
+      
       const phaseConfig = {
         "combo-x-salada": true,
         "combo-x-bacon": true,
@@ -66,7 +69,10 @@ const ProductListScreen = () => {
         "hamburguer-classico": true
       };
       
-      return phaseConfig[productKey as keyof typeof phaseConfig] || false;
+      const hasPhases = phaseConfig[productKey as keyof typeof phaseConfig] || false;
+      console.log('Has Phases:', hasPhases);
+      
+      return hasPhases;
     };
     
     if (needsPhaseSelection(product.nome)) {

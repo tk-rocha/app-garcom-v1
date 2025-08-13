@@ -92,7 +92,11 @@ export const ProductPhaseSelector = ({ isOpen, onClose, product, onAddToCart }: 
     ?.replace(/[^a-z0-9\s-]/g, '')
     ?.replace(/\s+/g, '-') || '';
 
+  console.log('ProductPhaseSelector - Product Name:', product?.name);
+  console.log('ProductPhaseSelector - Product Key:', productKey);
+
   const config = PHASE_CONFIG[productKey as keyof typeof PHASE_CONFIG];
+  console.log('ProductPhaseSelector - Config found:', config);
   
   useEffect(() => {
     if (isOpen && product) {
