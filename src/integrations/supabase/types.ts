@@ -32,6 +32,45 @@ export type Database = {
         }
         Relationships: []
       }
+      formas_pagamento: {
+        Row: {
+          atualizado_em: string | null
+          criado_em: string | null
+          id: string
+          nome: string
+          padrao_sangria: boolean | null
+          padrao_suprimento: boolean | null
+          parcelas_permitidas: number | null
+          permite_troco: boolean | null
+          situacao: string
+          traz_fechamento: boolean | null
+        }
+        Insert: {
+          atualizado_em?: string | null
+          criado_em?: string | null
+          id?: string
+          nome: string
+          padrao_sangria?: boolean | null
+          padrao_suprimento?: boolean | null
+          parcelas_permitidas?: number | null
+          permite_troco?: boolean | null
+          situacao?: string
+          traz_fechamento?: boolean | null
+        }
+        Update: {
+          atualizado_em?: string | null
+          criado_em?: string | null
+          id?: string
+          nome?: string
+          padrao_sangria?: boolean | null
+          padrao_suprimento?: boolean | null
+          parcelas_permitidas?: number | null
+          permite_troco?: boolean | null
+          situacao?: string
+          traz_fechamento?: boolean | null
+        }
+        Relationships: []
+      }
       garcons: {
         Row: {
           ativo: boolean | null
