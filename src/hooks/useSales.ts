@@ -91,7 +91,7 @@ export const useSales = () => {
         valor_troco: saleData.payments.reduce((total, p) => total + (p.change || 0), 0),
         cpf_cliente: saleData.customerCpf || null,
         vendedor_id: authUser.id || null,
-        status: 'finalizado',
+        status: 'finalizada',
         finalizado_em: new Date().toISOString()
       };
 
