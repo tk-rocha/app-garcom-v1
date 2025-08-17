@@ -36,6 +36,7 @@ interface SaleData {
   serviceFeeAmount: number;
   payments: Payment[];
   customerCpf?: string;
+  loyaltyCpf?: string;
   items: CartItem[];
   mesaId?: string;
   comandaId?: string;
@@ -90,6 +91,7 @@ export const useSales = () => {
         valor_taxa: (saleData.serviceFeeAmount ?? saleData.taxAmount) || 0,
         valor_troco: saleData.payments.reduce((total, p) => total + (p.change || 0), 0),
         cpf_cliente: saleData.customerCpf || null,
+        cpf_fidelidade: saleData.loyaltyCpf || null,
         vendedor_id: authUser.id || null,
         status: 'ativo',
         finalizado_em: new Date().toISOString()
@@ -98,6 +100,13 @@ export const useSales = () => {
       console.log('🔍 DEBUGGING - Dados da venda antes do insert:', JSON.stringify(vendaData, null, 2));
       console.log('🔍 DEBUGGING - Status value:', vendaData.status, typeof vendaData.status);
       console.log('🔍 DEBUGGING - Tipo value:', vendaData.tipo, typeof vendaData.tipo);
+      console.log('🔎 Campos críticos venda:', {
+        valor_taxa: vendaData.valor_taxa,
+        valor_desconto: vendaData.valor_desconto,
+        valor_troco: vendaData.valor_troco,
+        cpf_cliente: vendaData.cpf_cliente,
+        cpf_fidelidade: vendaData.cpf_fidelidade
+      });
 
       console.log('💾 Criando venda:', vendaData);
 
