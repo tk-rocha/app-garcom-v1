@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -80,6 +81,18 @@ export const useSales = () => {
       // 2. Criar registro da venda
       // Obter vendedor do localStorage se disponível
       const authUser = JSON.parse(localStorage.getItem('auth-user') || '{}');
+
+      // Garante existência do cliente de fidelidade, se informado
+      if (saleData.loyaltyCpf) {
+        const cpfDigits = saleData.loyaltyCpf.replace(/\D/g, '').slice(0, 11);
+        console.log('🔗 Garantindo cliente fidelidade para CPF:', cpfDigits);
+        const { error: upsertError } = await supabase
+          .from('clientes_fidelidade')
+          .upsert({ cpf: cpfDigits, nome: 'Cliente Fidelidade' }, { onConflict: 'cpf' });
+        if (upsertError) {
+          console.warn('⚠️ Não foi possível garantir o cliente fidelidade:', upsertError);
+        }
+      }
       
       const vendaData = {
         tipo: saleData.mesaId ? 'mesa' : 'balcao',

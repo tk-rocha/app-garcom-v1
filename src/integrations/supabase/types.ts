@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -29,6 +29,33 @@ export type Database = {
           criado_em?: string | null
           id?: string
           nome?: string
+        }
+        Relationships: []
+      }
+      clientes_fidelidade: {
+        Row: {
+          atualizado_em: string | null
+          cpf: string
+          criado_em: string | null
+          id: string
+          nome: string
+          pontos: number
+        }
+        Insert: {
+          atualizado_em?: string | null
+          cpf: string
+          criado_em?: string | null
+          id?: string
+          nome: string
+          pontos?: number
+        }
+        Update: {
+          atualizado_em?: string | null
+          cpf?: string
+          criado_em?: string | null
+          id?: string
+          nome?: string
+          pontos?: number
         }
         Relationships: []
       }
@@ -447,6 +474,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_vendas_clientes_fidelidade"
+            columns: ["cpf_fidelidade"]
+            isOneToOne: false
+            referencedRelation: "clientes_fidelidade"
+            referencedColumns: ["cpf"]
+          },
+          {
             foreignKeyName: "vendas_vendedor_id_fkey"
             columns: ["vendedor_id"]
             isOneToOne: false
@@ -460,7 +494,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      strip_digits: {
+        Args: { value: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

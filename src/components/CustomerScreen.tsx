@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,13 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus, Minus } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-
-// Mock customer data
-const mockCustomers: Record<string, { name: string; points: number }> = {
-  "22553346824": { name: "Ester Rocha", points: 80 },
-  "37097181800": { name: "Fagner Barreto", points: 50 },
-  "35649814899": { name: "Rodolpho Florentino", points: 1 },
-};
+import { useLoyalty } from "@/hooks/useLoyalty";
 
 // Mock redeemable products - sorted by points (highest last)
 const redeemableProducts = [
@@ -28,6 +23,7 @@ const CustomerScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { addToCart } = useCart();
+  const { ensureCustomer } = useLoyalty();
   
   // Detect origin context from URL parameters
   const mesaId = searchParams.get("mesa");
@@ -37,6 +33,7 @@ const CustomerScreen = () => {
   const [cpf, setCpf] = useState("");
   const [customer, setCustomer] = useState<{ name: string; points: number } | null>(null);
   const [selectedItems, setSelectedItems] = useState<Record<number, number>>({});
+  const [loadingCustomer, setLoadingCustomer] = useState(false);
 
   const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, "");
@@ -51,15 +48,18 @@ const CustomerScreen = () => {
     const formatted = formatCPF(value);
     setCpf(formatted);
     
-    // Auto-fill customer data when CPF is complete
+    // Auto-busca/cadastro no Supabase quando CPF estiver completo
     if (formatted.length === 14) {
-      const cpfNumbers = formatted.replace(/\D/g, "");
-      if (mockCustomers[cpfNumbers]) {
-        setCustomer(mockCustomers[cpfNumbers]);
-      } else {
-        // Default customer for any other valid CPF
-        setCustomer({ name: "Igor Monteiro", points: 90 });
-      }
+      setLoadingCustomer(true);
+      ensureCustomer(formatted)
+        .then((loyalty) => {
+          if (loyalty) {
+            setCustomer({ name: loyalty.nome, points: loyalty.pontos ?? 0 });
+          } else {
+            setCustomer(null);
+          }
+        })
+        .finally(() => setLoadingCustomer(false));
     } else {
       setCustomer(null);
     }
@@ -174,6 +174,9 @@ const CustomerScreen = () => {
             className="text-lg"
             inputMode="numeric"
           />
+          {loadingCustomer && (
+            <p className="text-xs text-muted-foreground">Buscando/cadastrando cliente...</p>
+          )}
         </div>
 
         {/* Customer Info */}
