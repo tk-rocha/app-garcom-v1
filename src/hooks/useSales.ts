@@ -222,6 +222,21 @@ export const useSales = () => {
         }
       }
 
+      // 6. Finalizar venda para disparar o trigger de pontos de fidelidade
+      if (finalLoyaltyCpf) {
+        console.log('🎯 Finalizando venda para calcular pontos de fidelidade...');
+        const { error: finalizeError } = await supabase
+          .from('vendas')
+          .update({ status: 'finalizado' })
+          .eq('id', venda.id);
+
+        if (finalizeError) {
+          console.error('❌ Erro ao finalizar venda para pontos:', finalizeError);
+        } else {
+          console.log('✅ Venda finalizada - pontos de fidelidade calculados');
+        }
+      }
+
       // Manter a funcionalidade existente do localStorage para compatibilidade
       const now = new Date();
       const receipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
