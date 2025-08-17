@@ -71,6 +71,8 @@ interface CartContextType {
   ensureMesaServiceFee: (cartId: string) => void;
   clearMesaCompletely: (cartId: string) => void;
   updateObservation: (productId: number, observacao: string, cartId?: string) => void;
+  setLoyaltyCpf: (cartId: string, cpf: string) => void;
+  getLoyaltyCpf: (cartId?: string) => string | null;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -95,6 +97,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const savedDiscounts = localStorage.getItem('restaurant-discounts');
       const savedTaxes = localStorage.getItem('restaurant-taxes');
       const savedServiceFees = localStorage.getItem('restaurant-service-fees');
+      const savedLoyaltyCpfs = localStorage.getItem('restaurant-loyalty-cpfs');
       
       // Debug log to verify data persistence
       console.log('CartContext - Loading from storage:', {
@@ -106,7 +109,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         carts: savedCarts ? JSON.parse(savedCarts) : { balcao: [] },
         discounts: savedDiscounts ? JSON.parse(savedDiscounts) : { balcao: null },
         taxes: savedTaxes ? JSON.parse(savedTaxes) : { balcao: null },
-        serviceFees: savedServiceFees ? JSON.parse(savedServiceFees) : { balcao: null }
+        serviceFees: savedServiceFees ? JSON.parse(savedServiceFees) : { balcao: null },
+        loyaltyCpfs: savedLoyaltyCpfs ? JSON.parse(savedLoyaltyCpfs) : { balcao: null }
       };
     } catch (error) {
       console.error('Error loading from localStorage:', error);
@@ -114,7 +118,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         carts: { balcao: [] },
         discounts: { balcao: null },
         taxes: { balcao: null },
-        serviceFees: { balcao: null }
+        serviceFees: { balcao: null },
+        loyaltyCpfs: { balcao: null }
       };
     }
   };
@@ -124,6 +129,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [discounts, setDiscounts] = useState<Record<string, Discount | null>>(loadFromStorage().discounts);
   const [taxes, setTaxes] = useState<Record<string, Tax | null>>(loadFromStorage().taxes);
   const [serviceFees, setServiceFees] = useState<Record<string, ServiceFee | null>>(loadFromStorage().serviceFees);
+  const [loyaltyCpfs, setLoyaltyCpfs] = useState<Record<string, string | null>>(loadFromStorage().loyaltyCpfs);
 
   // Save to localStorage whenever state changes
   React.useEffect(() => {
@@ -142,6 +148,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   React.useEffect(() => {
     localStorage.setItem('restaurant-service-fees', JSON.stringify(serviceFees));
   }, [serviceFees]);
+
+  React.useEffect(() => {
+    localStorage.setItem('restaurant-loyalty-cpfs', JSON.stringify(loyaltyCpfs));
+  }, [loyaltyCpfs]);
 
   // Get current cart, discount, tax, and service fee (for backward compatibility)
   const cart = carts.balcao || [];
@@ -341,11 +351,20 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setTax(amount > 0 ? { id: 'manual', name: 'Taxa Manual', type: 'fixed', value: amount } : null, cartId);
   };
 
+  const setLoyaltyCpf = (cartId: string, cpf: string) => {
+    setLoyaltyCpfs(prev => ({ ...prev, [cartId]: cpf }));
+  };
+
+  const getLoyaltyCpf = (cartId: string = 'balcao'): string | null => {
+    return loyaltyCpfs[cartId] || null;
+  };
+
   const clearCart = (cartId: string = 'balcao') => {
     setCarts(prev => ({ ...prev, [cartId]: [] }));
     setDiscount(null, cartId);
     setTax(null, cartId);
     setServiceFee(null, cartId);
+    setLoyaltyCpfs(prev => ({ ...prev, [cartId]: null }));
     
     // Also clear any saved data for this mesa or comanda
     if (cartId.startsWith('mesa-')) {
@@ -437,6 +456,13 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       console.log('🧹 clearMesaCompletely - Limpando taxa de serviço:', cartId);
       return updated;
     });
+
+    // Clear loyalty CPFs
+    setLoyaltyCpfs(prev => {
+      const updated = { ...prev, [cartId]: null };
+      console.log('🧹 clearMesaCompletely - Limpando CPF fidelidade:', cartId);
+      return updated;
+    });
     
     // Clear localStorage data for mesa
     if (cartId.startsWith('mesa-')) {
@@ -485,6 +511,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     hasItensEnviados,
     ensureMesaServiceFee,
     updateObservation,
+    setLoyaltyCpf,
+    getLoyaltyCpf,
   };
 
   return (

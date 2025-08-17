@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/contexts/CartContext';
 
 interface CartItem {
   productId: number;
@@ -41,6 +42,7 @@ interface SaleData {
   items: CartItem[];
   mesaId?: string;
   comandaId?: string;
+  cartId?: string;
 }
 
 // Mapeamento entre formas de pagamento do sistema e do banco
@@ -57,6 +59,7 @@ const PAYMENT_METHOD_MAPPING: Record<string, string> = {
 export const useSales = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { getLoyaltyCpf } = useCart();
 
   const createSale = async (saleData: SaleData) => {
     setIsLoading(true);
@@ -82,9 +85,13 @@ export const useSales = () => {
       // Obter vendedor do localStorage se disponível
       const authUser = JSON.parse(localStorage.getItem('auth-user') || '{}');
 
+      // Obter CPF de fidelidade vinculado ao carrinho, se houver
+      const loyaltyCpfFromCart = saleData.cartId ? getLoyaltyCpf(saleData.cartId) : null;
+      const finalLoyaltyCpf = saleData.loyaltyCpf || loyaltyCpfFromCart;
+
       // Garante existência do cliente de fidelidade, se informado
-      if (saleData.loyaltyCpf) {
-        const cpfDigits = saleData.loyaltyCpf.replace(/\D/g, '').slice(0, 11);
+      if (finalLoyaltyCpf) {
+        const cpfDigits = finalLoyaltyCpf.replace(/\D/g, '').slice(0, 11);
         console.log('🔗 Garantindo cliente fidelidade para CPF:', cpfDigits);
         const { error: upsertError } = await supabase
           .from('clientes_fidelidade')
@@ -104,7 +111,7 @@ export const useSales = () => {
         valor_taxa: (saleData.serviceFeeAmount ?? saleData.taxAmount) || 0,
         valor_troco: saleData.payments.reduce((total, p) => total + (p.change || 0), 0),
         cpf_cliente: saleData.customerCpf || null,
-        cpf_fidelidade: saleData.loyaltyCpf || null,
+        cpf_fidelidade: finalLoyaltyCpf || null,
         vendedor_id: authUser.id || null,
         status: 'ativo',
         finalizado_em: new Date().toISOString()

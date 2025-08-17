@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus, Minus } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useLoyalty } from "@/hooks/useLoyalty";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock redeemable products - sorted by points (highest last)
 const redeemableProducts = [
@@ -22,8 +23,9 @@ const redeemableProducts = [
 const CustomerScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { addToCart } = useCart();
-  const { ensureCustomer } = useLoyalty();
+  const { addToCart, setLoyaltyCpf } = useCart();
+  const { getByCpf } = useLoyalty();
+  const { toast } = useToast();
   
   // Detect origin context from URL parameters
   const mesaId = searchParams.get("mesa");
@@ -48,10 +50,10 @@ const CustomerScreen = () => {
     const formatted = formatCPF(value);
     setCpf(formatted);
     
-    // Auto-busca/cadastro no Supabase quando CPF estiver completo
+    // Auto-busca no Supabase quando CPF estiver completo
     if (formatted.length === 14) {
       setLoadingCustomer(true);
-      ensureCustomer(formatted)
+      getByCpf(formatted)
         .then((loyalty) => {
           if (loyalty) {
             setCustomer({ name: loyalty.nome, points: loyalty.pontos ?? 0 });
@@ -92,6 +94,35 @@ const CustomerScreen = () => {
     return availablePoints >= product.points;
   };
 
+  const handleConfirm = () => {
+    if (!customer || !cpf) return;
+    
+    // Determine the correct cart ID based on origin context
+    let cartId = "balcao"; // Default to balcao
+    if (isFromMesa && mesaId) {
+      cartId = `mesa-${mesaId}`;
+    } else if (isFromComanda && comandaId) {
+      cartId = `comanda-${comandaId}`;
+    }
+    
+    // Vincular CPF de fidelidade à venda atual
+    setLoyaltyCpf(cartId, cpf);
+    
+    toast({
+      title: "Cliente confirmado",
+      description: `CPF ${cpf} vinculado à venda. Pontos serão calculados automaticamente na finalização.`,
+    });
+    
+    // Navigate back to the appropriate cart/products screen
+    if (isFromMesa) {
+      navigate(`/produtos?mesa=${mesaId}`);
+    } else if (isFromComanda) {
+      navigate(`/produtos?comanda=${comandaId}`);
+    } else {
+      navigate("/produtos");
+    }
+  };
+
   const handleRedeem = () => {
     if (!customer) return;
     
@@ -102,6 +133,9 @@ const CustomerScreen = () => {
     } else if (isFromComanda && comandaId) {
       cartId = `comanda-${comandaId}`;
     }
+    
+    // Vincular CPF de fidelidade à venda atual para resgate
+    setLoyaltyCpf(cartId, cpf);
     
     // Add selected items to cart with symbolic price of R$ 0.01
     Object.entries(selectedItems).forEach(([productIdStr, quantity]) => {
@@ -175,7 +209,10 @@ const CustomerScreen = () => {
             inputMode="numeric"
           />
           {loadingCustomer && (
-            <p className="text-xs text-muted-foreground">Buscando/cadastrando cliente...</p>
+            <p className="text-xs text-muted-foreground">Buscando cliente...</p>
+          )}
+          {cpf.length === 14 && !customer && !loadingCustomer && (
+            <p className="text-xs text-destructive">Cliente não cadastrado</p>
           )}
         </div>
 
@@ -288,6 +325,13 @@ const CustomerScreen = () => {
               }}
             >
               Cancelar
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={handleConfirm}
+            >
+              Confirmar
             </Button>
             <Button
               className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
