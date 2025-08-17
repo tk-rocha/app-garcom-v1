@@ -87,7 +87,7 @@ export const useSales = () => {
         valor_bruto: saleData.subtotal + saleData.taxAmount + saleData.serviceFeeAmount,
         valor_liquido: saleData.total,
         valor_desconto: saleData.discountAmount || 0,
-        valor_taxa: saleData.taxAmount || 0,
+        valor_taxa: (saleData.serviceFeeAmount ?? saleData.taxAmount) || 0,
         valor_troco: saleData.payments.reduce((total, p) => total + (p.change || 0), 0),
         cpf_cliente: saleData.customerCpf || null,
         vendedor_id: authUser.id || null,
