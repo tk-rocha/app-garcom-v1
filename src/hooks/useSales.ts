@@ -113,7 +113,7 @@ export const useSales = () => {
         cpf_cliente: saleData.customerCpf || null,
         cpf_fidelidade: finalLoyaltyCpf || null,
         vendedor_id: authUser.id || null,
-        status: 'ativo',
+        status: finalLoyaltyCpf ? 'finalizado' : 'ativo',
         finalizado_em: new Date().toISOString()
       };
 
@@ -219,21 +219,6 @@ export const useSales = () => {
           // Continue mesmo se der erro nos pagamentos
         } else {
           console.log('✅ Pagamentos criados com sucesso');
-        }
-      }
-
-      // 6. Finalizar venda para disparar o trigger de pontos de fidelidade
-      if (finalLoyaltyCpf) {
-        console.log('🎯 Finalizando venda para calcular pontos de fidelidade...');
-        const { error: finalizeError } = await supabase
-          .from('vendas')
-          .update({ status: 'finalizado' })
-          .eq('id', venda.id);
-
-        if (finalizeError) {
-          console.error('❌ Erro ao finalizar venda para pontos:', finalizeError);
-        } else {
-          console.log('✅ Venda finalizada - pontos de fidelidade calculados');
         }
       }
 
