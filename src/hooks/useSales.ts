@@ -113,7 +113,7 @@ export const useSales = () => {
         cpf_cliente: saleData.customerCpf || null,
         cpf_fidelidade: finalLoyaltyCpf || null,
         vendedor_id: authUser.id || null,
-        status: finalLoyaltyCpf ? 'finalizado' : 'ativo',
+        status: 'finalizado',
         finalizado_em: new Date().toISOString()
       };
 
