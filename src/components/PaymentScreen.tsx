@@ -320,9 +320,10 @@ const PaymentScreen = () => {
         customerCpf,
         items: cartItems,
         mesaId,
-        comandaId
+        comandaId,
+        cartId
       };
-      
+
       // Criar venda no banco de dados
       console.log('💾 Salvando venda no banco...');
       const saleResult = await createSale(saleData);

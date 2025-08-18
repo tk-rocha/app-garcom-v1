@@ -87,7 +87,7 @@ export const useSales = () => {
 
       // Obter CPF de fidelidade vinculado ao carrinho, se houver
       const loyaltyCpfFromCart = saleData.cartId ? getLoyaltyCpf(saleData.cartId) : null;
-      const finalLoyaltyCpf = saleData.loyaltyCpf || loyaltyCpfFromCart;
+      const finalLoyaltyCpf = saleData.loyaltyCpf || loyaltyCpfFromCart || saleData.customerCpf;
 
       // Garante existência do cliente de fidelidade, se informado
       if (finalLoyaltyCpf) {
