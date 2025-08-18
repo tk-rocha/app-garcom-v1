@@ -7,7 +7,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { ArrowLeft, Printer } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
-import { getValidatedDailySalesTotal } from "@/utils/salesCalculations";
+import { getValidatedDailySalesTotalWithSync } from "@/utils/salesCalculations";
 
 interface Cupom {
   id: string;
@@ -21,67 +21,73 @@ interface Cupom {
 const ReimpressaoScreen = () => {
   const navigate = useNavigate();
   const [cupons, setCupons] = useState<Cupom[]>([]);
+  const [totalVendasHoje, setTotalVendasHoje] = useState(0);
 
   useEffect(() => {
-    // Clean and load receipts from localStorage (same logic as CancelarCupomScreen)
-    const cleanAndLoadReceipts = () => {
-      const rawReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
-      
-      // Remove duplicates based on number AND timestamp similarity (within 10 seconds)
-      const cleanReceipts = rawReceipts.filter((receipt: any, index: number) => {
-        // Skip invalid receipts
-        if (!receipt || !receipt.number || !receipt.timestamp) return false;
+    const loadData = async () => {
+      // Clean and load receipts from localStorage (same logic as CancelarCupomScreen)
+      const cleanAndLoadReceipts = () => {
+        const rawReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
         
-        const firstOccurrence = rawReceipts.findIndex((r: any) => {
-          if (!r || !r.number || !r.timestamp) return false;
+        // Remove duplicates based on number AND timestamp similarity (within 10 seconds)
+        const cleanReceipts = rawReceipts.filter((receipt: any, index: number) => {
+          // Skip invalid receipts
+          if (!receipt || !receipt.number || !receipt.timestamp) return false;
           
-          const rTime = new Date(r.timestamp).getTime();
-          const receiptTime = new Date(receipt.timestamp).getTime();
-          
-          // Skip if dates are invalid
-          if (isNaN(rTime) || isNaN(receiptTime)) return false;
-          
-          const timeDiff = Math.abs(rTime - receiptTime);
-          return r.number === receipt.number && timeDiff < 10000;
+          const firstOccurrence = rawReceipts.findIndex((r: any) => {
+            if (!r || !r.number || !r.timestamp) return false;
+            
+            const rTime = new Date(r.timestamp).getTime();
+            const receiptTime = new Date(receipt.timestamp).getTime();
+            
+            // Skip if dates are invalid
+            if (isNaN(rTime) || isNaN(receiptTime)) return false;
+            
+            const timeDiff = Math.abs(rTime - receiptTime);
+            return r.number === receipt.number && timeDiff < 10000;
+          });
+          return firstOccurrence === index;
         });
-        return firstOccurrence === index;
-      });
+        
+        // Save cleaned receipts back if we removed duplicates
+        if (cleanReceipts.length !== rawReceipts.length) {
+          localStorage.setItem('fiscalReceipts', JSON.stringify(cleanReceipts));
+        }
+        
+        // Filter to get only today's sales
+        const today = new Date().toDateString();
+        
+        const todayCupons = cleanReceipts
+          .filter((receipt: any) => {
+            if (!receipt || !receipt.timestamp) return false;
+            
+            const receiptDate = new Date(receipt.timestamp);
+            if (isNaN(receiptDate.getTime())) return false;
+            
+            return receiptDate.toDateString() === today;
+          })
+          .map((receipt: any, index: number) => ({
+            id: receipt.id || `${receipt.number || 'unknown'}-${receipt.timestamp}-${index}`,
+            numero: (receipt.number || 0).toString(),
+            timestamp: receipt.timestamp,
+            valorBruto: receipt.grossAmount || 0,
+            valorLiquido: receipt.netAmount || 0,
+            cancelado: receipt.cancelado || false
+          }))
+          .sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
+        
+        return todayCupons;
+      };
+
+      setCupons(cleanAndLoadReceipts());
       
-      // Save cleaned receipts back if we removed duplicates
-      if (cleanReceipts.length !== rawReceipts.length) {
-        localStorage.setItem('fiscalReceipts', JSON.stringify(cleanReceipts));
-      }
-      
-      // Filter to get only today's sales
-      const today = new Date().toDateString();
-      
-      const todayCupons = cleanReceipts
-        .filter((receipt: any) => {
-          if (!receipt || !receipt.timestamp) return false;
-          
-          const receiptDate = new Date(receipt.timestamp);
-          if (isNaN(receiptDate.getTime())) return false;
-          
-          return receiptDate.toDateString() === today;
-        })
-        .map((receipt: any, index: number) => ({
-          id: receipt.id || `${receipt.number || 'unknown'}-${receipt.timestamp}-${index}`,
-          numero: (receipt.number || 0).toString(),
-          timestamp: receipt.timestamp,
-          valorBruto: receipt.grossAmount || 0,
-          valorLiquido: receipt.netAmount || 0,
-          cancelado: receipt.cancelado || false
-        }))
-        .sort((a, b) => parseInt(a.numero) - parseInt(b.numero));
-      
-      return todayCupons;
+      // Calculate total sales for today using validated data with sync
+      const total = await getValidatedDailySalesTotalWithSync();
+      setTotalVendasHoje(total);
     };
 
-    setCupons(cleanAndLoadReceipts());
+    loadData();
   }, []);
-
-  // Calculate total sales for today using validated data
-  const totalVendasHoje = getValidatedDailySalesTotal();
 
   const handleReimprimir = (cupom: Cupom) => {
     // Simulate reprint

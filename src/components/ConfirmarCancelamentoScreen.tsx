@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Edit } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Cupom {
   id: string; // Changed to string to match CancelarCupomScreen
@@ -28,7 +29,7 @@ const ConfirmarCancelamentoScreen = () => {
     return null;
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!motivo.trim()) {
       toast({
         title: "Erro",
@@ -38,35 +39,63 @@ const ConfirmarCancelamentoScreen = () => {
       return;
     }
 
-    // Load and update fiscal receipts
-    const storedReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
-    const updatedReceipts = storedReceipts.map((receipt: any) => 
-      receipt.number.toString() === cupom.numero 
-        ? { ...receipt, cancelado: true, motivoCancelamento: motivo }
-        : receipt
-    );
-    localStorage.setItem('fiscalReceipts', JSON.stringify(updatedReceipts));
+    try {
+      // Update status in Supabase vendas table
+      const { error: updateError } = await supabase
+        .from('vendas')
+        .update({ 
+          status: 'cancelado',
+          atualizado_em: new Date().toISOString()
+        })
+        .eq('numero_cupom', parseInt(cupom.numero));
 
-    // Update daily sales total by subtracting the cancelled amount
-    const today = new Date().toDateString();
-    const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
-    const currentDailyTotal = dailySales[today] || 0;
-    const newDailyTotal = Math.max(0, currentDailyTotal - cupom.valorLiquido);
-    dailySales[today] = newDailyTotal;
-    localStorage.setItem('dailySales', JSON.stringify(dailySales));
+      if (updateError) {
+        console.error('Erro ao atualizar venda no Supabase:', updateError);
+        toast({
+          title: "Erro",
+          description: "Erro ao cancelar cupom no sistema",
+          variant: "destructive"
+        });
+        return;
+      }
 
-    console.log('Cupom cancelado - Total diário atualizado:', {
-      cupomValor: cupom.valorLiquido,
-      totalAnterior: currentDailyTotal,
-      novoTotal: newDailyTotal
-    });
+      // Load and update fiscal receipts
+      const storedReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
+      const updatedReceipts = storedReceipts.map((receipt: any) => 
+        receipt.number.toString() === cupom.numero 
+          ? { ...receipt, cancelado: true, motivoCancelamento: motivo }
+          : receipt
+      );
+      localStorage.setItem('fiscalReceipts', JSON.stringify(updatedReceipts));
 
-    toast({
-      title: "Cupom cancelado",
-      description: `Cupom ${cupom.numero} cancelado com sucesso`
-    });
+      // Update daily sales total by subtracting the cancelled amount
+      const today = new Date().toDateString();
+      const dailySales = JSON.parse(localStorage.getItem('dailySales') || '{}');
+      const currentDailyTotal = dailySales[today] || 0;
+      const newDailyTotal = Math.max(0, currentDailyTotal - cupom.valorLiquido);
+      dailySales[today] = newDailyTotal;
+      localStorage.setItem('dailySales', JSON.stringify(dailySales));
 
-    navigate("/cancelar-cupom");
+      console.log('Cupom cancelado - Total diário atualizado:', {
+        cupomValor: cupom.valorLiquido,
+        totalAnterior: currentDailyTotal,
+        novoTotal: newDailyTotal
+      });
+
+      toast({
+        title: "Cupom cancelado",
+        description: `Cupom ${cupom.numero} cancelado com sucesso`
+      });
+
+      navigate("/cancelar-cupom");
+    } catch (error) {
+      console.error('Erro ao cancelar cupom:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao cancelar cupom",
+        variant: "destructive"
+      });
+    }
   };
 
   return (

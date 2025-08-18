@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
-import { getValidatedDailySalesTotal } from "@/utils/salesCalculations";
+import { getValidatedDailySalesTotalWithSync, syncCancelledSalesFromDatabase } from "@/utils/salesCalculations";
 
 interface Cupom {
   id: string;
@@ -19,10 +19,14 @@ interface Cupom {
 const CancelarCupomScreen = () => {
   const navigate = useNavigate();
   const [cupons, setCupons] = useState<Cupom[]>([]);
+  const [totalVendasHoje, setTotalVendasHoje] = useState(0);
 
   useEffect(() => {
     // Clean and load receipts from localStorage
-    const cleanAndLoadReceipts = () => {
+    const cleanAndLoadReceipts = async () => {
+      // First sync cancelled sales from database
+      await syncCancelledSalesFromDatabase();
+      
       const rawReceipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
       console.log('=== DEBUG INICIO ===');
       console.log('Raw receipts:', rawReceipts.length);
@@ -83,11 +87,18 @@ const CancelarCupomScreen = () => {
       return todayCupons;
     };
 
-    setCupons(cleanAndLoadReceipts());
+    const loadData = async () => {
+      const cuponsData = await cleanAndLoadReceipts();
+      setCupons(cuponsData);
+      
+      // Load total sales with sync
+      const total = await getValidatedDailySalesTotalWithSync();
+      setTotalVendasHoje(total);
+    };
+
+    loadData();
   }, []);
 
-  // Calculate total sales for today using validated data
-  const totalVendasHoje = getValidatedDailySalesTotal();
 
   const handleCancelCupom = (cupom: Cupom) => {
     navigate("/confirmar-cancelamento", { state: { cupom } });
