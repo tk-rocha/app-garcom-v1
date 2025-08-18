@@ -65,8 +65,41 @@ export const useLoyalty = () => {
     return data as LoyaltyCustomer;
   };
 
+  const redeemPoints = async (maskedCpf: string, points: number): Promise<boolean> => {
+    const cpf = stripCpf(maskedCpf);
+    if (!cpf || points <= 0) return false;
+
+    // Get current customer points first
+    const currentCustomer = await getByCpf(cpf);
+    if (!currentCustomer) return false;
+
+    const newPoints = Math.max(0, currentCustomer.pontos - points);
+
+    const { error } = await supabase
+      .from("clientes_fidelidade")
+      .update({ 
+        pontos: newPoints,
+        atualizado_em: new Date().toISOString()
+      })
+      .eq("cpf", cpf);
+
+    if (error) {
+      console.error("Erro ao resgatar pontos:", error);
+      toast({
+        title: "Erro no resgate",
+        description: "Não foi possível resgatar os pontos.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    console.log(`✅ Pontos resgatados: ${points} para CPF ${cpf}, pontos restantes: ${newPoints}`);
+    return true;
+  };
+
   return {
     getByCpf,
     ensureCustomer,
+    redeemPoints,
   };
 };

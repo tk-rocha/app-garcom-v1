@@ -16,6 +16,7 @@ import DiscountScreen from "./components/DiscountScreen";
 import TaxScreen from "./components/TaxScreen";
 import CPFScreen from "./components/CPFScreen";
 import CustomerScreen from "./components/CustomerScreen";
+import ClientRegistrationScreen from "./components/ClientRegistrationScreen";
 import PaymentScreen from "./components/PaymentScreen";
 import ProductSearchScreen from "./components/ProductSearchScreen";
 import BarcodeScannerScreen from "./components/BarcodeScannerScreen";
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/taxas" element={<TaxScreen />} />
             <Route path="/cpf" element={<CPFScreen />} />
             <Route path="/cliente" element={<CustomerScreen />} />
+            <Route path="/cadastro-cliente" element={<ClientRegistrationScreen />} />
             <Route path="/pagamento" element={<PaymentScreen />} />
             <Route path="/buscar-produto" element={<ProductSearchScreen />} />
             <Route path="/codigo-barras" element={<BarcodeScannerScreen />} />

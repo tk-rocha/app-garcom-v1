@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,8 +23,9 @@ const redeemableProducts = [
 const CustomerScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const { addToCart, setLoyaltyCpf } = useCart();
-  const { getByCpf } = useLoyalty();
+  const { getByCpf, redeemPoints } = useLoyalty();
   const { toast } = useToast();
   
   // Detect origin context from URL parameters
@@ -32,10 +33,17 @@ const CustomerScreen = () => {
   const comandaId = searchParams.get("comanda");
   const isFromMesa = !!mesaId;
   const isFromComanda = !!comandaId;
-  const [cpf, setCpf] = useState("");
+  const [cpf, setCpf] = useState(location.state?.registeredCpf || "");
   const [customer, setCustomer] = useState<{ name: string; points: number } | null>(null);
   const [selectedItems, setSelectedItems] = useState<Record<number, number>>({});
   const [loadingCustomer, setLoadingCustomer] = useState(false);
+
+  // Load customer data if CPF was passed from registration
+  useEffect(() => {
+    if (location.state?.registeredCpf) {
+      handleCPFChange(location.state.registeredCpf);
+    }
+  }, [location.state?.registeredCpf]);
 
   const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, "");
@@ -123,8 +131,18 @@ const CustomerScreen = () => {
     }
   };
 
-  const handleRedeem = () => {
+  const handleRedeem = async () => {
     if (!customer) return;
+    
+    const totalPointsUsed = getTotalPointsUsed();
+    if (totalPointsUsed <= 0) return;
+
+    // Baixar pontos imediatamente do cliente
+    const success = await redeemPoints(cpf, totalPointsUsed);
+    if (!success) return;
+
+    // Atualizar o estado do cliente com os pontos reduzidos
+    setCustomer(prev => prev ? { ...prev, points: Math.max(0, prev.points - totalPointsUsed) } : null);
     
     // Determine the correct cart ID based on origin context
     let cartId = "balcao"; // Default to balcao
@@ -153,6 +171,14 @@ const CustomerScreen = () => {
         }
       }
     });
+
+    toast({
+      title: "Resgate realizado",
+      description: `${totalPointsUsed} pontos resgatados com sucesso.`,
+    });
+    
+    // Clear selected items
+    setSelectedItems({});
     
     // Navigate back to the appropriate cart screen
     if (isFromMesa) {
@@ -212,7 +238,25 @@ const CustomerScreen = () => {
             <p className="text-xs text-muted-foreground">Buscando cliente...</p>
           )}
           {cpf.length === 14 && !customer && !loadingCustomer && (
-            <p className="text-xs text-destructive">Cliente não cadastrado</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-destructive">Cliente não cadastrado</p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  const params = new URLSearchParams();
+                  if (mesaId) params.set("mesa", mesaId);
+                  if (comandaId) params.set("comanda", comandaId);
+                  
+                  navigate(`/cadastro-cliente?${params.toString()}`, {
+                    state: { cpf }
+                  });
+                }}
+                className="text-xs px-2 py-1 h-6 border-primary text-primary hover:bg-primary/5"
+              >
+                Cadastrar
+              </Button>
+            </div>
           )}
         </div>
 
