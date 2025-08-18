@@ -7,6 +7,8 @@ import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import { useEffect } from "react";
+import { performSystemReset } from "./utils/clearSystemData";
 import CashOpeningScreen from "./components/CashOpeningScreen";
 import BalcaoScreen from "./components/BalcaoScreen";
 import ProductListScreen from "./components/ProductListScreen";
@@ -42,14 +44,19 @@ import FechamentoPDVScreen from "./components/FechamentoPDVScreen";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <CartProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+const App = () => {
+  useEffect(() => {
+    performSystemReset();
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <CartProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Index />} />
@@ -97,6 +104,7 @@ const App = () => (
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
