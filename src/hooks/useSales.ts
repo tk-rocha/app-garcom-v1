@@ -226,11 +226,8 @@ export const useSales = () => {
       const now = new Date();
       const receipts = JSON.parse(localStorage.getItem('fiscalReceipts') || '[]');
       
-      let receiptNumber = 700;
-      if (receipts.length > 0) {
-        const lastReceipt = receipts[receipts.length - 1];
-        receiptNumber = (parseInt(lastReceipt.number) || 699) + 1;
-      }
+      // Usar o número de cupom gerado automaticamente pelo banco (sequence)
+      const receiptNumber = venda.numero_cupom;
       
       const receipt = {
         id: `${now.getTime()}-${Math.random().toString(36).substring(2)}`,
